@@ -1,0 +1,257 @@
+#include <btreep.h>
+#include <stdlib.h>
+#include <cda.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdarg.h>
+
+typedef struct context_s
+{
+    CDA_UINT32_t    count;
+    CDA_UINT32_t    path_len_sum;
+} CONTEXT_t, *CONTEXT_p_t;
+
+typedef struct vcontext_s
+{
+    CDA_UINT32_t    node_num;
+    CDA_BOOL_t      result;
+} VCONTEXT_t, *VCONTEXT_p_t;
+
+static void count_nodes(
+    BTREE__NODE_p_t node
+);
+
+static CDA_BOOL_t validate( 
+    BTREE_NODE_ID_t node 
+);
+
+static CDA_BOOL_t errpreamble( 
+    int             line, 
+    BTREE_NODE_ID_t node
+ );
+
+
+void BTREE_compute_stats( BTREE_ID_t btree )
+{
+    CONTEXT_t ctx;
+    btree->context = &ctx;
+    ctx.count = 0;
+    ctx.path_len_sum = 0;
+
+    btree->longest_path = 0;
+    btree->shortest_path = btree->root != NULL ? 1000000 : 0;
+    btree->num_leaves = 0;
+    btree->num_nodes = 0;
+    count_nodes( btree->root );
+    if ( btree->num_leaves > 0 )
+        btree->avg_path = (double)ctx.path_len_sum / btree->num_leaves;
+    else
+        btree->avg_path = 0;
+
+    btree->context = NULL;
+}
+
+CDA_BOOL_t BTREE_validate( BTREE_ID_t tree )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    VCONTEXT_t  ctx;
+
+    BTREE_compute_stats( tree );
+
+    ctx.node_num = 0;
+    ctx.result = CDA_TRUE;
+    tree->context = &ctx;
+
+    validate( tree->root );
+    rcode = ctx.result;
+
+    tree->context = NULL;
+    return rcode;
+}
+
+CDA_UINT32_t BTREE_get_num_nodes( BTREE_ID_t btree )
+{
+    return btree->num_nodes;
+}
+
+CDA_UINT32_t BTREE_get_num_leaves( BTREE_ID_t btree )
+{
+    return btree->num_leaves;
+}
+
+CDA_UINT32_t BTREE_get_optimum_leaves( BTREE_ID_t btree )
+{
+    /* Divide by 2 and round up. */
+    CDA_UINT32_t    result  = btree->num_nodes / 2 + (1 & btree->num_nodes);
+    return result;
+}
+
+CDA_UINT32_t BTREE_get_optimum_path( BTREE_ID_t btree )
+{
+    CDA_UINT32_t    result  = 0;
+
+    if ( btree->num_nodes == 0 )
+        ;
+    else
+    {
+        /* If ln is the natural logarithm function, 
+         * and l2 is the log base 2 function, then
+         * l2( n ) == ln( n ) / ln( 2 ).
+         */
+        double  opt = log( btree->num_nodes + 1 ) / log( 2 );
+        result = (CDA_UINT32_t)ceil( opt ); 
+    }
+
+    return result;
+}
+
+CDA_UINT32_t BTREE_get_shortest_path( BTREE_ID_t btree )
+{
+    return btree->shortest_path;
+}
+
+CDA_UINT32_t BTREE_get_longest_path( BTREE_ID_t btree )
+{
+    return btree->longest_path;
+}
+
+double BTREE_get_avg_path( BTREE_ID_t btree )
+{
+    return btree->avg_path;
+}
+
+double BTREE_get_optimum_visits( BTREE_ID_t btree )
+{
+    double          result      = 0;
+    CDA_UINT32_t    levels      = BTREE_get_optimum_path( btree );
+    CDA_UINT32_t    complete    = (CDA_UINT32_t)pow( 2, levels ) - 1;
+    CDA_UINT32_t    diff        = complete - btree->num_nodes;
+    CDA_UINT32_t    nodes       = 0;
+    CDA_UINT32_t    sum         = 0;
+    CDA_UINT32_t    jnx         = 0;
+
+#ifndef NDEBUG
+    CDA_UINT32_t    leaves      = (complete + 1) / 2;
+    CDA_ASSERT( (leaves == 0 && diff == 0) || (diff < leaves) );
+#endif
+    /* Compute the total number of visits that would take place
+     * if a search were to be conducted for every node in a 
+     * balanced binary search tree...
+     */
+
+    /* A complete binary tree consisting of N levels will have
+     * 2**N - 1 nodes. 1 of those nodes (the root) can be found
+     * in just one visit; 2 can be found in 2 visits; 4 can be
+     * found in 3 visits, etc.
+     */
+    for ( nodes = 1, jnx = 1 ; jnx <= levels ; ++jnx, nodes *= 2 )
+        sum += nodes * jnx;
+
+    /* If the binary tree is incomplete, all the missing nodes
+     * will be absent from level the last (leaf) level, so subtract
+     * the number of visits that would be made to the missing
+     * nodes.
+     */
+    sum -= diff * levels;
+
+    /* Compute the average number of searches for a random node. */
+    if ( btree->num_nodes > 0 )
+        result = (double)sum / btree->num_nodes;
+
+    return result;
+}
+
+static void count_nodes( BTREE__NODE_p_t node )
+{
+    if ( node != NULL )
+    {
+        BTREE_ID_t  tree    = node->tree;
+        CONTEXT_p_t ctx     = tree->context;
+        
+        ++ctx->count;
+        count_nodes( node->left );
+        count_nodes( node->right );
+        ++tree->num_nodes;
+        if ( BTREE_is_leaf( node ) )
+        {
+            ++tree->num_leaves;
+            ctx->path_len_sum += ctx->count;
+            if ( ctx->count > tree->longest_path )
+                tree->longest_path = ctx->count;
+            if ( ctx->count < tree->shortest_path )
+                tree->shortest_path = ctx->count;
+        }
+
+        --ctx->count;
+    }
+}
+
+static CDA_BOOL_t validate( BTREE_NODE_ID_t node )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    if ( node != NULL )
+    {
+        VCONTEXT_p_t    ctx         = node->tree->context;
+        const char      *invpforc   =
+            "%s child of node (%p) has invalid parent (%p)\n\n";
+        const char      *invpforr   =
+            "Root node has invalid parent (%p)\n\n";
+        const char      *invpforn   =
+            "Node has invalid parent (%p)\n\n";
+
+        ++ctx->node_num;
+        validate( node->left );
+        validate( node->right );
+
+        if ( node->left != NULL )
+            if ( node->left->parent != node )
+            {
+                rcode = errpreamble( __LINE__, node );
+                fprintf( stderr, invpforc, "Left", node->left, node->parent );
+                fprintf( stderr, "\n" );
+            }
+
+        if ( node->right != NULL )
+            if ( node->right->parent != node )
+            {
+                rcode = errpreamble( __LINE__, node );
+                fprintf( stderr, invpforc, "Right", node->right, node->parent );
+                fprintf( stderr, "\n" );
+            }
+
+        if ( node == node->tree->root )
+        {
+            if ( node->parent != NULL )
+            {
+                rcode = errpreamble( __LINE__, node );
+                fprintf( stderr, invpforr, node->parent );
+                fprintf( stderr, "\n" );
+            }
+        }
+        else
+            if ( node->parent->left != node && node->parent->right != node )
+            {
+                rcode = errpreamble( __LINE__, node );
+                fprintf( stderr, invpforn, node->parent );
+            }
+
+        if ( !rcode )
+            ctx->result = rcode;
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t errpreamble( int line, BTREE_NODE_ID_t node )
+{
+    VCONTEXT_p_t    ctx         = node->tree->context;
+    const char      *vfailnode  = "node id: %p, node num: %u\n";
+    const char      *vfailat    = 
+        "BTREE validation failure at line %d, file %s\n";
+
+    fprintf( stderr, vfailat, line, __FILE__ );
+    fprintf( stderr, vfailnode, node, ctx->node_num );
+
+    return CDA_FALSE;
+}

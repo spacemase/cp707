@@ -1,0 +1,92 @@
+/* Sample code to demonstrate how to catch and recover from an assertion. */
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <setjmp.h>
+#include <cda.h>
+
+#define JMP_ASSERT  (2)
+
+#ifdef CDA_ASSERT
+#undef CDA_ASSERT
+#endif
+#define CDA_ASSERT( e ) \
+    ((e) ? (void)0 : assert_proc( (e) ))
+
+static CDA_BOOL_t doTest(
+    void
+);
+
+static int testTrap(
+    int val
+);
+
+static void assert_proc(
+    int dummy
+);
+
+static jmp_buf    jbuf_;
+
+int main( int argc, char** argv )
+{
+    if ( !doTest() )
+        puts( "FAILED" );
+    else
+        puts( "PASSED" );
+
+    return EXIT_SUCCESS;
+}
+
+static CDA_BOOL_t doTest( void )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+
+    if ( setjmp( jbuf_ ) == 0 )
+    {
+        /* Check for a valid return from the test proc
+         * when called properly.
+         */
+        if ( testTrap( 5 ) != 5 )
+        {
+            printf( "testTrap returned an invalid value\n" );
+            rcode = CDA_FALSE;
+        }
+        else
+        {
+            printf( "testTrap returned a valid value\n" );
+
+            /* Make sure the test proc asserts when
+             * passed an invalid value.
+             */
+            testTrap( -1 );
+
+            /* If we get back here it means that the test proc
+             * did NOT assert like it's supposed to.
+             */
+            printf( "testTrap failed to assert\n" );
+            rcode = CDA_FALSE;
+        }
+    }
+    else
+    {
+        /* If we get here it's because someone long-jumped. */
+        printf( "testTrap successfully asserted.\n" );
+        rcode = CDA_TRUE;
+    }
+    return rcode;
+}
+
+/* If you pass a negative number to this routine it will assert,
+ * otherwise it will simply return the value you passed.
+ */
+static int testTrap( int val )
+{
+    CDA_ASSERT( val >= 0 );
+
+    return val;
+}
+
+static void assert_proc( int dummy )
+{
+    longjmp( jbuf_, JMP_ASSERT );
+}

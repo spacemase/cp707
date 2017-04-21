@@ -1,0 +1,15 @@
+#ifndef RANDP_H
+#define RANDP_H
+
+#include <math.h>
+#include <cda.h>
+#include <rand.h>
+
+typedef struct rand__control_s
+{
+    CDA_UINT32_t    *mt;
+    int             mti;
+    int             architecture;
+} RAND__CONTROL_t, *RAND__CONTROL_p_t;
+
+#endif

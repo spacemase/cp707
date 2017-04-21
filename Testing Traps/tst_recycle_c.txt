@@ -1,0 +1,216 @@
+#include <tstp.h>
+#include <btreep.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define LEFT( inx )     (2 * (inx) + 1)
+#define RIGHT( inx )    (2 * (inx) + 2)
+#define PARENT( inx )   (((inx) - 1) / 2)
+
+typedef CDA_BOOL_t TEST_PROC_t( BTREE_ID_t tree, int parent, int exp_count );
+typedef TEST_PROC_t *TEST_PROC_p_t;
+
+typedef struct test_desc_s
+{
+    TEST_PROC_p_t   proc;
+    int             parent;
+    int             exp_count;
+    const char      *comment;
+} TEST_DESC_t, *TEST_DESC_p_t;
+
+static TEST_PROC_t add_root;
+static TEST_PROC_t add_left;
+static TEST_PROC_t add_right;
+static TEST_PROC_t destroy_node;
+static TEST_PROC_t recycle_node;
+
+static void null_subtree(
+    int node
+);
+
+static int count_recycled(
+    BTREE_ID_t tree
+);
+
+static CDA_BOOL_t validate_recycled_count(
+    BTREE_ID_t tree,
+    int        exp,
+    int        line
+);
+
+static BTREE_NODE_ID_t  nodes_[100];
+static TEST_DESC_t      test_descs_[]   =
+{
+    { add_root,     0,          0, "004010: Add root (1)"       },
+    { add_left,     0,          0, "004015: Add left (1)"       },
+    { add_right,    0,          0, "004020: Add right (1)"      },
+    { destroy_node, LEFT( 0 ),  0, "004025: Destroy left (1)"   },
+    { destroy_node, 0,          0, "004030: Destroy root (1)"   },
+    { add_root,     0,          0, "004035: Add root (2)"       },
+    { add_left,     0,          0, "004040: Add left (2)"       },
+    { add_right,    0,          0, "004045: Add right (2)"      },
+    { recycle_node, LEFT( 0 ),  1, "004050: Recycle left (1)"   },
+    { destroy_node, RIGHT( 0 ), 1, "004055: Destroy right (2)"  },
+    { recycle_node, 0,          2, "004060: Recycle root (1)"   },
+    { add_root,     0,          1, "004065: Add root (3)"       },
+    { add_left,     0,          0, "004070: Add left (3)"       },
+    { add_right,    0,          0, "004075: Add right (3)"      },
+    { add_left,     LEFT( 0 ),  0, "004080: Add left/left"      },
+    { add_right,    LEFT( 0 ),  0, "004085: Add right (3)"      },
+    { recycle_node, LEFT( 0 ),  3, "004090: Recycle left (2)"   },
+    { add_right,    RIGHT( 0 ), 2, "004095: Add right/right"    },
+    { recycle_node, 0,          5, "004100: Recycle root (2)"   }
+};
+
+CDA_BOOL_t TST_recycle( void )
+{
+    CDA_BOOL_t          rcode   = CDA_TRUE;
+    BTREE_ID_t          tree    = BTREE_NULL_ID;
+    size_t              inx     = 0;
+    TST_HEAP_STATE_t    old_state;
+
+    TST_get_heap_snapshot( &old_state );
+    tree = BTREE_create_tree();
+    for ( inx = 0 ; inx < CDA_CARD( nodes_ ) ; ++inx )
+        nodes_[inx] = BTREE_NULL_NODE_ID;
+
+    for ( inx = 0 ; rcode && inx < CDA_CARD( test_descs_ ) ; ++inx )
+    {
+        printf( "%2d: %s\n", inx, test_descs_[inx].comment );
+        rcode = test_descs_[inx].proc( tree, 
+                                       test_descs_[inx].parent,
+                                       test_descs_[inx].exp_count
+                                     );
+        if ( rcode )
+            puts( "PASSED" );
+        else
+            puts( "FAILED" );
+    }
+
+    BTREE_destroy_tree( tree, NULL );
+    if ( rcode )
+    {
+        TST_HEAP_STATE_t    new_state;
+
+        puts( "004300: Destroy tree" );
+        TST_get_heap_snapshot( &new_state );
+        if ( TST_compare_heap_snapshots( &old_state, &new_state ) == 0 )
+            puts( "PASSED" );
+        else
+        {
+            puts( "FAILED" );
+            rcode = CDA_FALSE;
+        }
+    }
+
+    return rcode;
+}
+
+/* parameter parent not used */
+static CDA_BOOL_t add_root( BTREE_ID_t tree, int parent, int exp_count )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    CDA_ASSERT( nodes_[0] == BTREE_NULL_ID );
+    nodes_[0] = BTREE_add_root( tree, NULL );
+    rcode = validate_recycled_count( tree, exp_count, __LINE__ );
+
+    return rcode;
+}
+
+static CDA_BOOL_t add_left( BTREE_ID_t tree, int parent, int exp_count )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    int         left    = LEFT( parent );
+
+    CDA_ASSERT( parent < (int)CDA_CARD( nodes_ ) );
+    CDA_ASSERT( nodes_[parent] != BTREE_NULL_ID );
+    CDA_ASSERT( nodes_[left] == BTREE_NULL_ID );
+    nodes_[left] = BTREE_add_left( nodes_[parent], NULL );
+    rcode = validate_recycled_count( tree, exp_count, __LINE__ );
+
+    return rcode;
+}
+
+static CDA_BOOL_t add_right( BTREE_ID_t tree, int parent, int exp_count )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    int         right    = RIGHT( parent );
+
+    CDA_ASSERT( parent < (int)CDA_CARD( nodes_ ) );
+    CDA_ASSERT( nodes_[parent] != BTREE_NULL_ID );
+    CDA_ASSERT( nodes_[right] == BTREE_NULL_ID );
+    nodes_[right] = BTREE_add_right( nodes_[parent], NULL );
+    rcode = validate_recycled_count( tree, exp_count, __LINE__ );
+
+    return rcode;
+}
+
+static CDA_BOOL_t destroy_node( BTREE_ID_t tree, int node, int exp_count )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    CDA_ASSERT( node < (int)CDA_CARD( nodes_ ) );
+    CDA_ASSERT( nodes_[node] != BTREE_NULL_NODE_ID );
+    BTREE_destroy_subtree( nodes_[node], NULL );
+    null_subtree( node );
+    rcode = validate_recycled_count( tree, exp_count, __LINE__ );
+
+    return rcode;
+}
+
+static CDA_BOOL_t recycle_node( BTREE_ID_t tree, int node, int exp_count )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    CDA_ASSERT( node < (int)CDA_CARD( nodes_ ) );
+    CDA_ASSERT( nodes_[node] != BTREE_NULL_NODE_ID );
+    BTREE__recycle_node( nodes_[node] );
+    null_subtree( node );
+    rcode = validate_recycled_count( tree, exp_count, __LINE__ );
+
+    return rcode;
+}
+
+static void null_subtree( int node )
+{
+    if ( node < (int)CDA_CARD( nodes_ ) && nodes_[node] != BTREE_NULL_NODE_ID )
+    {
+        null_subtree( LEFT( node ) );
+        null_subtree( RIGHT( node ) );
+        nodes_[node] = BTREE_NULL_NODE_ID;
+    }
+}
+
+static CDA_BOOL_t validate_recycled_count( BTREE_ID_t tree, int exp, int line )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    int         act     = count_recycled( tree );
+
+    if ( act != exp )
+    {
+        printf( "Recycle count mismatch: "
+                    "expected = %d, actual = %d (line %d)\n",
+                exp,
+                act,
+                line
+              );
+        rcode = CDA_FALSE;
+    }
+
+    return rcode;
+}
+
+static int count_recycled( BTREE_ID_t tree )
+{
+    int             count   = 0;
+    BTREE_NODE_ID_t node    = tree->unused;
+
+    while ( node != NULL )
+    {
+        ++count;
+        node = node->right;
+    }
+
+    return count;
+}

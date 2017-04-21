@@ -1,0 +1,927 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: The BTREE Module: Balancing a Binary Tree
+Date: Wed, 17 Oct 2007 20:41:33 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/index.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>The BTREE Module: Balancing a Binary Tree</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H1>The BTREE Module: Balancing a Binary Tree</H1><B>[Home] [ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html">Next =
+Page=20
+</A>]</B> <BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B> <BR><BR><B>[BTREE Module Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_c.txt">btre=
+e.c.=20
+</A>]</B> <BR><B>[BTREE Module Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_statistics_=
+c.txt">btree_statistics.c.=20
+</A>]</B> <BR><B>[BTREE Module Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_balance_c.t=
+xt">btree_balance.c.=20
+</A>]</B> <BR><B>[BTREE Module Public Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_h.txt">btre=
+e.h.=20
+</A>]</B> <BR><B>[BTREE Module Private Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btreep_h.txt">btr=
+eep.h.=20
+</A>]</B>=20
+<BLOCKQUOTE>
+  <P>This discussion concerns adding a method to our BTREE module to =
+balance a=20
+  binary tree. The algorithm I will use is from your textbook, <I>Data=20
+  Structures and Program Design in C, Second Edition </I>by Kruse, Tondo =
+and=20
+  Leung (Prentice Hall, New Jersey, 1997). The authors describe the =
+algorithm in=20
+  pretty good detail in Section 9.3, "Building a Binary Search Tree," so =
+I will=20
+  not attempt to describe the algorithm here beyond discussing the=20
+  idiosyncracies of my specific adaptation.=20
+  <P>Since balancing a binary tree pretty much presupposes that we will =
+be using=20
+  the module to build a binary search tree, it makes sense that we also =
+add a=20
+  method to delete a node from the tree. The algorithm for doing so may =
+be found=20
+  in your textbook in Section 9.2.5, "Deletion from a Binary Search =
+Tree." In=20
+  addition, we will want to test and evaluate our implementation, so I =
+will=20
+  discuss a test driver for doing so; to facilitate this process we will =
+
+  incorporate into the module a facility for validating and analyzing a =
+tree.=20
+  Since part of the driver will require generating large numbers of =
+random keys=20
+  and timing certain operations, we will also need a random number =
+generator and=20
+  a timing tool, which I will describe in the appendices to this =
+document.=20
+  <P>
+  <H3>Table of Contents</H3>
+  <OL>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Deleti=
+ngANode">Deleting=20
+    a Node from a Binary Search Tree: The BTREE_delete_node Method </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Valida=
+tingATree">Validating=20
+    a Binary Tree: The BTREE_validate Method </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Analyz=
+ingATree">Analyzing=20
+    a Binary Tree: The BTREE Module Statistics Facility </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Balanc=
+ingATree">Balancing=20
+    a Binary Tree: The BTREE_balance Method </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html">Testin=
+g the=20
+    Implementation </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer.html">Appen=
+dix=20
+    A: The Timer Module </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand.html">Append=
+ix B:=20
+    The Rand Module </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">Reference=20
+    Pages </A></LI></OL><A name=3DDeletingANode>
+  <H3>Deleting a Node from a Binary Search Tree: The BTREE_delete_node =
+Method=20
+  </H3>
+  <P>The algorithm for deleting a node from a Binary Search Tree is =
+given in=20
+  your textbook, in Section 9.2.5 "Deletion from A Binary Search Tree." =
+To=20
+  summarize, the algorithm follows the this procedure:=20
+  <P>[Note: In the following discussion <B>D</B> refers to the node to =
+be=20
+  deleted; <B>L</B> refers to the left child of the node to be deleted; =
+<B>R</B>=20
+  refers to the right child of the node to be deleted; and <B>P</B> =
+refers to=20
+  the parent of the node to be deleted.]=20
+  <OL>
+    <LI>If <B>D</B> is a leaf, we need simply remove it from the tree.=20
+    <LI>If <B>D</B> has only a right or left child, <B>D</B> is removed =
+from the=20
+    tree, and its child is attached to the branch of <B>P</B> vacated by =
+
+    <B>D</B>.=20
+    <LI>If <B>D</B> has both left and right children, <B>D</B> is =
+removed from=20
+    the tree, <B>R</B> is attached to the vacated branch of <B>P</B>, =
+and a home=20
+    is found for <B>L</B> by recursively descending the left subtree of =
+<B>R</B>=20
+    until we find an empty left branch (see your textbook for a more =
+detailed=20
+    explanation).=20
+    <LI>Boundary conditions: special logic is required if <B>D</B> is =
+the root=20
+    node. </LI></OL>
+  <P>The code provided by the authors of your textbook consists of a =
+subroutine=20
+  to which is passed the address of a pointer to the node to be deleted; =
+for=20
+  example:=20
+  <BLOCKQUOTE><PRE>/* Delete parent's left child */
+DeleteNodeTree( &amp;parent-&gt;left );</PRE></BLOCKQUOTE>
+  <P>Our implementation, however, will require that the user pass the =
+address of=20
+  the node to be deleted. Therefore the user will pass the ID of the =
+node to be=20
+  deleted, and our first job will be to go to the node's parent and find =
+the=20
+  address of the appropriate pointer:=20
+  <BLOCKQUOTE><PRE>    DeleteNode( node );
+    . . .
+void DeleteNode( BTREE__NODE_p_t node )
+{
+    BTREE__NODE_p_t temp    =3D NULL;
+    BTREE__NODE_p_t parent  =3D node-&gt;parent;
+    BTREE__NODE_p_t *hole   =3D NULL;
+
+    /* Deleting the node is going to leave a hole in the parent node or,
+     * if the deleted node is the root, the tree control structure. This
+     * logic finds the address of the hole.
+     */
+    if ( parent =3D=3D NULL )
+    {
+        CDA_ASSERT( node =3D=3D node-&gt;tree-&gt;root );
+        hole =3D &amp;node-&gt;tree-&gt;root;
+    }
+    else if ( node =3D=3D parent-&gt;left )
+    {
+        hole =3D &amp;parent-&gt;left;
+    }
+    else
+    {
+        CDA_ASSERT( node =3D=3D parent-&gt;right );
+        hole =3D &amp;parent-&gt;right;
+    }
+    . . .
+}</PRE></BLOCKQUOTE>
+  <P>The remainder of our logic pretty much follows the code in the =
+textbook=20
+  making allowances for the fact that our BTREE node structure differs =
+from the=20
+  authors' node structure in several details:=20
+  <BLOCKQUOTE><PRE>    . . .
+    /* If the deleted node is a leaf, fill the hole with NULL; otherwise
+     * if the deleted node's right subtree is empty, fill the hole with
+     * the node's left subtree; otherwise fill the hole with the node's=20
+     * right subtree, and look for a new home for the left subtree.
+     */
+    if ( node-&gt;right =3D=3D NULL )
+    {
+        *hole =3D node-&gt;left;
+        if ( node-&gt;left !=3D NULL )
+            node-&gt;left-&gt;parent =3D parent;
+    }
+    else if ( node-&gt;left =3D=3D NULL )
+    {
+        *hole =3D node-&gt;right;
+        if ( node-&gt;right !=3D NULL )
+            node-&gt;right-&gt;parent =3D parent;
+    }
+    else
+    {
+        for ( temp =3D node-&gt;right ; temp-&gt;left !=3D NULL ; temp =
+=3D temp-&gt;left )
+            ;
+        temp-&gt;left =3D node-&gt;left;
+        temp-&gt;left-&gt;parent =3D temp;
+
+        *hole =3D node-&gt;right;
+        node-&gt;right-&gt;parent =3D parent;
+    }
+    . . .
+}</PRE></BLOCKQUOTE>
+  <P>One final note: because of an optimization that will be discussed =
+later=20
+  (see <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Balanc=
+ingATree">Balancing=20
+  a Binary Tree: The BTREE_balance Method </A>) we anticipate that in =
+the future=20
+  we may provide the user with more than one way to delete a node; to =
+facilitate=20
+  that, the main body of our delete logic is divorced from the public=20
+  delete-node entry point:=20
+  <BLOCKQUOTE><PRE>
+BTREE_NODE_ID_t BTREE_delete_node( BTREE_NODE_ID_t node )
+{
+    /* put most of the deletion logic in a separate subroutine
+     * because one day we might provide the user with a new method
+     * that *recycles* a deleted node instead of destroying it.
+     */
+    delete_node( node );
+    CDA_free( node );
+
+    return BTREE_NULL_NODE_ID;
+}</PRE></BLOCKQUOTE>
+  <P>The complete implementation of this method is found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_c.txt">btre=
+e.c=20
+  </A><A name=3DValidatingATree>
+  <H3>Validating a Binary Tree: The BTREE_validate Method </H3>
+  <P>The truth is there's not a whole lot we can do to validate a binary =
+tree.=20
+  Really, all we can do is to visit every node in the tree and verify =
+that it=20
+  points upwards to its parent. Still, after we get around to balancing =
+a tree,=20
+  it will be useful to be able to validate that we correctly re-parented =
+all the=20
+  tree's nodes.=20
+  <P>So we're going to visit each node in the tree using a post-order =
+traversal=20
+  and make sure that each of the node's children point back to the node; =
+special=20
+  consideration will have to be made for the root node which doesn't =
+have a=20
+  parent. Along the way we will need to keep track of the number of the =
+node=20
+  that we are testing; knowing the number of a node that has an invalid =
+parent=20
+  will make debugging the error easier. And since we will be executing a =
+
+  recursive traversal of the tree, it will also help to keep track of =
+the=20
+  overall status of the operation. Which gives us the opportunity to =
+introduce=20
+  the idea of an <I>operation context.</I>=20
+  <P>One way to keep track of the state of a recursive operation is via =
+global=20
+  variables. For example:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t   validation_result =3D CDA_TRUE;
+static CDA_UINT32_t node_num          =3D 0;
+
+static CDA_BOOL_t validate( BTREE__NODE_p_t node )
+{
+    . . .
+    ++node_num;
+    . . .
+    if ( node-&gt;left !=3D NULL )
+        if ( node-&gt;left-&gt;parent !=3D node )
+            validation_result =3D CDA_FALSE;
+    . . .
+}</PRE></BLOCKQUOTE>
+  <P>This approach, however, has a couple of problems, most notably it =
+is not=20
+  <I>reentrant.</I> And just what do we mean by that?=20
+  <P>Suppose your application is composed of two threads of execution =
+(that is,=20
+  your application is divided into two pieces, each of which can execute =
+
+  independently). Further suppose that each thread is operating on a =
+different=20
+  binary tree. Now, say thread 1 has started a validation operation on =
+its=20
+  btree. Then thread 2 comes along, interrupts thread 1, and begins a =
+validation=20
+  operation on its binary tree. Well, both validation operations are =
+going to be=20
+  using the same global variables to keep track of their states, which =
+means=20
+  that at least one of the operations is going to get its state =
+corrupted.=20
+  [Note: A full understanding of the above argument is not crucial to=20
+  understanding the rest of this discussion.]=20
+  <P>One solution to this problem is to introduce a <I>context</I> in =
+place of=20
+  the global variables. This will be a struct unique to each operation =
+that=20
+  contains fields to track the operation's state. A reference to the =
+struct will=20
+  have to be stored somewhere that it can be associated with a specific =
+tree;=20
+  within our BTREE module, that would be somewhere in the tree's control =
+
+  structure. Later we will find that there are other operations that =
+would=20
+  benefit from a context; so we will add to the BTREE control structure =
+a void*=20
+  field to point to anything that may be appropriate to a particular =
+operation.=20
+  Our new control structure will look like this:=20
+  <BLOCKQUOTE><PRE>typedef struct btree__control_s
+{
+    BTREE__NODE_p_t root;
+    void            *context;
+}  BTREE__CONTROL_t;</PRE></BLOCKQUOTE>
+  <P>And we will use it something like this:=20
+  <BLOCKQUOTE><PRE>typedef struct vcontext_s
+{
+    CDA_UINT32_t    node_num;
+    CDA_BOOL_t      result;
+} VCONTEXT_t, *VCONTEXT_p_t;
+. . .
+
+CDA_BOOL_t BTREE_validate( BTREE_ID_t tree )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+    VCONTEXT_t  ctx;
+
+    ctx.node_num =3D 0;
+    ctx.result =3D CDA_TRUE;
+    tree-&gt;context =3D &amp;ctx;
+
+    validate( tree-&gt;root ); /* begin tree traversal */
+    rcode =3D ctx.result;
+
+    tree-&gt;context =3D NULL;
+    return rcode;
+}
+. . .
+static CDA_BOOL_t validate( BTREE_NODE_ID_t node )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+
+    if ( node !=3D NULL )
+    {
+        VCONTEXT_p_t    ctx =3D node-&gt;tree-&gt;context;
+        . . .
+        ++ctx-&gt;node_num;
+        . . .
+
+        if ( !rcode )
+            ctx-&gt;result =3D rcode;
+    }
+    . . .
+}</PRE></BLOCKQUOTE>
+  <P>The complete implementation of this method is found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_statistics_=
+c.txt">btree_statistics.c.=20
+  </A>Anytime the method discovers an invalid node it will print an =
+explanatory=20
+  note to stderr. <A name=3DAnalyzingATree>
+  <H3>Analyzing a Binary Tree: The BTREE Module Statistics Facility =
+</H3>
+  <P>When analyzing a binary tree mainly what we want to know is: 1) how =
+many=20
+  nodes does the tree contain; 2) is the tree balanced; and 3) if the =
+tree isn't=20
+  balanced, how far out of balance is it?=20
+  <P>Answering question 1 is fairly easy. Answering questions 2 and 3,=20
+  particularly 3, is a little more complicated. In order to answer =
+question 2 we=20
+  need to know the length of the longest path from root to leaf, and the =
+length=20
+  of the shortest path from root to leaf; if these values differ by more =
+than 1=20
+  the tree is unbalanced.=20
+  <P>Answering question 3 in detail requires looking ahead a bit in your =
+
+  textbook to the section on balancing a tree. The short answer is: we =
+need to=20
+  know now many leaf nodes there are, and the <I>average</I> length of a =
+path=20
+  from root to node. How to <I>use</I> these values is a subject of a =
+later=20
+  discussion; how to <I>obtain</I> them is what we're concerned with =
+here.=20
+  Specifically, we propose adding to the BTREE module a facility which =
+consists=20
+  of the following methods:=20
+  <BLOCKQUOTE>
+    <DL>
+      <DT><B>BTREE_compute_stats</B>=20
+      <DD>This method will compute a variety of statistics; each =
+statistic may=20
+      be obtained by calling one of the methods discussed below. Note =
+that the=20
+      result returned by any of the statistics interrogation methods is=20
+      undefined if <I>BTREE_compute_stats</I> is not called first. Any =
+time the=20
+      tree is changed <I>BTREE_compute_stats</I> must be called again in =
+order=20
+      to update the statistics. <BR><BR>
+      <DT><B>BTREE_get_num_nodes</B>=20
+      <DD>This method will return the number of nodes resident in the =
+tree as of=20
+      the last time <I>BTREE_compute_stats</I> was called. <BR><BR>
+      <DT><B>BTREE_get_num_leaves</B>=20
+      <DD>This method will return the number of leaves resident in the =
+tree as=20
+      of the last time <I>BTREE_compute_stats</I> was called. <BR><BR>
+      <DT><B>BTREE_get_shortest_path</B>=20
+      <DD>This method will return the length of the shortest path from =
+root node=20
+      to leaf as of the last time <I>BTREE_compute_stats</I> was called. =
+
+<BR><BR>
+      <DT><B>BTREE_get_longest_path</B>=20
+      <DD>This method will return the length of the longest path from =
+root node=20
+      to leaf as of the last time <I>BTREE_compute_stats</I> was called. =
+
+<BR><BR>
+      <DT><B>BTREE_get_avg_path</B>=20
+      <DD>This method will return the average length all paths from root =
+node to=20
+      leaf as of the last time <I>BTREE_compute_stats</I> was called. =
+<BR><BR>
+      <DT><B>BTREE_get_optimum_leaves</B>=20
+      <DD>This method will return the optimum number of leaves that =
+would be=20
+      resident in the tree given the total number of nodes as of the =
+last time=20
+      <I>BTREE_compute_stats</I> was called. Looking ahead in your =
+textbook to=20
+      the discussion of creating a balanced tree, you will see that this =
+is=20
+      always half the total number of nodes in the tree. <BR><BR>
+      <DT><B>BTREE_get_optimum_path</B>=20
+      <DD>This method will return the optimum path length from root to =
+node=20
+      given the total number of nodes as of the last time=20
+      <I>BTREE_compute_stats</I> was called. This is always the log =
+(base 2) of=20
+      the total number of nodes in the tree. <BR><BR>
+      <DT><B>BTREE_get_optimum_visits</B>=20
+      <DD>This method will return the average number of visits to =
+complete a=20
+      successful search of a binary tree under optimal conditions, given =
+the=20
+      total number of nodes as of the last time =
+<I>BTREE_compute_stats</I> was=20
+      called. This figure is computed by determining the number of =
+levels in the=20
+      tree (which is the same as the optimum path length) and =
+calculating the=20
+      number of nodes that are present at each level. For example, a =
+tree with=20
+      15 nodes will have 4 levels, with 8 nodes in the fourth (leaf) =
+level, 4=20
+      nodes in the third level, 2 nodes in the second level and one node =
+in the=20
+      first (root) level; therefore 8 searches will require visiting 4 =
+nodes, 4=20
+      searches will require visiting 3 nodes, 2 searches will require =
+visiting 2=20
+      and 1 search will need to visit just one node. Overall, under =
+optimal=20
+      circumstances, a tree with fifteen nodes will satisfy a successful =
+search=20
+      making an average of ((8 * 4) + (4 * 3) + (2 * 2) + (1 * 1)) / 15 =
+equals=20
+      (approximately) 3.267 visits. </DD></DL></BLOCKQUOTE>
+  <P>Our implementation strategy for <I>BTREE_compute_stats</I> will be =
+as=20
+  follows:=20
+  <UL>
+    <LI>Our BTREE control structure will be modified by adding fields to =
+store=20
+    the number of nodes, number of leaves, shortest path length, longest =
+path=20
+    length and average path length:=20
+    <BLOCKQUOTE><PRE>typedef struct btree__control_s
+{
+    BTREE__NODE_p_t root;
+    BTREE__NODE_p_t unused;
+    CDA_UINT32_t    num_nodes;
+    CDA_UINT32_t    num_leaves;
+    CDA_UINT32_t    shortest_path;
+    CDA_UINT32_t    longest_path;
+    double          avg_path;
+    void            *context;
+}  BTREE__CONTROL_t;</PRE></BLOCKQUOTE>
+    <LI>We will perform a post-order traversal of the tree counting the =
+number=20
+    of nodes and keeping track of the shortest and longest path found; =
+as we go=20
+    along, we will also keep track of the sum of all the path lengths =
+for use in=20
+    calculating the average length. The number of nodes, shortest and =
+longest=20
+    path lengths can be stored right in the tree control structure. To =
+keep=20
+    track of the length of each path during traversal, and the sum of =
+all path=20
+    lengths we will use a context such as that introduced in the =
+validation=20
+    discussion (see <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Valida=
+tingATree">Validating=20
+    a Binary Tree: The BTREE_validate Method </A>):=20
+    <BLOCKQUOTE><PRE>typedef struct context_s
+{
+    CDA_UINT32_t    count;
+    CDA_UINT32_t    path_len_sum;
+} CONTEXT_t, *CONTEXT_p_t;
+
+void BTREE_compute_stats( BTREE_ID_t btree )
+{
+    CONTEXT_t ctx;
+    btree-&gt;context =3D &amp;ctx;
+    ctx.count =3D 0;
+    ctx.path_len_sum =3D 0;
+
+    btree-&gt;longest_path =3D 0;
+    btree-&gt;shortest_path =3D btree-&gt;root !=3D NULL ? 1000000 : 0;
+    btree-&gt;num_leaves =3D 0;
+    btree-&gt;num_nodes =3D 0;
+    count_nodes( btree-&gt;root );
+    . . .
+}
+
+static void count_nodes( BTREE__NODE_p_t node )
+{
+    if ( node !=3D NULL )
+    {
+        BTREE_ID_t  tree    =3D node-&gt;tree;
+        CONTEXT_p_t ctx     =3D tree-&gt;context;
+       =20
+        ++ctx-&gt;count;
+        count_nodes( node-&gt;left );
+        count_nodes( node-&gt;right );
+        ++tree-&gt;num_nodes;
+        if ( BTREE_is_leaf( node ) )
+        {
+            ++tree-&gt;num_leaves;
+            ctx-&gt;path_len_sum +=3D ctx-&gt;count;
+            if ( ctx-&gt;count &gt; tree-&gt;longest_path )
+                tree-&gt;longest_path =3D ctx-&gt;count;
+            if ( ctx-&gt;count &lt; tree-&gt;shortest_path )
+                tree-&gt;shortest_path =3D ctx-&gt;count;
+        }
+
+        --ctx-&gt;count;
+    }
+}</PRE></BLOCKQUOTE>
+    <LI>Once the traversal is complete the average path length can be =
+computed=20
+    and stowed in the control structure:=20
+    <BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;btree-&gt;avg_path =3D=20
+    (double)ctx.path_len_sum / btree-&gt;num_leaves;</TT> <BR>The =
+"optimum"=20
+    values can be computed dynamically, for example:=20
+    <BLOCKQUOTE><PRE>CDA_UINT32_t BTREE_get_optimum_leaves( BTREE_ID_t =
+btree )
+{
+    CDA_UINT32_t    result  =3D 0;
+
+    if ( btree-&gt;num_nodes &gt; 0 )
+    {
+        result =3D (CDA_UINT32_t)ceil( btree-&gt;num_nodes / 2. );=20
+    }
+
+    return result;
+}</PRE></BLOCKQUOTE></LI></UL>
+  <P>The complete implementation of this facility is found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_statistics_=
+c.txt">btree_statistics.c=20
+  </A><A name=3DBalancingATree>
+  <H3>Balancing a Binary Tree: The BTREE_balance Method </H3>
+  <P>The algorithm that we will use to balance a tree is found in your =
+textbook=20
+  in Section 9.3, "Building a Binary Search Tree." I will not try to =
+explain the=20
+  algorithm or it's implementation, except where our specific code =
+departs from=20
+  the authors' (or, in one case, where there's a bug in the authors' =
+code).=20
+  <P>The first thing you should note about the algorithm is, as the =
+authors=20
+  explain, that it does not always create a perfectly balanced tree. The =
+second=20
+  thing is that the authors' discuss building a balanced tree from =
+scratch,=20
+  using an anonymous source that provides tree nodes already in an =
+ordered=20
+  sequence. Since we are starting with an existing tree, we will get our =
+ordered=20
+  sequence of nodes by simply doing an in-order traversal of the tree:=20
+  <BLOCKQUOTE><PRE>/* pseudocode for in-order traversal; details omitted =
+*/
+traverse( BTREE__NODE_p_t node )
+{
+    if ( node !=3D NULL )
+    {
+        traverse( node-&gt;left )
+        insert_node( node )
+        traverse( node-&gt;right )
+    }
+}</PRE></BLOCKQUOTE>
+  <P>To keep track of the node count and <I>lastnode</I> array of the =
+authors'=20
+  algorithm I chose to use a context like the one introduced above, in =
+<A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Valida=
+tingATree">Validating=20
+  a Binary Tree: The BTREE_validate Method </A>; for the size of the=20
+  <I>lastnode</I> array I arbitrarily chose a size of 30, giving us the =
+ability=20
+  to balance a tree with over one billion nodes (I'm unhappy with this =
+arbitrary=20
+  selection, as I always am with arbitrary choices; we should probably =
+count the=20
+  number of nodes in the tree, and create an array of an appropriate =
+size, but,=20
+  at least at the time of original implementation, I was also unhappy =
+with=20
+  adding that much overhead to the algorithm):=20
+  <BLOCKQUOTE><PRE>typedef struct context_s
+{
+    int                 count;
+    BTREE__NODE_p_t     nodes[30];
+} CONTEXT_t, *CONTEXT_p_t;
+
+BTREE_ID_t BTREE_balance( BTREE_ID_t tree )
+{
+    int         inx     =3D 0;
+    CONTEXT_t   context;
+
+    context.count =3D 0;
+    for ( inx =3D 0 ; inx &lt; (int)CDA_CARD( context.nodes ) ; ++inx )
+        context.nodes[inx] =3D NULL;
+    tree-&gt;context =3D &amp;context;
+    traverse( tree-&gt;root );
+    . . .
+}</PRE></BLOCKQUOTE>
+  <P>Our adaptation of the authors' algorithm will require us to: a) use =
+the=20
+  in-order traversal to find the next node to insert; b) create a new =
+node, copy=20
+  the data out of the old node, and insert the new node into the =
+balanced=20
+  structure; and c) dispose of the old node when it is no longer needed. =
+
+  "Disposing" of the old node could well mean simply destroying it; =
+that,=20
+  however, would introduce an enormous amount of churn into the heap =
+management=20
+  routines (<I>malloc</I> and <I>free</I>), and decrease the efficiency =
+of the=20
+  algorithm greatly. So we will introduce the concept of "recycling" a =
+node; a=20
+  node that is no longer needed will be placed in a used-node list, and, =
+when a=20
+  new node is needed we will try to find one in the used-node list =
+before=20
+  allocating a brand new one.=20
+  <H4>The Recycling Facility</H4>
+  <P>Implementing the recycling facility will require the following:=20
+  <OL>
+    <LI>One final modification to the BTREE control structure, to add a =
+field to=20
+    serve as head of the used-node list:=20
+    <BLOCKQUOTE><PRE>/* "unused" will be the head of the used-node list =
+*/
+typedef struct btree__control_s
+{
+    BTREE__NODE_p_t root;
+    BTREE__NODE_p_t unused;
+    CDA_UINT32_t    num_nodes;
+    CDA_UINT32_t    num_leaves;
+    CDA_UINT32_t    shortest_path;
+    CDA_UINT32_t    longest_path;
+    double          avg_path;
+    void            *context;
+}  BTREE__CONTROL_t;</PRE></BLOCKQUOTE>
+    <LI>The addition of a private method, <I>BTREE__recycle_node</I>, to =
+recycle=20
+    a subtree instead of destroying it. The new method needs to be =
+private (as=20
+    opposed to local) because it needs to be accessed from both btree.c =
+and=20
+    btree_balance.c (note that a prototype will need to be added to =
+btreep.h).=20
+    It will put the nodes from the deleted subtree into a singly linked =
+list=20
+    anchored by the <I>unused</I> field of the control structure, and =
+utilizing=20
+    a node's <I>right</I> field as the link to the following node in the =
+list:=20
+    <BLOCKQUOTE><PRE>void BTREE__recycle_node( BTREE__NODE_p_t node )
+{
+    BTREE__CONTROL_p_t  tree    =3D node-&gt;tree;
+
+    if( node-&gt;left !=3D NULL )
+        BTREE__recycle_node( node-&gt;left );
+
+    if( node-&gt;right !=3D NULL )
+        BTREE__recycle_node( node-&gt;right );
+
+    remove_node( node );
+    node-&gt;right =3D tree-&gt;unused;
+    tree-&gt;unused =3D node;
+}</PRE></BLOCKQUOTE>
+    <LI>The addition of a private method, <I>BTREE__new_node</I>, that =
+will=20
+    obtain and initialize a new node. If the used-node list is nonempty =
+the new=20
+    node will come from the from the used-node list, otherwise a new =
+node will=20
+    be allocated from the heap:=20
+    <BLOCKQUOTE><PRE>BTREE__NODE_p_t BTREE__new_node( BTREE__CONTROL_p_t =
+tree, void *data )
+{
+    BTREE__NODE_p_t node    =3D tree-&gt;unused;
+
+    if ( node !=3D NULL )
+        tree-&gt;unused =3D node-&gt;right;
+    else
+        node =3D CDA_NEW( BTREE__NODE_t );
+                                    =20
+    node-&gt;data =3D data;
+    node-&gt;tree =3D tree;
+    node-&gt;parent =3D NULL;
+    node-&gt;left =3D NULL;
+    node-&gt;right =3D NULL;
+
+    return node;
+}</PRE></BLOCKQUOTE>
+    <LI>Other minor changes to the existing implementation need to be =
+made,=20
+    specifically: any method that formerly manufactured a new node from =
+the=20
+    heap, for example <I>BTREE_add_left</I>, will now call=20
+    <I>BTREE__new_node</I> to obtain the node; and administrative =
+details common=20
+    to both <I>BTREE__recycle_node</I> and <I>BTREE_destroy_subtree</I> =
+will be=20
+    removed to a local subroutine, <I>remove_node</I>. </LI></OL>
+  <P>The complete set of revisions needed to implement the recycling =
+facility=20
+  may be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btreep_h.txt">btr=
+eep.h=20
+  </A>and <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_c.txt">btre=
+e.c.=20
+  </A>
+  <H4>The Balancing Logic</H4>
+  <P>The code for balancing a tree will be placed in the file =
+btree_balanced.c.=20
+  Our adaptation of the authors' <I>BuildTree</I> subroutine is =
+contained in=20
+  <I>BTREE_balance</I> and the subroutine <I>traverse</I>:=20
+  <BLOCKQUOTE><PRE>BTREE_ID_t BTREE_balance( BTREE_ID_t tree )
+{
+    int         inx     =3D 0;
+    CONTEXT_t   context;
+
+    context.count =3D 0;
+    for ( inx =3D 0 ; inx &lt; (int)CDA_CARD( context.nodes ) ; ++inx )
+        context.nodes[inx] =3D NULL;
+    tree-&gt;context =3D &amp;context;
+    traverse( tree-&gt;root );
+    CDA_ASSERT( tree-&gt;root =3D=3D NULL );
+
+    connect_subtrees( tree );
+
+    tree-&gt;context =3D NULL;
+
+    return tree;
+}
+
+static void traverse( BTREE__NODE_p_t node )
+{
+    if ( node !=3D NULL )
+    {
+        traverse( node-&gt;left );=20
+        insert_node( node );                  =20
+        traverse( node-&gt;right );
+        CDA_ASSERT( BTREE_is_leaf( node ) );
+        BTREE__recycle_node( node );
+    }
+}</PRE></BLOCKQUOTE>
+  <P>Our version of the <I>insert</I> subroutine will depart from the =
+authors'=20
+  mainly in the details we require to maintain the <I>parent</I> field =
+of a=20
+  node:=20
+  <BLOCKQUOTE><PRE>static void insert_node( BTREE__NODE_p_t node )
+{
+    CONTEXT_p_t     context =3D node-&gt;tree-&gt;context;
+    BTREE__NODE_p_t *nodes  =3D context-&gt;nodes;
+    int             level   =3D get_level( ++context-&gt;count );
+    BTREE__NODE_p_t next    =3D BTREE__new_node( node-&gt;tree, =
+node-&gt;data );
+
+    next-&gt;left =3D nodes[level - 1];
+    next-&gt;right =3D NULL;
+    next-&gt;data =3D node-&gt;data;
+    next-&gt;tree =3D node-&gt;tree;
+    next-&gt;parent =3D NULL;
+    nodes[level] =3D next;
+
+    if ( next-&gt;left !=3D NULL )
+        next-&gt;left-&gt;parent =3D next;
+
+    if ( nodes[level + 1] !=3D NULL )
+    {
+        BTREE__NODE_p_t temp =3D nodes[level + 1];
+        if ( temp-&gt;right =3D=3D NULL )
+        {
+            temp-&gt;right =3D next;
+            next-&gt;parent =3D temp;
+        }
+    }
+}</PRE></BLOCKQUOTE>
+  <P>Finally, we will combine the authors' subroutines <I>FindRoot</I> =
+and=20
+  <I>ConnectSubtrees</I> into a single subroutine. As you can see from =
+the code,=20
+  below, we will make a few minor changes to the logic. The first (see =
+boldface=20
+  text) is required in order to properly identify the root of the tree =
+(in the=20
+  authors' code this is done via an independent subroutine), and the =
+second (see=20
+  boldface text) is required to fix a bug in the connection logic. =
+Additional=20
+  changes are required to maintain our node's <I>parent</I> field:=20
+  <BLOCKQUOTE><PRE>static void connect_subtrees( BTREE__CONTROL_p_t tree =
+)
+{
+    CONTEXT_p_t     context     =3D tree-&gt;context;
+    BTREE__NODE_p_t *nodes      =3D context-&gt;nodes;
+    BTREE__NODE_p_t node        =3D NULL;
+    int             inx         =3D 0;
+
+    for ( inx =3D CDA_CARD( context-&gt;nodes ) - 1  ;=20
+          inx &gt; 0 &amp;&amp; nodes[inx] =3D=3D NULL         ; <B>/* =
+Kruse: inx &gt; 2 */</B>
+          --inx
+        )
+        ;
+
+    tree-&gt;root =3D nodes[inx];
+    while ( inx &gt; 2 )
+    {
+        if ( nodes[inx]-&gt;right !=3D NULL )
+        {
+            --inx;
+        }
+        else
+        {
+            int jnx =3D inx - 1;
+            node =3D nodes[inx]-&gt;left;
+            do
+            {
+                node =3D node-&gt;right;
+            } while  ( node !=3D NULL &amp;&amp; node =3D=3D =
+nodes[--jnx] );
+
+            <B>/* Kruse: if ( jnx &gt; 1 ) */</B>
+            if ( jnx &gt; 0 &amp; &amp; nodes[jnx]-&gt;parent =3D=3D =
+NULL )
+            {
+                nodes[inx]-&gt;right =3D nodes[jnx];
+                nodes[jnx]-&gt;parent =3D nodes[inx];
+            }
+            --inx; <B>/* Kruse: inx =3D jnx; */</B>
+        }
+    }
+}</PRE></BLOCKQUOTE>
+  <P>The complete details of the implementation may be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/btree_balance_c.t=
+xt">btree_balance.c.=20
+  </A>
+  <P><I><B>Next: <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html">Testin=
+g the=20
+  Implementation. </A></I></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>

@@ -1,0 +1,318 @@
+#include <stdlib.h>
+#include <btreep.h> 
+
+static void traverse_inorder(
+    BTREE__NODE_p_t      node,
+    BTREE_VISIT_PROC_p_t visit_proc
+);
+
+static void traverse_preorder(
+    BTREE__NODE_p_t      node,
+    BTREE_VISIT_PROC_p_t visit_proc
+);
+
+static void traverse_postorder(
+    BTREE__NODE_p_t      node,
+    BTREE_VISIT_PROC_p_t visit_proc
+);
+
+static void remove_node(
+    BTREE__NODE_p_t node
+);
+
+static void delete_node(
+    BTREE__NODE_p_t node
+);
+
+BTREE_ID_t BTREE_create_tree( void )
+{
+    BTREE__CONTROL_p_t tree = CDA_NEW( BTREE__CONTROL_t );
+    tree->root = NULL;
+    tree->context = NULL;
+    tree->unused = NULL;
+
+    return tree;
+}
+
+BTREE_NODE_ID_t BTREE_add_root( BTREE_ID_t tree, void *data ) 
+{
+    BTREE__NODE_p_t node = BTREE__new_node( tree, data );
+    CDA_ASSERT( tree->root == NULL );
+
+    tree->root = node;
+
+    return node;
+}
+
+BTREE_NODE_ID_t BTREE_add_left( BTREE_NODE_ID_t node, void *data )
+{
+    BTREE__NODE_p_t left = BTREE__new_node( node->tree, data );
+    CDA_ASSERT( node->left == NULL );
+                                     
+    left->parent = node;
+    node->left = left;
+
+    return left;
+}
+
+BTREE_NODE_ID_t BTREE_add_right( BTREE_NODE_ID_t node, void *data )
+{
+    BTREE__NODE_p_t right = BTREE__new_node( node->tree, data );
+    CDA_ASSERT( node->right == NULL );
+                                      
+    right->parent = node;
+    node->right = right;
+
+    return right;
+}
+
+BTREE_NODE_ID_t BTREE_delete_node( BTREE_NODE_ID_t node )
+{
+    /* put most of the deletion logic in a separate subroutine
+     * because one day we might provide the user with a new method
+     * that *recycles* a node instead of deleting it.
+     */
+    delete_node( node );
+    CDA_free( node );
+
+    return BTREE_NULL_NODE_ID;
+}
+
+BTREE_NODE_ID_t BTREE_get_root( BTREE_ID_t tree )
+{
+    return tree->root;
+}
+
+void *BTREE_get_data( BTREE_NODE_ID_t node )
+{
+    return node->data;
+}
+
+BTREE_NODE_ID_t BTREE_get_left( BTREE_NODE_ID_t node )
+{
+    return node->left;
+}
+
+BTREE_NODE_ID_t BTREE_get_right( BTREE_NODE_ID_t node )
+{
+    return node->right;
+}
+
+CDA_BOOL_t BTREE_is_empty( BTREE_ID_t tree )
+{
+    CDA_BOOL_t rcode = (tree->root == NULL ? CDA_TRUE : CDA_FALSE);
+    return rcode;
+}
+
+CDA_BOOL_t BTREE_is_leaf( BTREE_NODE_ID_t node )
+{
+    CDA_BOOL_t rcode =
+        (node->left == NULL && node->right == NULL ?  CDA_TRUE : CDA_FALSE);
+    return rcode;
+}
+
+BTREE_ID_t BTREE_traverse_tree( BTREE_ID_t               tree,
+                                BTREE_TRAVERSE_ORDER_e_t order,
+                                BTREE_VISIT_PROC_p_t     visit_proc
+                              )
+{
+    switch ( order )
+    {
+        case BTREE_PREORDER:
+            traverse_preorder( tree->root, visit_proc );
+            break;
+
+        case BTREE_INORDER:
+            traverse_inorder( tree->root, visit_proc );
+            break;
+
+        case BTREE_POSTORDER:
+            traverse_postorder( tree->root, visit_proc );
+            break;
+
+        default:
+            CDA_ASSERT( CDA_FALSE );  
+            break;
+    }
+
+    return tree;
+}
+
+BTREE_NODE_ID_t BTREE_destroy_subtree( BTREE_NODE_ID_t           node,
+                                       BTREE_DESTROY_PROC_p_t destroy_proc
+                                     )
+{
+    if( node->left != NULL )
+        BTREE_destroy_subtree( node->left,  destroy_proc );
+
+    if( node->right != NULL )
+        BTREE_destroy_subtree( node->right, destroy_proc );
+
+    if( destroy_proc != NULL )
+        destroy_proc( node->data );
+
+    remove_node( node );
+    CDA_free( node );
+    return BTREE_NULL_NODE_ID;
+}
+
+BTREE_ID_t BTREE_destroy_tree( BTREE_ID_t                tree,
+                               BTREE_DESTROY_PROC_p_t destroy_proc
+                             )
+{
+    BTREE__NODE_p_t recycled    = tree->unused;
+
+    if ( tree->root != NULL )
+        BTREE_destroy_subtree( tree->root, destroy_proc );
+
+    while ( recycled != NULL )
+    {
+        BTREE__NODE_p_t temp    = recycled->right;
+        CDA_free( recycled );
+        recycled = temp;
+    }
+
+    CDA_free( tree );
+    return BTREE_NULL_ID;
+}
+
+void BTREE__recycle_node( BTREE__NODE_p_t node )
+{
+    BTREE__CONTROL_p_t  tree    = node->tree;
+
+    if( node->left != NULL )
+        BTREE__recycle_node( node->left );
+
+    if( node->right != NULL )
+        BTREE__recycle_node( node->right );
+
+    remove_node( node );
+    node->right = tree->unused;
+    tree->unused = node;
+}
+
+BTREE__NODE_p_t BTREE__new_node( BTREE__CONTROL_p_t tree, void *data )
+{
+    BTREE__NODE_p_t node    = tree->unused;
+
+    if ( node != NULL )
+        tree->unused = node->right;
+    else
+        node = CDA_NEW( BTREE__NODE_t );
+                                     
+    node->data = data;
+    node->tree = tree;
+    node->parent = NULL;
+    node->left = NULL;
+    node->right = NULL;
+
+    return node;
+}
+
+static void remove_node( BTREE__NODE_p_t node )
+{
+
+    if( node == node->tree->root )
+        node->tree->root = NULL;
+    else if ( node == node->parent->left )
+        node->parent->left = NULL;
+    else if ( node == node->parent->right )
+        node->parent->right = NULL;
+    else
+        CDA_ASSERT( CDA_FALSE );
+}
+
+static void traverse_preorder( BTREE__NODE_p_t      node,
+                               BTREE_VISIT_PROC_p_t visit_proc
+                             )
+{
+    if ( node != NULL )
+    {
+        visit_proc( node->data );              
+        traverse_preorder( node->left, visit_proc ); 
+        traverse_preorder( node->right, visit_proc );
+    }
+}
+
+static void traverse_inorder( BTREE__NODE_p_t      node,
+                              BTREE_VISIT_PROC_p_t visit_proc
+                            )
+{
+    if ( node != NULL )
+    {
+        traverse_inorder( node->left, visit_proc ); 
+        visit_proc( node->data );                   
+        traverse_inorder( node->right, visit_proc );
+    }
+}
+
+static void traverse_postorder( BTREE__NODE_p_t      node,
+                                BTREE_VISIT_PROC_p_t visit_proc
+                              )
+{
+    if ( node != NULL )
+    {
+        traverse_postorder( node->left, visit_proc ); 
+        traverse_postorder( node->right, visit_proc );
+        visit_proc( node->data );                     
+    }
+}
+
+typedef struct data_s
+{
+int pos;
+unsigned key;
+} DATA_t, *DATA_p_t;
+static void delete_node( BTREE_NODE_ID_t node )
+{
+    BTREE__NODE_p_t temp    = NULL;
+    BTREE__NODE_p_t parent  = node->parent;
+    BTREE__NODE_p_t *hole   = NULL;
+
+    /* Deleting the node is going to leave a hole in the parent node or,
+     * if the deleted node is the root, the tree control structure. This
+     * logic finds the address of the hole.
+     */
+    if ( parent == NULL )
+    {
+        CDA_ASSERT( node == node->tree->root );
+        hole = &node->tree->root;
+    }
+    else if ( node == parent->left )
+    {
+        hole = &parent->left;
+    }
+    else
+    {
+        CDA_ASSERT( node == parent->right );
+        hole = &parent->right;
+    }
+
+    /* If the deleted node is a leaf, fill the hole with NULL; otherwise
+     * if the deleted node's right subtree is empty, fill the hole with
+     * the node's left subtree; otherwise fill the hole with the node's 
+     * right subtree, and look for a new home for the left subtree.
+     */
+    if ( node->right == NULL )
+    {
+        *hole = node->left;
+        if ( node->left != NULL )
+            node->left->parent = parent;
+    }
+    else if ( node->left == NULL )
+    {
+        *hole = node->right;
+        if ( node->right != NULL )
+            node->right->parent = parent;
+    }
+    else
+    {
+        for ( temp = node->right ; temp->left != NULL ; temp = temp->left )
+            ;
+        temp->left = node->left;
+        temp->left->parent = temp;
+
+        *hole = node->right;
+        node->right->parent = parent;
+    }
+}

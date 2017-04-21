@@ -1,0 +1,41 @@
+#ifndef BTREEP_H
+#define BTREEP_H
+
+#include <btree.h>
+
+typedef struct btree__node_s      *BTREE__NODE_p_t;
+typedef struct btree__control_s   *BTREE__CONTROL_p_t;
+
+typedef struct btree__node_s
+{
+    void                *data;
+    BTREE__CONTROL_p_t  tree;
+    BTREE__NODE_p_t     parent;
+    BTREE__NODE_p_t     left;
+    BTREE__NODE_p_t     right;
+} BTREE__NODE_t;
+
+
+typedef struct btree__control_s
+{
+    BTREE__NODE_p_t root;
+    BTREE__NODE_p_t unused;
+    CDA_UINT32_t    num_nodes;
+    CDA_UINT32_t    num_leaves;
+    CDA_UINT32_t    shortest_path;
+    CDA_UINT32_t    longest_path;
+    double          avg_path;
+    void            *context;
+}  BTREE__CONTROL_t;
+
+void BTREE__recycle_node(
+    BTREE__NODE_p_t node
+);
+
+BTREE__NODE_p_t BTREE__new_node(
+    BTREE__CONTROL_p_t tree,
+    void               *data
+);
+
+#endif
+

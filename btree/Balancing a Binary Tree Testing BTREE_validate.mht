@@ -1,0 +1,251 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Balancing a Binary Tree: Testing BTREE_validate
+Date: Wed, 17 Oct 2007 20:42:11 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/test_validate.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Balancing a Binary Tree: Testing =
+BTREE_validate</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY><I>BTREE_validate</I>html&gt;=20
+<H3>Balancing a Binary Tree: Testing BTREE_validate </H3><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html"> =
+Home </A>]=20
+</B><B>[<A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html">=20
+Testing the Implementation ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html"> =
+Previous Page=20
+]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_stats.html">=
+ Next=20
+Page ]</A> </B><BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B> <BR><BR><B>[Test Driver: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_validate_c.tx=
+t">tst_validate.c=20
+]</A> </B>
+<BLOCKQUOTE>
+  <P>I see three general requirements for testing <I>BTREE_validate</I>: =
+1) that=20
+  the method returns <I>true</I> if it finds no invalid nodes, 2) that =
+the=20
+  method returns <I>false</I> if it finds an invalid node, and 3) should =
+it find=20
+  an invalid node, that it streams to stderr a meaningful and correct =
+diagnostic=20
+  (generally, I would find "meaningful and correct" too vague, but since =
+we're=20
+  talking about a utility that is going to be used strictly for testing =
+and=20
+  debugging I'll let it pass). In this context "invalid node" refers to =
+any node=20
+  whose parent field is incorrect, including the special case where the =
+root=20
+  node has a non-NULL parent. I can think of four test cases:=20
+  <DL>
+    <DT>001050 (Valid Tree)=20
+    <DD>Build a complete tree consisting of four levels and verify that=20
+    <I>BTREE_validate</I> returns <I>true.</I>=20
+    <DT>001100 (Invalid Root)=20
+    <DD>Build a tree consisting of four levels and deliberately corrupt =
+the=20
+    parent field of the root. Verify that <I>BTREE_validate</I> returns=20
+    <I>false;</I> examine the output on stderr to verify that a =
+meaningful and=20
+    correct diagnostic was produced.=20
+    <DT>001150 (Invalid Left Child)=20
+    <DD>Build a tree consisting of four levels and deliberately corrupt =
+the=20
+    parent field of the left child of a node on the third level. Verify =
+that=20
+    <I>BTREE_validate</I> returns <I>false;</I> examine the output on =
+stderr to=20
+    verify that a meaningful and correct diagnostic was produced.=20
+    <DT>001200 (Invalid Right Child)=20
+    <DD>Build a tree consisting of four levels and deliberately corrupt =
+the=20
+    parent field of the right child of a node on the second level. =
+Verify that=20
+    <I>BTREE_validate</I> returns <I>false;</I> examine the output on =
+stderr to=20
+    verify that a meaningful and correct diagnostic was produced. =
+</DD></DL>
+  <P>To satisfy the above test cases we are going to have to build a=20
+  <I>whitebox</I> test driver, that is, a test driver with intimate =
+knowledge of=20
+  a module's implementation; in this case that will entail test code =
+that=20
+  includes the module's (normally off-limits) private header file, =
+btreep.h.=20
+  Since we are planning to implement several discrete test drivers, we =
+will=20
+  create a mini-module named TST to encapsulate the majority of the test =
+code.=20
+  Our first test driver will be coded into a source file named =
+tst_validate.c,=20
+  with the single entry point <I>TST_validate</I> which will have a void =
+
+  parameter list and return a Boolean value indicating the final status =
+of the=20
+  test. (Note that we will have to put a prototype for =
+<I>TST_validate</I> in a=20
+  header file named tst.h, and that we will have to create a private =
+header file=20
+  named tstp.h.) Our main function will be coded into a source file =
+named=20
+  test.c, and will look pretty much like this:=20
+  <BLOCKQUOTE><PRE>#include &lt;tst.h&gt;
+#include &lt;cda.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main( int argc, char **argv )
+{
+    int result  =3D EXIT_SUCCESS;
+
+    if ( !TST_validate() )
+        result =3D EXIT_FAILURE;
+
+    return result;
+}</PRE></BLOCKQUOTE>
+  <P>The main body of the test will contain a couple of interesting =
+things.=20
+  First, we will build our four-level binary tree (consisting of 15 =
+nodes) and=20
+  keep track internally of all the nodes in a second, array-based binary =
+tree=20
+  (see the <I>Binary Tree</I> section of your notes for a discussion of =
+the=20
+  contiguous array representation of a binary tree):=20
+  <BLOCKQUOTE><PRE>#define LEFT( inx )     (2 * (inx) + 1)
+#define RIGHT( inx )    (2 * (inx) + 2)
+#define PARENT( inx )   (((inx) - 1) / 2)
+
+static BTREE_NODE_ID_t  nodes_[15];
+
+static BTREE_ID_t build_tree()
+{
+    BTREE_ID_t      tree    =3D BTREE_create_tree();
+    int             limit   =3D CDA_CARD( nodes_ );
+    int             inx     =3D 0;
+
+    nodes_[0] =3D BTREE_add_root( tree, NULL );
+    for ( inx =3D 0 ; inx &lt; limit ; ++inx )
+    {
+        int left    =3D LEFT( inx );
+        int right   =3D RIGHT( inx );
+        if ( left &lt; limit )
+            nodes_[left] =3D BTREE_add_left( nodes_[inx], NULL );
+        if ( right &lt; limit )
+            nodes_[right] =3D BTREE_add_right( nodes_[inx], NULL );
+    }
+    . . .
+}</PRE></BLOCKQUOTE>
+  <P>As a sanity check, after building the tree we can call=20
+  <I>BTREE_compute_stats</I>, and display the longest and shortest path =
+values,=20
+  both of which should be 4, and the number of nodes in the tree, which =
+should=20
+  be 15. Now, with direct access to all the nodes readily available via =
+the=20
+  array <I>nodes_</I>, we can easily find any node and corrupt it =
+however we=20
+  want. Note that after we corrupt a node and call <I>BTREE_validate</I> =
+we will=20
+  restore the node, that way we can run all our tests using a single =
+tree. Here,=20
+  for example, is our test for a corrupted left child:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t test_ivleft( BTREE_ID_t tree )
+{
+    CDA_BOOL_t      rcode   =3D CDA_TRUE;
+    BTREE_NODE_ID_t parent  =3D nodes_[5];
+
+    parent-&gt;left-&gt;parent =3D nodes_[14];
+    rcode =3D !BTREE_validate( tree );
+    parent-&gt;left-&gt;parent =3D parent;
+
+    if ( !rcode )
+        puts( "    BTREE_validate failed to find invalid left child" );
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P><A name=3Dtable_driven></A>The other interesting thing about our =
+test driver=20
+  is that it is going to be <I>table driven;</I> that is, we're going to =
+have a=20
+  separate subroutine for each test, put a pointer to it in an array =
+along with=20
+  a comment and call all the tests in a loop. To do that we need to =
+declare the=20
+  type of a test function, and a struct to hold the address of a test =
+function=20
+  and an associated comment:=20
+  <BLOCKQUOTE><PRE>typedef CDA_BOOL_t TEST_PROC_t( BTREE_ID_t tree );
+typedef TEST_PROC_t *TEST_PROC_p_t;
+
+typedef struct test_case_s
+{
+    TEST_PROC_p_t   test_proc;
+    const char      *comment;
+} TEST_CASE_t, TEST_CASE_p_t;</PRE></BLOCKQUOTE>
+  <P>Next we declare all the test procs, and create an array to hold the =
+
+  indicated data:=20
+  <BLOCKQUOTE><PRE>static TEST_PROC_t test_v;
+static TEST_PROC_t test_ivroot;
+static TEST_PROC_t test_ivleft;
+static TEST_PROC_t test_ivright;
+
+static TEST_CASE_t  tests[] =3D
+{
+    { test_v,       "001050: Testing valid tree"                    },
+    { test_ivroot,  "001100: Testing tree w/invalid root"           },
+    { test_ivleft,  "001150: Testing tree w/invalid left child"     },
+    { test_ivright, "001200: Testing tree w/invalid right child"    },
+    { test_v,       "Sanity check: tree should be valid now"        }
+};</PRE></BLOCKQUOTE>
+  <P>Finally we implement TST_validate, using a loop to call test =
+functions and=20
+  determine a final result:=20
+  <BLOCKQUOTE><PRE>CDA_BOOL_t TST_validate( void )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+    BTREE_ID_t  tree    =3D build_tree();
+    int         inx     =3D 0;
+
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; CDA_CARD( tests ) ; =
+++inx )
+    {
+        puts( tests[inx].comment );
+        if ( rcode =3D tests[inx].test_proc( tree ) )
+            puts( "PASSED" );
+        else
+            puts( "FAILED" );
+    }
+
+    BTREE_destroy_tree( tree, NULL );
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>The complete test driver can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_validate_c.tx=
+t">tst_validate.c.=20
+  </A>
+  <P><B><I>Next: <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_stats.html">=
+Testing=20
+  the Statistics Facility </A></I></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>

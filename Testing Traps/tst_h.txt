@@ -1,0 +1,50 @@
+#ifndef TST_H
+#define TST_H
+
+#include <cda.h>
+
+#ifdef _WIN32
+#include <crtdbg.h>
+typedef _CrtMemState TST_HEAP_STATE_t, *TST_HEAP_STATE_p_t;
+#else
+typedef int TST_HEAP_STATE_t, *TST_HEAP_STATE_p_t;
+#endif /* #ifdef _WIN32 */
+
+CDA_BOOL_t TST_validate(
+    void
+);
+
+CDA_BOOL_t TST_delete(
+    void
+);
+
+CDA_BOOL_t TST_statistics(
+    void
+);
+
+CDA_BOOL_t TST_recycle(
+    void
+);
+
+CDA_BOOL_t TST_heap_reporting_available(
+    void
+);
+
+CDA_BOOL_t TST_balance(
+    void
+);
+
+void TST_get_heap_snapshot(
+    TST_HEAP_STATE_p_t state
+);
+
+int TST_compare_heap_snapshots(
+    TST_HEAP_STATE_p_t state1,
+    TST_HEAP_STATE_p_t state2
+);
+
+void TST_dump_curr_mem_stats(
+    void
+);
+
+#endif /* #ifndef TST_H*/

@@ -1,0 +1,91 @@
+#include <timerp.h>
+#include <sys/timeb.h>
+#include <cda.h>
+
+#define ZEROT( t )      ((t).time = 0, (t).millitm = 0)
+#define IS_ZEROT( t )   ((t).time == 0 && (t).millitm == 0)
+
+typedef struct timeb TIMEB_t, *TIMEB_p_t;
+
+static double time_diff_from_curr( 
+    TIMEB_p_t time 
+);
+
+TIMER_ID_t TIMER_create( void )
+{
+    TIMER__CONTROL_p_t  timer   = CDA_NEW( TIMER__CONTROL_t );
+    ZEROT( timer->time );
+    timer->elapsed = 0;
+
+    return timer;
+}
+
+TIMER_ID_t TIMER_destroy( TIMER_ID_t timer )
+{
+    CDA_free( timer );
+    return TIMER_NULL_ID;
+}
+
+double TIMER_start( TIMER_ID_t timer )
+{
+    ftime( &timer->time );
+    timer->elapsed = 0;
+    return 0;
+}
+
+double TIMER_stop( TIMER_ID_t timer )
+{
+    if ( !IS_ZEROT( timer->time ) )
+        timer->elapsed += time_diff_from_curr( &timer->time );
+    ZEROT( timer->time );
+    return timer->elapsed;
+}
+
+double TIMER_restart( TIMER_ID_t timer )
+{
+    ftime( &timer->time );
+    return timer->elapsed;
+}
+
+double TIMER_reset( TIMER_ID_t timer )
+{
+    if ( IS_ZEROT( timer->time ) )
+        ftime( &timer->time );
+    timer->elapsed = 0;
+    return 0;
+}
+
+double TIMER_get_elapsed_secs( TIMER_ID_t timer )
+{
+    double  elapsed = TIMER_get_elapsed_msecs( timer ) / 1000;
+    return elapsed;
+}
+
+double TIMER_get_elapsed_msecs( TIMER_ID_t timer )
+{
+    double  elapsed = 0;
+    
+    if ( !IS_ZEROT( timer->time ) )
+        elapsed = time_diff_from_curr( &timer->time );
+    elapsed += timer->elapsed;
+
+    return elapsed;
+}
+
+static double time_diff_from_curr( TIMEB_p_t time )
+{
+    double  diff    = 0;
+    TIMEB_t curr;
+    ftime( &curr );
+
+    if ( curr.millitm < time->millitm )
+    {
+        --curr.time;
+        curr.millitm += 1000;
+    }
+
+    diff = (curr.time - time->time) * 1000;
+    diff += curr.millitm - time->millitm;
+
+    return diff;
+}

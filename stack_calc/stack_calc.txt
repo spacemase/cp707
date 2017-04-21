@@ -1,0 +1,320 @@
+#include <string.h>
+#include <ctype.h>
+#include <cda.h>
+#include <stack_calc.h>
+
+typedef const char *CSTR_p_t;
+
+#define ADD     (0)
+#define SUB     (1)
+#define MUL     (2)
+#define DIV     (3)
+#define XOR     (4)
+#define LOR     (5)
+#define AND     (6)
+#define LSH     (7)
+#define RSH     (8)
+#define SUM     (9)
+
+static long stack[512];
+static long *sptr   = stack;
+
+static void push( int item );
+static long pop( void );
+static long getOperator( CSTR_p_t *str );
+static CDA_BOOL_t getOperand( long *operand, CSTR_p_t *str );
+static const char *skipWhite( const char *str );
+static long xadd( int count );
+static long xsum( int count );
+static long xxor( int count );
+static long xlor( int count );
+static long xand( int count );
+static long xlsh( int count );
+static long xrsh( int count );
+static long xsub( int count );
+static long xmul( int count );
+static long xdiv( int count );
+
+static void push( int item )
+{
+    *sptr++ = item ;
+}
+
+static long pop( void )
+{
+    return *--sptr;
+}
+
+static long getOperator( CSTR_p_t *str )
+{
+    long        rcode   = 0;
+    CSTR_p_t    temp    = *str;
+
+    if ( strncmp( "add", temp, 3 ) == 0 )
+        rcode = ADD;
+    else if ( strncmp( "sum", temp, 3 ) == 0 )
+        rcode = SUM;
+    else if ( strncmp( "xor", temp, 3 ) == 0 )
+        rcode = XOR;
+    else if ( strncmp( "lor", temp, 3 ) == 0 )
+        rcode = LOR;
+    else if ( strncmp( "lsh", temp, 3 ) == 0 )
+        rcode = LSH;
+    else if ( strncmp( "rsh", temp, 3 ) == 0 )
+        rcode = RSH;
+    else if ( strncmp( "and", temp, 3 ) == 0 )
+        rcode = AND;
+    else if ( strncmp( "sub", temp, 3 ) == 0 )
+        rcode = SUB;
+    else if ( strncmp( "mul", temp, 3 ) == 0 )
+        rcode = MUL;
+    else if ( strncmp( "div", temp, 3 ) == 0 )
+        rcode = DIV;
+    else
+        abort();
+
+    temp += 3;
+    temp = skipWhite( temp );
+    if ( *temp++ != '(' )
+        abort();
+    temp = skipWhite( temp );
+    *str = temp;
+
+    return rcode;
+}
+
+static CDA_BOOL_t getOperand( long *operand, CSTR_p_t *str )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    CSTR_p_t    temp    = *str;
+
+    if ( *temp == ')' )
+    {
+        temp = skipWhite( ++temp );
+        rcode = CDA_FALSE;
+    }
+    else if ( isalpha( *temp ) )
+        *operand = StackCalc( *str, &temp );
+    else if ( isdigit( *temp ) || (*temp == '-') || (*temp == '+') )
+    {
+        *operand = strtol( *str, (char **)&temp, 0 );
+        temp = skipWhite( temp );
+    }
+    else
+        abort();
+
+    if ( *temp == ',' )
+    {
+        temp = skipWhite( ++temp );
+        if ( *temp == ')' )
+            abort();
+    }
+    else 
+        skipWhite( temp );
+
+    *str = temp;
+    return rcode;
+}
+
+
+static const char *skipWhite( const char *str )
+{
+    const char  *temp   = str;
+
+    while ( isspace( *temp ) && (*temp != '\000') )
+        ++temp;
+
+    return temp;
+}
+
+long StackCalc( const char *expr, const char **end )
+{
+    long        rval        = 0;
+    long        operator    = 0;
+    long        operand     = 0;
+    int         count       = 0;
+    CDA_BOOL_t  working     = CDA_TRUE;
+    const char  *temp       = skipWhite( expr );
+
+    operator = getOperator( &temp );
+    while ( working )
+    {
+        if ( getOperand( &operand, &temp ) )
+        {
+            ++count;
+            push( operand );
+        }
+        else
+            working = CDA_FALSE;
+    }
+
+    switch ( operator )
+    {
+        case ADD:
+            rval = xadd( count );
+            break;
+        case SUB:
+            rval = xsub( count );
+            break;
+        case MUL:
+            rval = xmul( count );
+            break;
+        case DIV:
+            rval = xdiv( count );
+            break;
+        case XOR:
+            rval = xxor( count );
+            break;
+        case LOR:
+            rval = xlor( count );
+            break;
+        case AND:
+            rval = xand( count );
+            break;
+        case LSH:
+            rval = xlsh( count );
+            break;
+        case RSH:
+            rval = xrsh( count );
+            break;
+        case SUM:
+            rval = xsum( count );
+            break;
+        default:
+            abort();
+    }
+
+    if ( end != NULL )
+        *end = skipWhite( temp );
+
+    return rval;
+}
+
+static long xadd( int count )
+{
+    long    rcode   = 0;
+
+    if ( count != 2 )
+        abort();
+
+    rcode = pop();
+    rcode += pop();
+
+    return rcode;
+}
+
+static long xsum( int count )
+{
+    long    rcode   = 0;
+    int     inx     = 0;
+
+    for ( inx = 0 ; inx < count ; ++inx )
+        rcode += pop();
+
+    return rcode;
+}
+
+static long xxor( int count )
+{
+    long    rcode   = 0;
+    int     inx     = 0;
+
+    for ( inx = 0 ; inx < count ; ++inx )
+        rcode ^= pop();
+
+    return rcode;
+}
+
+static long xlor( int count )
+{
+    long    rcode   = 0;
+    int     inx     = 0;
+
+    for ( inx = 0 ; inx < count ; ++inx )
+        rcode |= pop();
+
+    return rcode;
+}
+
+static long xand( int count )
+{
+    long    rcode   = 0;
+    int     inx     = 0;
+
+    if ( count > 0 )
+        rcode = pop();
+
+    for ( inx = 1 ; inx < count ; ++inx )
+        rcode &= pop();
+
+    return rcode;
+}
+
+static long xlsh( int count )
+{
+    long            rcode   = 0;
+    unsigned long   val     = 0;
+    unsigned long   shift   = 0;
+
+    if ( count != 2 )
+        abort();
+    shift = (unsigned long)pop();
+    val = (unsigned long)pop();
+    rcode = (long)(val << shift );
+
+    return rcode;
+}
+
+static long xrsh( int count )
+{
+    long            rcode   = 0;
+    unsigned long   val     = 0;
+    unsigned long   shift   = 0;
+
+    if ( count != 2 )
+        abort();
+    shift = (unsigned long)pop();
+    val = (unsigned long)pop();
+    rcode = (long)(val >> shift );
+
+    return rcode;
+}
+
+static long xsub( int count )
+{
+    long    rcode   = 0;
+
+    if ( count != 2 )
+        abort();
+
+    rcode   = pop();
+    rcode = pop() - rcode;
+
+    return rcode;
+}
+
+static long xmul( int count )
+{
+    long    rcode   = 0;
+
+    if ( count != 2 )
+        abort();
+
+    rcode   = pop();
+    rcode *= pop();
+
+    return rcode;
+}
+
+static long xdiv( int count )
+{
+    long    rcode   = 0;
+
+    if ( count != 2 )
+        abort();
+
+    rcode = pop();
+    rcode = pop() / rcode;
+
+    return rcode;
+}

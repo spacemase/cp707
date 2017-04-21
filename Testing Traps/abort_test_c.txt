@@ -1,0 +1,104 @@
+/* Sample code to demonstrate how to catch and recover from SIGABRT */
+
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <setjmp.h>
+#include <cda.h>
+
+#define JMP_SIGABRT (1)
+
+/* The type of a signal handler as defined by the C89 signal facility. */
+typedef void SIG_PROC_t( int sig );
+typedef SIG_PROC_t *SIG_PROC_p_t;
+
+static CDA_BOOL_t doTest(
+    void
+);
+
+static int testTrap(
+    int val
+);
+
+static SIG_PROC_t catch_sigabrt;
+
+static jmp_buf    jbuf_;
+
+int main( int argc, char** argv )
+{
+    if ( !doTest() )
+        puts( "FAILED" );
+    else
+        puts( "PASSED" );
+
+    return EXIT_SUCCESS;
+}
+
+static CDA_BOOL_t doTest( void )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+    SIG_PROC_p_t    oldHandler  = signal( SIGABRT, catch_sigabrt );
+
+    if ( oldHandler == SIG_ERR )
+        abort();
+
+    if ( setjmp( jbuf_ ) == 0 )
+    {
+        /* Check for a valid return from the test proc
+         * when called properly.
+         */
+        if ( testTrap( 5 ) != 5 )
+        {
+            printf( "testTrap returned an invalid value\n" );
+            rcode = CDA_FALSE;
+        }
+        else
+        {
+            /* Make sure the test proc raises SIGABRT when
+             * passed an invalid value.
+             */
+            testTrap( -1 );
+
+            /* If we get back here it means that the test proc
+             * did NOT raise SIGABRT like it's supposed to.
+             */
+            printf( "testTrap failed to raise SIGABRT\n" );
+            rcode = CDA_FALSE;
+        }
+    }
+    else
+    {
+        /* If we get here it's because someone long-jumped. */
+        printf( "SIGABRT successfully raised.\n" );
+        rcode = CDA_TRUE;
+    }
+
+    if ( signal( SIGABRT, oldHandler ) == SIG_ERR )
+        abort();
+    return rcode;
+}
+
+/* If you pass a negative number to this routine it will raise
+ * SIGABRT, otherwise it will simply return the value you passed.
+ */
+static int testTrap( int val )
+{
+    if ( val < 0 )
+        raise( SIGABRT );
+
+    return val;
+}
+
+/* Before registering this signal handler you must save your
+ * environment in the global variable jbuf_.
+ */
+static void catch_sigabrt( int sig )
+{
+    /* Being tediously cautious here; make sure we caught
+     * SIGABRT and not some other signal.
+     */
+    if( sig != SIGABRT )
+        raise( sig );
+
+    longjmp( jbuf_, JMP_SIGABRT );
+}

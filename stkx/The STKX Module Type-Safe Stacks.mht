@@ -1,0 +1,120 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: The STKX Module: Type-Safe Stacks
+Date: Wed, 17 Oct 2007 20:34:10 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/stkx/index.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>The STKX Module: Type-Safe Stacks</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H1>The STKX Module: Type-Safe Stacks</H1><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/index.html">Home =
+</A>]</B>=20
+<BR><BR><B>[STKX Module Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/stkx/stkx.h">stkx.h. =
+</A>]</B>=20
+<BR><B>[STKX Module Sample Usage: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/stkx/test.c">test.c. =
+</A>]</B>=20
+<BR><B>[STKX Module Documentation: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/stkx/doc/html/index.htm=
+l">Online=20
+Docs </A>]</B>=20
+<BLOCKQUOTE>
+  <P>This module demonstrates how to create stacks of a specific type. =
+Such=20
+  stacks are not only useful, but <I>type safe,</I> because they are =
+targeted=20
+  for use only by a single data type; attempts to use them with data of =
+the=20
+  wrong type will generate, at the very least, a compiler warning.=20
+  <P>The stack is created using a macro which generates code similar to =
+this:=20
+  <BLOCKQUOTE><PRE>static int stack[1000];
+static int *sp =3D stack;
+
+static void push( int arg )
+{
+    *sp++ =3D arg;
+}
+
+static int pop( void )
+{
+    return *--sp;
+}</PRE></BLOCKQUOTE>The macro, STKX_NEW, is invoked with four arguments, =
+
+  including the type of the stack, the size of the stack and a =
+user-supplied=20
+  suffix that will make the automatically generated names unique. The =
+first=20
+  argument is a storage class which will be applied to the generated =
+push and=20
+  pop functions; it must be either 'static' or 'extern.' In addition the =
+names=20
+  of the stack and stack pointer variables begin with 'STKX_,' ensuring =
+that=20
+  they will not conflict with the names of any local variables (assuming =
+the=20
+  programmer adheres to out module naming conventions). Given the nature =
+of the=20
+  macro expansion the macro must be invoked in the global area of a C =
+source=20
+  file. For example, this macro invocation:=20
+  <BLOCKQUOTE><PRE>STKX_NEW( static, double, 100, dbl =
+);</PRE></BLOCKQUOTE>will generate=20
+  code similar to the following:=20
+  <BLOCKQUOTE><PRE>static double STKX_dbl[100];
+static double *STKX_sp_dbl =3D STKX_dbl;
+
+static void PUSH_dbl( double arg )
+{
+    *STKX_sp_dbl++ =3D arg;
+}
+
+static int POP_dbl( void )
+{
+    return *--STKX_sp_dbl;
+}</PRE></BLOCKQUOTE>Name generation in the macro expansion requires use =
+of the=20
+  macro merging operator '##." For example, the generation of the =
+STKX_dbl=20
+  declaration, above, is accomplished using this line of code in the =
+macro=20
+  declaration:=20
+  <BLOCKQUOTE><PRE>static type *STX_ ## suffix [size]; =
+\</PRE></BLOCKQUOTE>where 'suffix'=20
+  and 'size' are the dummy arguments associated with 'dbl' and '100,'=20
+  respectively. Note that, because the value of an expression using the =
+merging=20
+  operator must be a valid token, there must be a space between 'suffix' =
+and=20
+  '[size].' The complete macro declaration is as follows:=20
+  <BLOCKQUOTE><PRE>#define STKX_NEW( sc, type, size, suffix ) \
+    static type STKX_ ## suffix [ size ]; \
+    static type *STKX_sp_ ## suffix =3D STKX_ ## suffix ; \
+    sc void PUSH_ ## suffix ( item ) { *STKX_sp_ ## suffix ++ =3D =
+(item); }\
+    sc type POP_ ## suffix ( void ) { return *--STKX_sp_ ## suffix ; =
+}</PRE></BLOCKQUOTE>
+  <P>The complete macro definition can be found in <A=20
+  href=3D"http://faculty.washington.edu/jstraub/dsa/stkx/stkx.h">stkx.h; =
+</A>the=20
+  online documentation can be found <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/stkx/doc/html/index.htm=
+l">here;=20
+  </A>and a simple example of its use can be found in <A=20
+  href=3D"http://faculty.washington.edu/jstraub/dsa/stkx/test.c">test.c. =
+
+</A></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2007 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>

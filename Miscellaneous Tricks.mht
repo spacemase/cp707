@@ -1,0 +1,253 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Miscellaneous Tricks
+Date: Wed, 17 Oct 2007 21:00:31 -0700
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----=_NextPart_000_0089_01C81100.C0B68B40"
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0089_01C81100.C0B68B40
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/misc_tricks/index.html
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Miscellaneous Tricks</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252"><LINK=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/sub.css" =
+rel=3DStylesheet>
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H1>Miscellaneous Tricks</H1><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/index.html">Home =
+</A>]</B>=20
+<BLOCKQUOTE>
+  <P>Here, in no particular order, are bits and pieces of code that =
+students may=20
+  find helpful.=20
+  <P><B>Table of Contents</B>=20
+  <P>
+  <OL>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/misc_tricks/index.html#=
+stringization-macro">Stringization=20
+    Macro </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/misc_tricks/index.html#=
+nulling-1">NULL-ing=20
+    Pointer Variables (macro method) </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/misc_tricks/index.html#=
+nulling-2">NULL-ing=20
+    Pointer Variables (CDA_free modification) </A></LI></OL><A=20
+  name=3Dstringization-macro>
+  <H3>Stringization Macro </H3>
+  <P><I>Create a </I>constant<I> string containing the value of a =
+symbolic=20
+  constant. Thanks to Micah for coming up with this. </I>
+  <P>Consider the following piece of code: </P><PRE class=3Dcode>/* =
+in_str =3D "3.4 Spot" */
+double  num =3D 0;
+char    name[NAME_LEN + 1]  =3D "";
+
+sscanf( in_str, "%lf %20s", &amp;num, name );
+name[NAME_LEN] =3D '\000';</PRE>
+  <P>In the above code, presumably <I>NAME_LEN is 20,</I> and =
+the<I>%20s</I> in=20
+  the <I>sscanf</I> format string will prevent the operation from =
+overflowing=20
+  the <I>name</I> buffer. The problem is if the value of <I>NAME_LEN</I> =
+changes=20
+  you have to remember to change the format string as well. This pair of =
+macros=20
+  allow you to create a constant string that is automatically updated =
+when the=20
+  value of <I>NAME_LEN</I> changes: </P><PRE class=3Dcode>#define =
+CSTR(x) #x
+#define XCSTR(x) CSTR(x)</PRE>
+  <P>You can use the macros to construct a format string like this: =
+</P><PRE class=3Dcode>#define NAME_LEN 10
+"%lf %" XCSTR( NAME_LEN ) "s"</PRE>
+  <P>Now happens is this:=20
+  <OL>
+    <LI>Macro substitution for <I>NAME_LEN</I> yields:<BR><PRE =
+class=3Dcode>10</PRE>
+    <LI>Substitution of <I>XCSTR( NAME_LEN )</I> produces:<BR><PRE =
+class=3Dcode>CSTR( 10 )</PRE>
+    <LI>After substitution, the macro stringization operator gives =
+us:<BR><PRE class=3Dcode>"10"</PRE>
+    <LI>That gets us the three strings:<BR><PRE class=3Dcode>"%lf %" =
+"10" "s"</PRE>
+    <LI>Which the compiler concatenates for the final result:<BR><PRE =
+class=3Dcode>"%lf %10s"</PRE></LI></OL>
+  <P>Note that the declaration of NAME_LEN cannot include parentheses=20
+  (<I>#define NAME_LEN (10)</I>) otherwise the macro expansion would =
+yield=20
+  <I>"%lf %(10)s."</I>=20
+  <P>Here is a short program to illustrate the use of the macros. </P>
+  <P class=3Dcaption>Stringization </P><PRE class=3Dexample>#include =
+&lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define NAME_LEN    10
+#define IN_STR      "2.79 Kind-of-a-long-name"
+
+#define CSTR( x )   #x
+#define XCSTR( x )  CSTR( x )
+
+int main( int argc, char **argv )
+{
+    double  num                 =3D 0;
+    char    name[NAME_LEN + 1]  =3D "";
+
+    sscanf( IN_STR, "%lf %" XCSTR( NAME_LEN ) "s", &amp;num, name );
+    name[NAME_LEN] =3D '\000';
+
+    printf( "control string: \"%s\"\n",
+            "%lf %" XCSTR( NAME_LEN ) "s"
+          );
+    printf( "result: %lf, \"%s\"\n", num, name );
+
+    puts( CSTR( NAME_LEN ) );
+
+    return EXIT_SUCCESS;
+}</PRE><A name=3Dnulling-1>
+  <H3>NULL-ing Pointer Variables (macro method) </H3>
+  <P><I>Use a macro to automatically set a pointer variable to NULL =
+after=20
+  freeing associated memory. Thanks to Micah for suggesting this. </I>
+  <P>This macro will free some memory then set the (now invalid) pointer =
+value=20
+  to NULL: </P><PRE class=3Dcode>#define CDA_FREE( p ) \
+    (CDA_free( (p) ), (p) =3D NULL)</PRE>
+  <P>Here is a quick example of its use: </P>
+  <P class=3Dcaption>The CDA_FREE Macro </P><PRE =
+class=3Dexample>#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;cda.h&gt;
+
+#define CDA_FREE( p ) \
+    (CDA_free( (p) ), (p) =3D NULL)
+
+int main( int argc, char **argv )
+{
+    int *ptr    =3D CDA_malloc( 10 );
+
+    printf( "%p\n", ptr );
+    CDA_FREE( ptr );
+    printf( "%p\n", ptr );
+
+    return EXIT_SUCCESS;
+}</PRE><A name=3Dnulling-2>
+  <H3>NULL-ing Pointer Variables (CDA_free modification) </H3>
+  <P><I>Redesign </I>CDA_free<I> to return </I>NULL.<I> </I>
+  <P>If we modified <I>CDA_free</I> so that it returns <I>NULL</I> we =
+could free=20
+  memory and initialize the associated pointer all in one statement: =
+</P>
+  <P class=3Dcaption>Redesign <I>CDA_free</I> to Return <I>NULL</I> =
+</P><PRE class=3Dexample>void *CDA_free( void *ptr )
+{
+    if ( ptr !=3D NULL )
+        free( ptr );
+
+    return NULL;
+}
+
+/* ---------------------------- */
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;cda.h&gt;
+
+int main( int argc, char **argv )
+{
+    int *ptr    =3D CDA_malloc( 10 );
+
+    /* . . . */
+
+    ptr =3D CDA_free( ptr );
+    return EXIT_SUCCESS;
+}</PRE></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2007 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></A></BODY></HTML>
+
+------=_NextPart_000_0089_01C81100.C0B68B40
+Content-Type: text/css;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/sub.css
+
+BODY {
+	BORDER-RIGHT: black thick ridge; PADDING-RIGHT: 10px; =
+BACKGROUND-POSITION: left bottom; BORDER-TOP: black thick ridge; =
+PADDING-LEFT: 10px; BACKGROUND-ATTACHMENT: fixed; PADDING-BOTTOM: 10px; =
+BORDER-LEFT: black thick ridge; PADDING-TOP: 10px; BORDER-BOTTOM: black =
+thick ridge; BACKGROUND-REPEAT: no-repeat; FONT-FAMILY: arial, =
+helvetica, sans-serif; BACKGROUND-COLOR: #f5f5f5; -moz-border-radius: =
+8px 8px 8px 8px
+}
+BODY.ref-frame {
+	BORDER-RIGHT: medium none; BORDER-TOP: medium none; MARGIN-LEFT: 5%; =
+BORDER-LEFT: medium none; WIDTH: 90%; BORDER-BOTTOM: medium none; =
+BACKGROUND-COLOR: #00ffaa
+}
+TABLE.ref-frame {
+	BORDER-COLLAPSE: collapse; empty-cells: show
+}
+H3 {
+	counter-increment: section; counter-reset: subsection
+}
+H3:unknown {
+	content: counter( section ) ". "
+}
+H4 {
+	counter-increment: subsection; counter-reset: subsubsection
+}
+H4:unknown {
+	content: counter( section ) "." counter( subsection ) ". "
+}
+#logo {
+	BACKGROUND-POSITION: center center; FLOAT: left; BACKGROUND-IMAGE: =
+url(backg_small.gif); WIDTH: 32pt; BOTTOM: -2px; BACKGROUND-REPEAT: =
+no-repeat; POSITION: relative; HEIGHT: 27pt
+}
+P.caption {
+	FONT-WEIGHT: bold; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 2%; WIDTH: 94%; =
+FONT-FAMILY: Arial, Verdana, sans-serif; WHITE-SPACE: normal; =
+counter-increment: example
+}
+P.caption:unknown {
+	content: "Example " counter( example ) ". "
+}
+P.code {
+	PADDING-LEFT: 6px; MARGIN-LEFT: 5%; FONT-FAMILY: "Courier New", =
+Courier, "Lucida Console", monospace
+}
+PRE.code {
+	PADDING-LEFT: 6px; MARGIN-LEFT: 5%; WIDTH: 90%; FONT-FAMILY: "Courier =
+New", Courier, "Lucida Console", monospace
+}
+PRE.example {
+	BORDER-RIGHT: black 2px solid; PADDING-RIGHT: 6px; BORDER-TOP: black =
+2px solid; MARGIN-TOP: 4px; PADDING-LEFT: 6px; FONT-SIZE: 90%; =
+MARGIN-BOTTOM: 4px; PADDING-BOTTOM: 4px; MARGIN-LEFT: 2%; BORDER-LEFT: =
+black 2px solid; WIDTH: 94%; PADDING-TOP: 4px; BORDER-BOTTOM: black 2px =
+solid; FONT-FAMILY: "Courier New", Courier, "Lucida Console", monospace; =
+BACKGROUND-COLOR: #cfcfcf
+}
+DL.code > DT {
+	FONT-WEIGHT: bold; FONT-STYLE: italic
+}
+
+------=_NextPart_000_0089_01C81100.C0B68B40--

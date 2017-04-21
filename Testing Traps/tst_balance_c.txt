@@ -1,0 +1,609 @@
+#include <tstp.h>
+#include <rand.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cda.h>
+#include <btree.h>
+#include <timer.h>
+#include <math.h>
+
+#define MAX_RETRIES (5)
+
+typedef struct test_ctx_s
+{
+    BTREE_ID_t      tree;
+    CDA_UINT32_t    *keys;
+    size_t          size;
+    CDA_UINT32_t    seed;
+    size_t          num_dupes;
+    int             max_retries;
+    CDA_BOOL_t      visit_result;
+    CDA_UINT32_t    last_visit;
+    size_t          num_visits;
+} TEST_CTX_t, *TEST_CTX_p_t;
+
+typedef struct test_desc_s
+{
+    CDA_UINT32_t    *keys;
+    size_t          min;
+    size_t          max;
+} TEST_DESC_t, *TEST_DESC_p_t;
+
+typedef struct group_desc_s
+{
+    TEST_DESC_p_t   test_desc;
+    const char      *comment;
+} GROUP_DESC_t, *GROUP_DESC_p_t;
+
+typedef CDA_BOOL_t TEST_PROC_t( TEST_CTX_p_t ctx );
+typedef TEST_PROC_t *TEST_PROC_p_t;
+
+typedef struct step_desc_s
+{
+    TEST_PROC_p_t   proc;
+    const char      *comment;
+} STEP_DESC_t, *STEP_DESC_p_t;
+
+typedef struct data_s
+{
+    int           position;
+    CDA_UINT32_t  key;
+    TEST_CTX_p_t  ctx;
+} DATA_t, *DATA_p_t;
+
+static CDA_BOOL_t add(
+    DATA_p_t        data,
+    BTREE_NODE_ID_t node
+);
+
+static int get(
+    CDA_UINT32_t    key,
+    BTREE_NODE_ID_t node,
+    BTREE_NODE_ID_t *node_ret,
+    int             *test_count
+);
+
+static int get_btree(
+    CDA_STR_CONST_p_t key
+);
+
+static TEST_PROC_t balance_test;
+static TEST_PROC_t create_test;
+static TEST_PROC_t create_tree_arr;
+static TEST_PROC_t create_tree_rand;
+static TEST_PROC_t delete_test;
+static TEST_PROC_t destroy_test;
+static TEST_PROC_t get_test;
+static TEST_PROC_t traversal_test;
+static TEST_PROC_t validate_test;
+static TEST_PROC_t verify_test;
+
+static BTREE_DESTROY_PROC_t destroy_proc;
+static BTREE_VISIT_PROC_t   visit_proc;
+
+static CDA_UINT32_t k50xx_[]    = { 16, 8, 32, 4 };
+static TEST_DESC_t  d50xx_      = { k50xx_, 0, 4 };
+
+static CDA_UINT32_t k5100_[]    = 
+    { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+static TEST_DESC_t  d5100_      = { k5100_, 17, 17 };
+
+static CDA_UINT32_t k5110_[]    = 
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+static TEST_DESC_t  d5110_      = { k5110_, 17, 17 };
+
+static TEST_DESC_t  d512x_      = { NULL,       6,       9 };
+static TEST_DESC_t  d514x_      = { NULL,      30,      33 };
+static TEST_DESC_t  d516x_      = { NULL,    1022,    1025 };
+static TEST_DESC_t  d5300_      = { NULL,       4,    1026 };
+static TEST_DESC_t  d5320_      = { NULL,  100000,  100000 };
+
+static GROUP_DESC_t groups_[]   =
+{
+    { &d50xx_, "005005 - 005025: Empty Tree through Four Nodes" },
+    { &d5100_, "005100: Left Degenerate"                        },
+    { &d5110_, "005110: Right Degenerate"                       },
+    { &d512x_, "005120 - 005126: ~2**3 nodes"                   },
+    { &d514x_, "005140 - 005146: ~2**5 nodes"                   },
+    { &d512x_, "005160 - 005166: ~2**10 nodes"                  },
+    { &d5300_, "005300: General Testing"                        },
+    { &d5320_, "005320: One Hundred Thousand Nodes"             }
+};
+
+/*******************************************************************************
+ * For each test group (from the groups[] array) each of the these tasks
+ * will be performed.
+ */
+static STEP_DESC_t  steps_[]    =
+{
+    { create_test,      "create tree"                                       },
+    { validate_test,    "verify via BTREE_validate"                         },
+    { traversal_test,   "verify traversal visits all nodes in sequence"     },
+    { get_test,         "verify all nodes can be retrieved"                 },
+    { balance_test,     "balance tree"                                      },
+    { validate_test,    "verify via BTREE_validate"                         },
+    { verify_test,      "verify tree is balanced"                           },
+    { traversal_test,   "verify traversal visits all nodes in sequence"     },
+    { get_test,         "verify all nodes can be retrieved"                 },
+    { delete_test,      "delete nodes one-by-one; verify tree is empty"     },
+    { destroy_test,     "destroy the tree"                                  }
+};
+
+CDA_BOOL_t TST_balance( void )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    TIMER_ID_t  o_timer = TIMER_create();
+    TIMER_ID_t  timer   = TIMER_create();
+    size_t      inx     = 0;
+    double      elapsed = 0;
+
+    TIMER_start( o_timer );
+    for ( inx = 0 ; rcode && inx < CDA_CARD( groups_ ) ; ++inx )
+    {
+        size_t              jnx     = 0;
+        TEST_DESC_p_t       desc    = groups_[inx].test_desc;
+
+        puts( groups_[inx].comment );
+        for ( jnx = desc->min ; rcode && jnx <= desc->max ; ++jnx )
+        {
+            size_t              knx = 0;
+            TEST_CTX_t          ctx;
+            TST_HEAP_STATE_t    start_heap;
+            TST_HEAP_STATE_t    end_heap;
+
+            ctx.tree = BTREE_NULL_ID;
+            ctx.keys = desc->keys;
+            ctx.size = jnx;
+            ctx.seed = 0;
+            ctx.num_dupes = 0;
+            ctx.max_retries = MAX_RETRIES;
+            ctx.visit_result = CDA_TRUE;
+            ctx.last_visit = 0;
+            ctx.num_visits = 0;
+
+            printf( "    #nodes = %u\n", jnx );
+            TST_get_heap_snapshot( &start_heap );
+            for ( knx = 0 ; rcode && knx < CDA_CARD( steps_ ) ; ++knx )
+            {
+                printf( "        %s\n", steps_[knx].comment );
+                TIMER_start( timer );
+                if ( rcode = steps_[knx].proc( &ctx ) )
+                {
+                    elapsed = TIMER_stop( timer ) / 1000;
+                    printf( "        (%.3lf seconds)\n", elapsed );
+                    puts( "        PASSED" );
+                }
+                else
+                    puts( "        FAILED" );
+            }
+
+            TST_get_heap_snapshot( &end_heap );
+            if ( rcode && 
+                 TST_compare_heap_snapshots( &start_heap, &end_heap ) != 0
+               )
+            {
+                printf( "    MEMORY LEAKS DETECTED\n" );
+                rcode = CDA_FALSE;
+            }
+        }
+    }
+    elapsed = TIMER_stop( o_timer ) / 1000;
+    printf( "Overall test time: %.3lf seconds\n", elapsed );
+
+    TIMER_destroy( o_timer );
+    TIMER_destroy( timer );
+
+    return rcode;
+}
+
+static CDA_BOOL_t create_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    if ( ctx->keys != NULL )
+        rcode = create_tree_arr( ctx );
+    else
+        rcode = create_tree_rand( ctx );
+
+    return rcode;
+}
+
+static CDA_BOOL_t create_tree_arr( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+    BTREE_ID_t      tree        = BTREE_create_tree();
+    BTREE_NODE_ID_t root        = BTREE_NULL_NODE_ID;
+    DATA_p_t        data        = NULL;
+    CDA_UINT32_t    *keys       = ctx->keys;
+    size_t          size        = ctx->size;
+    size_t          inx         = 0;
+
+    CDA_ASSERT( ctx->tree == BTREE_NULL_ID );
+    CDA_ASSERT( keys != NULL || size == 0 );
+
+    ctx->num_dupes = 0;
+    ctx->tree = tree;
+    if ( size > 0 )
+    {
+        data = CDA_NEW( DATA_t );
+        data->key = keys[0];
+        data->position = 0;
+        data->ctx = ctx;
+        root = BTREE_add_root( tree, data );
+    }
+
+    for ( inx = 1 ; rcode && inx < size ; ++inx )
+    {
+        data = CDA_NEW( DATA_t );
+        data->position = (int)inx;
+        data->key = (int)keys[inx];
+        data->ctx = ctx;
+        if ( !(rcode = add( data, root )) )
+            printf( "            Unexpected add failure; "
+                        "key = %lu position = %lu (line = %d\n",
+                    data->key,
+                    data->position,
+                    __LINE__
+                  );
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t create_tree_rand( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+    BTREE_ID_t      tree        = BTREE_create_tree();
+    BTREE_NODE_ID_t root        = BTREE_NULL_ID;
+    size_t          inx         = 0;
+    CDA_UINT32_t    key         = 0;
+    int             num_dupes   = 0;
+    int             max_retries = ctx->max_retries;
+    size_t          size        = ctx->size;
+    RAND_ID_t       rid         = RAND_create();
+    DATA_p_t        data        = NULL;
+
+    ctx->tree = tree;
+    if ( size > 0 )
+    {
+        data = CDA_NEW( DATA_t );
+        RAND_init( rid, ctx->seed );
+        key = RAND_irandom( rid );
+        data->key = key;
+        data->position = 0;
+        data->ctx = ctx;
+        root = BTREE_add_root( tree, data );
+    }
+
+    for ( inx = 1 ; rcode && inx < size ; ++inx )
+    {
+        int retries = 0;
+
+        data = CDA_NEW( DATA_t );
+        data->position = (int)inx;
+        data->ctx = ctx;
+        do
+        {
+            data->key = RAND_irandom( rid );
+            if ( rcode = add( data, root ) )
+                retries = 0;
+            else
+            {
+                ++num_dupes;
+                ++retries;
+            }
+        } while ( !rcode && retries < max_retries );
+        if ( !rcode )
+            printf( "            Add failure, retries exceeded; "
+                        "position = %lu, retries = %d (line = %d)\n",
+                    data->position,
+                    retries,
+                    __LINE__
+                    );
+    }
+
+    ctx->num_dupes = num_dupes;
+    RAND_destroy( rid );
+
+    return rcode;
+}
+
+static CDA_BOOL_t balance_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+
+    BTREE_balance( ctx->tree );
+
+    return rcode;
+}
+
+static CDA_BOOL_t get_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+    BTREE_NODE_ID_t root        = BTREE_get_root( ctx->tree );
+    RAND_ID_t       rid         = RAND_create();
+    size_t          limit       = ctx->size + ctx->num_dupes;
+    int             count_accum = 0;
+    int             long_count  = 0;
+    size_t          inx         = 0;
+
+    RAND_init( rid, ctx->seed );
+    for ( inx = 0 ; rcode && inx < limit ; ++inx )
+    {
+        CDA_UINT32_t    key         = 
+            ctx->keys != NULL ? ctx->keys[inx] : RAND_irandom( rid );
+        int             test_count  = 0;
+        int             pos         = get( key, root, NULL, &test_count );
+        if ( pos < 0 )
+        {
+            const char  *fmt    = "            failed to retrieve data for "
+                                  "key = %lu, idx = %d\n";
+            printf( fmt, key, inx );
+            rcode = CDA_FALSE;
+        }
+        else
+        {
+            count_accum += test_count;
+            if ( test_count > long_count )
+                long_count = test_count;
+        }
+    }
+
+    if ( rcode )
+    {
+        double      avg_count   = (double)count_accum / limit;
+        const char  *fmt        = 
+            "            (avg #tests = %lf, longest #tests = %d)\n";
+        printf( fmt, avg_count,  long_count );
+    }
+
+    RAND_destroy( rid );
+    return rcode;
+}
+
+static CDA_BOOL_t delete_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+    BTREE_ID_t      tree        = ctx->tree;
+    RAND_ID_t       rid         = RAND_create();
+    size_t          limit       = ctx->size + ctx->num_dupes;
+    size_t          num_misses  = 0;
+    size_t          inx         = 0;
+    int             dcount      = 0;
+
+    RAND_init( rid, ctx->seed );
+    for ( inx = 0 ; rcode && inx < limit ; ++inx )
+    {
+        BTREE_NODE_ID_t root    = BTREE_get_root( ctx->tree );
+        BTREE_NODE_ID_t target  = NULL;
+        CDA_UINT32_t    key     = 
+            ctx->keys != NULL ? ctx->keys[inx] : RAND_irandom( rid );
+        int             pos     = -1;
+        
+        CDA_ASSERT( root != NULL );
+        pos = get( key, root, &target, NULL );
+        if ( pos < 0 )
+        {
+            /* We should expect exactly as many misses as num_dupes_. */
+            ++num_misses;
+        }
+        else
+        {
+            DATA_p_t    data    = BTREE_get_data( target );
+            BTREE_delete_node( target );
+            root = BTREE_get_root( ctx->tree );
+            if ( root != NULL && get( key, root, NULL, NULL ) >= 0 )
+            {
+                printf( "            deleted node found; key = %lu, pos = %d\n",
+                        data->key,
+                        data->position
+                      );
+                rcode = CDA_FALSE;
+            }
+            else if ( ++dcount == 10 )
+            {
+                BTREE_balance( tree );
+                dcount = 0;
+            }
+            else
+            {}
+
+            CDA_free( data );
+        }
+    }
+
+    /* Sanity check */
+    if ( rcode && num_misses != ctx->num_dupes )
+    {
+        printf( "            # misses (%u) does not match # dupes (%u) (%d)\n",
+                num_misses,
+                ctx->num_dupes,
+                __LINE__
+              );
+        rcode = CDA_FALSE;
+    }
+
+    if ( rcode )
+        if ( !BTREE_is_empty( tree ) )
+        {
+            printf( "            tree not empty after deleting all keys\n" );
+            rcode = CDA_FALSE;
+        }
+
+    RAND_destroy( rid );
+    return rcode;
+}
+
+static CDA_BOOL_t traversal_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode = CDA_TRUE;
+
+    ctx->last_visit = 0;
+    ctx->num_visits = 0;
+    ctx->visit_result = CDA_TRUE;
+    BTREE_traverse_tree( ctx->tree, BTREE_INORDER, visit_proc );
+    rcode = ctx->visit_result;
+
+    if ( !rcode )
+        puts( "                data out of order" );
+
+    if ( ctx->num_visits != ctx->size )
+    {
+        printf( "            num visits = %d; expected %d\n", 
+                ctx->num_visits,
+                ctx->size );
+        rcode = CDA_FALSE;
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t destroy_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode   = CDA_TRUE;
+
+    CDA_ASSERT( ctx->tree != BTREE_NULL_ID );
+    BTREE_destroy_tree( ctx->tree, destroy_proc );
+
+    return rcode;
+}
+
+static CDA_BOOL_t validate_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode   = CDA_TRUE;
+
+    CDA_ASSERT( ctx->tree != BTREE_NULL_ID );
+    rcode   = BTREE_validate( ctx->tree );
+
+    return rcode;
+}
+
+static CDA_BOOL_t verify_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       = CDA_TRUE;
+    BTREE_ID_t      tree        = ctx->tree;
+    CDA_UINT32_t    leaves      = 0;
+    CDA_UINT32_t    nodes       = 0;
+    CDA_UINT32_t    size        = (CDA_UINT32_t)ctx->size;
+    CDA_UINT32_t    exp_leaves  = (size / 2) + (1 & size);
+    CDA_UINT32_t    opt_path    = 0;
+    CDA_UINT32_t    act_path    = 0;
+
+    BTREE_compute_stats( tree );
+    leaves = BTREE_get_num_leaves( tree );
+    nodes = BTREE_get_num_nodes( tree );
+    opt_path = BTREE_get_optimum_path( tree );
+    act_path = BTREE_get_longest_path( tree );
+    
+    if ( abs( leaves - exp_leaves ) > 1 )
+    {
+        const char  *fmt    = "            num leaves = %lu; expected %lu\n";
+        printf( fmt, leaves, exp_leaves );
+        rcode = CDA_FALSE;
+    }
+    else if ( nodes != ctx->size )
+    {
+        const char  *fmt    = 
+            "            num nodes = %lu; expected = %lu (line = %d)\n";
+        printf( fmt, nodes, ctx->size, __LINE__ );
+        rcode = CDA_FALSE;
+    }
+    else if ( act_path > opt_path )
+    {
+        const char  *fmt    = 
+            "            long path len = %lu; expected = %lu (line = %d)\n";
+        printf( fmt, act_path, opt_path, __LINE__ );
+        rcode = CDA_FALSE;
+    }
+    else
+        rcode = CDA_TRUE;
+
+    return rcode;
+}
+
+static CDA_BOOL_t add( DATA_p_t data, BTREE_NODE_ID_t node )
+{
+    CDA_BOOL_t      rcode     = CDA_TRUE;
+    DATA_p_t        node_data = BTREE_get_data( node );
+    BTREE_NODE_ID_t next_node = BTREE_NULL_ID;
+
+    if ( data->key == node_data->key )
+        rcode = CDA_FALSE;
+    else if ( data->key < node_data->key )
+    {
+        next_node = BTREE_get_left( node );
+        if ( next_node == BTREE_NULL_NODE_ID )
+            BTREE_add_left( node, data );
+        else
+            rcode = add( data, next_node );
+    }
+    else
+    {
+        next_node = BTREE_get_right( node );
+        if ( next_node == BTREE_NULL_NODE_ID )
+            BTREE_add_right( node, data );
+        else
+            rcode = add( data, next_node );
+    }
+
+    return rcode;
+}
+
+static int get( CDA_UINT32_t    key, 
+                BTREE_NODE_ID_t node, 
+                BTREE_NODE_ID_t *node_ret,
+                int             *test_count
+              )
+{
+    DATA_p_t        node_data = BTREE_get_data( node );
+    BTREE_NODE_ID_t next_node = BTREE_NULL_ID;
+    int             strc      = 0;
+    int             rcode     = -1;
+
+    if ( test_count != NULL )
+        ++*test_count;
+
+    if ( node_ret != NULL )
+        *node_ret = NULL;
+    if ( key == node_data->key )
+    {
+        rcode = node_data->position;
+        if ( node_ret != NULL )
+            *node_ret = node;
+    }
+    else if ( key < node_data->key )
+    {
+        next_node = BTREE_get_left( node );
+        if ( next_node == BTREE_NULL_ID )
+            ;
+        else
+            rcode = get( key, next_node, node_ret, test_count );
+    }
+    else
+    {
+        next_node = BTREE_get_right( node );
+        if ( next_node == BTREE_NULL_ID )
+            ;
+        else
+            rcode = get( key, next_node, node_ret, test_count );
+    }
+
+    return rcode;
+}
+
+static void visit_proc( void *visit_data )
+{
+    DATA_p_t        data = visit_data;
+    TEST_CTX_p_t    ctx = data->ctx;
+    ++ctx->num_visits;
+
+    if ( ctx->num_visits > 1 && data->key <= ctx->last_visit )
+        ctx->visit_result = CDA_FALSE;
+    ctx->last_visit = data->key;
+}
+
+static void destroy_proc( void *visit_data )
+{
+    DATA_p_t data = visit_data;
+    CDA_free( data );
+}

@@ -1,0 +1,265 @@
+#include <cda.h>
+#include <btree.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#define EPSILON (.005)
+
+typedef struct data_s
+{
+    int key;
+} DATA_t, *DATA_p_t;
+
+typedef struct expected_s
+{
+    CDA_UINT32_t    num_nodes;
+    CDA_UINT32_t    num_leaves;
+    CDA_UINT32_t    shortest_path;
+    CDA_UINT32_t    longest_path;
+    double          avg_path;
+    CDA_UINT32_t    optimum_path;
+    CDA_UINT32_t    optimum_leaves;
+    double          optimum_visits;
+} EXPECTED_t, *EXPECTED_p_t;
+
+typedef struct test_desc_s
+{
+    int             *keys;
+    EXPECTED_p_t    expected;
+    size_t          size;
+    const char      *comment;
+} TEST_DESC_t, *TEST_DESC_p_t;
+
+/* In the descriptor array, below, the size of key00310_ must be
+ * hard-coded to 0.
+ */
+static int  key003010_[]    = { 0 }; 
+static EXPECTED_t   exp003010_  =
+{ 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static int  key003015_[]    = { 1024 };
+static EXPECTED_t   exp003015_  =
+{ 1, 1, 1, 1, 1, 1, 1, 1 };
+
+static int  key003020_[]    = {1024, 512 };
+static EXPECTED_t	exp003020_  =
+{ 2, 1, 2, 2, 2, 2, 1, 1.5 };
+
+static int  key003025_[]    = {1024, 1536 };
+static EXPECTED_t	exp003025_  =
+{ 2, 1, 2, 2, 2, 2, 1, 1.5 };
+
+static int  key003030_[]    = {1024, 512, 1536 };
+static EXPECTED_t	exp003030_  =
+{ 3, 2, 2, 2, 2, 2, 2, 1.67 };
+
+static int  key003035_[]    = {1024, 512, 256, 128, 64 };
+static EXPECTED_t	exp003035_  =
+{ 5, 1, 5, 5, 5, 3, 3, 2.2 };
+
+static int  key003040_[]    = {1024, 1536, 1792, 1920, 1984 };
+static EXPECTED_t	exp003040_  =
+{ 5, 1, 5, 5, 5, 3, 3, 2.2 };
+
+static int  key003100_[]    = {1024, 512, 1536, 1280, 1152, 1088, 1216 };
+static EXPECTED_t	exp003100_  =
+{ 7, 3, 2, 5, 4, 3, 4, 2.43 };
+
+static int  key003110_[]    = {1024, 512, 768, 640, 704 };
+static EXPECTED_t	exp003110_  =
+{ 5, 1, 5, 5, 5, 3, 3, 2.2 };
+
+static int  key003120_[]    = 
+{ 1024,   512, 1536,  256, 768, 1280,  128,  640,
+   896,  1408,   64,  192, 576,  704,  832,  960
+};
+static EXPECTED_t	exp003120_  =
+{ 16, 7, 4, 5, 4.86, 5, 8, 3.375 };
+
+#define CC( a ) CDA_CARD( (a) )
+static TEST_DESC_t  tests_[]    =
+{
+    { key003010_, &exp003010_, 0,                "003010 Empty Tree"         },
+    { key003015_, &exp003015_, CC( key003015_ ), "003015 Root Alone"         },
+    { key003020_, &exp003020_, CC( key003020_ ), "003020 Root + Left Child"  },
+    { key003025_, &exp003025_, CC( key003025_ ), "003025 Root + Right Child" },
+    { key003030_, &exp003030_, CC( key003030_ ), "003030 Root + 2 Children"  },
+    { key003035_, &exp003035_, CC( key003035_ ), "003035 Left Degenerate"    },
+    { key003040_, &exp003040_, CC( key003040_ ), "003040 Right Degenerate"   },
+    { key003100_, &exp003100_, CC( key003100_ ), "003100 Misc. Topology (1)" },
+    { key003110_, &exp003110_, CC( key003110_ ), "003110 Misc. Topology (2)" },
+    { key003120_, &exp003120_, CC( key003120_ ), "003120 Misc. Topology (3)" }
+};
+#undef CC
+
+static CDA_BOOL_t exec_test( 
+    TEST_DESC_p_t   desc
+);
+
+static CDA_BOOL_t icomp(
+    const char      *field,
+    CDA_UINT32_t    exp,
+    CDA_UINT32_t    act
+);
+
+static CDA_BOOL_t dcomp(
+    const char  *field,
+    double      exp,
+    double      act
+);
+
+static void add(
+    DATA_p_t        data,
+    BTREE_NODE_ID_t node
+);
+
+static BTREE_DESTROY_PROC_t destroy_proc;
+
+CDA_BOOL_t TST_statistics( void )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    size_t      inx     = 0;
+
+    for ( inx = 0 ; rcode && inx < CDA_CARD( tests_ ) ; ++inx )
+    {
+        puts( tests_[inx].comment );
+        if ( rcode = exec_test( &tests_[inx] ) )
+            puts( "PASSED" );
+        else
+            puts( "FAILED" );
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t exec_test( TEST_DESC_p_t desc )
+{
+    CDA_BOOL_t      rcode           = CDA_TRUE;
+    BTREE_ID_t      tree            = BTREE_create_tree();
+    BTREE_NODE_ID_t root            = BTREE_NULL_ID;
+    EXPECTED_p_t    exp             = desc->expected;
+    DATA_p_t        data            = NULL;
+    int             inx             = 0;
+    CDA_UINT32_t    num_nodes       = 0;
+    CDA_UINT32_t    num_leaves      = 0;
+    CDA_UINT32_t    shortest_path   = 0;
+    CDA_UINT32_t    longest_path    = 0;
+    double          avg_path        = 0;
+    CDA_UINT32_t    optimum_path    = 0;
+    CDA_UINT32_t    optimum_leaves  = 0;
+    double          optimum_visits  = 0;
+
+    if ( desc->size > 0 )
+    {
+        data = CDA_NEW( DATA_t );
+        data->key = desc->keys[0];
+        root = BTREE_add_root( tree, data );
+    }
+
+    for ( inx = 1 ; inx < (int)desc->size ; ++inx )
+    {
+        data = CDA_NEW( DATA_t );
+        data->key = desc->keys[inx];
+        add( data, root );
+    }
+
+    BTREE_compute_stats( tree );
+    num_nodes = BTREE_get_num_nodes( tree );
+    num_leaves = BTREE_get_num_leaves( tree );
+    shortest_path = BTREE_get_shortest_path( tree );
+    longest_path = BTREE_get_longest_path( tree );
+    avg_path = BTREE_get_avg_path( tree );
+    optimum_path = BTREE_get_optimum_path( tree );
+    optimum_leaves = BTREE_get_optimum_leaves( tree );
+    optimum_visits = BTREE_get_optimum_visits( tree );
+
+    if ( !icomp( "num_nodes", exp->num_nodes, num_nodes ) )
+        rcode = CDA_FALSE;
+    else if ( !icomp( "num_leaves", exp->num_leaves, num_leaves ) )
+        rcode = CDA_FALSE;
+    else if ( !icomp( "shortest_path", exp->shortest_path, shortest_path ) )
+        rcode = CDA_FALSE;
+    else if ( !icomp( "longest_path", exp->longest_path, longest_path ) )
+        rcode = CDA_FALSE;
+    else if ( !dcomp( "avg_path", exp->avg_path, avg_path ) )
+        rcode = CDA_FALSE;
+    else if ( !icomp( "optimum_path", exp->optimum_path, optimum_path ) )
+        rcode = CDA_FALSE;
+    else if ( !icomp( "optimum_leaves", exp->optimum_leaves, optimum_leaves ) )
+        rcode = CDA_FALSE;
+    else if ( !dcomp( "optimum_visits", exp->optimum_visits, optimum_visits ) )
+        rcode = CDA_FALSE;
+    else
+        rcode = CDA_TRUE;
+
+    BTREE_destroy_tree( tree, destroy_proc );
+
+    return rcode;
+}
+
+static 
+CDA_BOOL_t icomp( const char *field, CDA_UINT32_t exp, CDA_UINT32_t act )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    if ( exp == act )
+        printf( "    %s valid (%lu)\n", field, act );
+    else
+    {
+        const char  *fmt    = 
+            "    %s INVALID,  expected = %lu, actual = %lu)\n";
+        printf( fmt, field, exp, act );
+        rcode = CDA_FALSE;
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t dcomp( const char *field, double exp, double act )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    if ( fabs( exp - act ) <= EPSILON )
+        printf( "    %s valid (%lf)\n", field, act );
+    else
+    {
+        const char
+            *fmt    = "    %s INVALID,  expected = %lf, actual = %lf)\n";
+        printf( fmt, field, exp, act );
+        rcode = CDA_FALSE;
+    }
+
+    return rcode;
+}
+
+static void add( DATA_p_t data, BTREE_NODE_ID_t node )
+{
+    DATA_p_t        node_data = BTREE_get_data( node );
+    BTREE_NODE_ID_t next_node = BTREE_NULL_ID;
+
+    if ( data->key == node_data->key )
+        abort();
+
+    if ( data->key < node_data->key )
+    {
+        next_node = BTREE_get_left( node );
+        if ( next_node == BTREE_NULL_NODE_ID )
+            BTREE_add_left( node, data );
+        else
+            add( data, next_node );
+    }
+    else
+    {
+        next_node = BTREE_get_right( node );
+        if ( next_node == BTREE_NULL_NODE_ID )
+            BTREE_add_right( node, data );
+        else
+            add( data, next_node );
+    }
+}
+
+static void destroy_proc( void *data )
+{
+    CDA_free( data );
+}

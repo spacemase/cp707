@@ -1,0 +1,101 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Balancing a Binary Tree: Testing the Implementation
+Date: Wed, 17 Oct 2007 20:42:01 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/test.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Balancing a Binary Tree: Testing the =
+Implementation</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H2>Balancing a Binary Tree: Testing the Implementation </H2><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html"> =
+Home </A>]=20
+</B><B>[<A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html">=20
+Previous Page ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_validate.htm=
+l"> Next=20
+Page ]</A> </B><BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B>=20
+<BLOCKQUOTE>
+  <P>Now that all the easy work is done we get to the hard part: writing =
+a test=20
+  driver to verify that it was done right. Whatever we do, our test =
+driver is=20
+  going to get complicated. So I propose that we keep it simple wherever =
+we can;=20
+  in particular, I suggest, for the purposes of this discussion, that we =
+write=20
+  several discreet drivers instead of rolling all our tests into a =
+single=20
+  program, and that we don't try too hard to fully automate the process; =
+instead=20
+  we can display results at various points, and eyeball the display to =
+make sure=20
+  that the results are valid. We'll leave it as an exercise to the =
+reader to=20
+  bolt our test drivers together and massage them into a single process =
+that can=20
+  be fully automated.=20
+  <P>Our first question, of course, is just what do we need to test? Our =
+biggest=20
+  changes to the BTREE module were adding the <B><I>delete, =
+recycle</I></B> and=20
+  <B><I>validate methods,</I></B> the <B><I>statistics facility</I></B> =
+and, of=20
+  course, the <B><I>balance method.</I></B> We also had to modify the =
+various=20
+  the <B><I>add</I></B> utilities to utilize the new recycling logic. =
+Testing in=20
+  each of these areas is described below. In addition, we probably =
+shouldn't=20
+  miss the opportunity to see how fast (or slow) our implementation is, =
+so we'll=20
+  build some timing analysis into the test drivers, as well.=20
+  <P>
+  <H3>Table of Contents</H3>
+  <OL>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_validate.htm=
+l">Testing=20
+    BTREE_validate </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_stats.html">=
+Testing=20
+    the Statistics Facility </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html"=
+>Testing=20
+    BTREE_delete_node </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_recycle.html=
+">Testing=20
+    the Recycling Logic </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+">Testing=20
+    BTREE_balance </A></LI></OL>
+  <P><B><I>Next: <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_validate.htm=
+l">Testing=20
+  BTREE_validate </A></I></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>

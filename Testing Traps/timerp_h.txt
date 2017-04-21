@@ -1,0 +1,18 @@
+#ifndef TIMERP_H
+#define TIMERP_H
+
+#include <timer.h>
+#include <sys/timeb.h>
+
+#ifdef _WIN32
+#define ftime _ftime
+#define timeb _timeb
+#endif
+
+typedef struct timer__control_s
+{
+    struct timeb    time;
+    double          elapsed;
+} TIMER__CONTROL_t, *TIMER__CONTROL_p_t;
+
+#endif

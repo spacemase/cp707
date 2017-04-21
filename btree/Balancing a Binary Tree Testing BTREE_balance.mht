@@ -1,0 +1,2100 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Balancing a Binary Tree: Testing BTREE_balance
+Date: Wed, 17 Oct 2007 20:42:50 -0700
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----=_NextPart_000_004B_01C810FE.48555A70"
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_004B_01C810FE.48555A70
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Balancing a Binary Tree: Testing =
+BTREE_balance</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H3>Balancing a Binary Tree: Testing BTREE_balance </H3><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html"> =
+Home </A>]=20
+</B><B>[<A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html">=20
+Testing the Implementation ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_recycle.html=
+">=20
+Previous Page ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer.html"> =
+Next Page=20
+]</A> </B><BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B> <BR><BR><B>[Test Driver: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_balance_c.txt=
+">tst_balance.c=20
+]</A> </B>
+<BLOCKQUOTE>
+  <P>Generally, testing <I>BTREE_balance</I> will consist of building an =
+
+  unbalanced search tree, balancing it, and verifying that the balanced =
+tree is=20
+  valid, and produces the same search results as the original tree. For =
+boundary=20
+  conditions I see testing trees consisting of one, two, three and four =
+nodes;=20
+  left and right degenerate trees; trees consisting of 2**N - 2 nodes, =
+2**N - 1=20
+  nodes, 2**N nodes and 2**N + 1 nodes, for N equal to some integer =
+between,=20
+  say, 3 and 10. We should also test a very large tree, say one =
+consisting of=20
+  100,000 nodes. And we shouldn't miss the opportunity to do some =
+timings and=20
+  track some other metrics; for example, your text book says that =
+searching for=20
+  a key in a randomly built tree (with a good random distribution) =
+should=20
+  require testing 1.39 times as many nodes as would searching a balanced =
+tree. I=20
+  propose that a good validation of our balancing algorithm consist of =
+the=20
+  following steps:=20
+  <P><B>Tree Validation Procedure</B>=20
+  <OL>
+    <LI>Build a binary search tree consisting of a given number of =
+nodes.=20
+    <LI>Verify the tree using <I>BTREE_validate</I>.=20
+    <LI>Verify that an in-order traversal of the tree visits all the =
+nodes in=20
+    the correct order.=20
+    <LI>Verify that all the keys in the tree can be retrieved, keeping =
+track of=20
+    the average number of nodes that have to be tested to find the key.=20
+    <LI>Balance the tree.=20
+    <LI>Verify the tree using <I>BTREE_validate</I>.=20
+    <LI>Verify that the tree has the expected number of leaves.=20
+    <LI>Verify that an in-order traversal of the tree visits all the =
+nodes in=20
+    the correct order.=20
+    <LI>Verify that all the keys in the tree can be retrieved, keeping =
+track of=20
+    the average number of nodes that have to be tested to find the key.=20
+    <LI>Delete the nodes in the tree one at a time; after all the nodes =
+are=20
+    deleted verify that the tree is empty.=20
+    <LI>Destroy the tree and, if possible, check for memory leaks. =
+</LI></OL>
+  <P>(See also <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+#DeletionCaveat">caveat,=20
+  </A>below.)=20
+  <P>And I propose the following test cases:=20
+  <DL>
+    <DT>005005 (Empty tree)=20
+    <DD>Create an empty tree and validate it according to the above tree =
+
+    validation procedure.=20
+    <DT>005010 (One node)=20
+    <DD>Create a tree consisting of a single node and validate it =
+according to=20
+    the above tree validation procedure.=20
+    <DT>005015 (Two nodes)=20
+    <DD>Create a tree consisting of two nodes and validate it according =
+to the=20
+    above tree validation procedure.=20
+    <DT>005020 (Three nodes)=20
+    <DD>Create a complete tree consisting of three nodes and validate it =
+
+    according to the above tree validation procedure.=20
+    <DT>005025 (Four nodes)=20
+    <DD>Create a complete tree consisting of three nodes; add one more =
+node and=20
+    validate it according to the above tree validation procedure.=20
+    <DT>005100 (Left degenerate)=20
+    <DD>Incrementally by one, create trees consisting of 3 to 17 nodes, =
+adding=20
+    keys to the tree in reverse order (e.g. 10, 9, 8, etc.) and validate =
+them=20
+    according to the above tree validation procedure.=20
+    <DT>005110 (Right degenerate)=20
+    <DD>Incrementally by one, create trees consisting of 3 to 17 nodes, =
+adding=20
+    keys to the tree in order (e.g. 1, 2, 3, etc.) and validate them =
+according=20
+    to the above tree validation procedure.=20
+    <DT>005120 (2**3 - 2 nodes)=20
+    <DD>Create a tree with 6 nodes using randomly generated keys and =
+validate it=20
+    according to the above tree validation procedure.=20
+    <DT>005122 (2**3 - 1 nodes)=20
+    <DD>Create a tree with 7 nodes using randomly generated keys and =
+validate it=20
+    according to the above tree validation procedure.=20
+    <DT>005124 (2**3 nodes)=20
+    <DD>Create a tree with 8 nodes using randomly generated keys and =
+validate it=20
+    according to the above tree validation procedure.=20
+    <DT>005126 (2**3 + 1 nodes)=20
+    <DD>Create a tree with 9 nodes using randomly generated keys and =
+validate it=20
+    according to the above tree validation procedure.=20
+    <DT>005140 (2**5 - 2 nodes)=20
+    <DD>Create a tree with 30 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005142 (2**5 - 1 nodes)=20
+    <DD>Create a tree with 31 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005144 (2**5 nodes)=20
+    <DD>Create a tree with 32 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005146 (2**5 + 1 nodes)=20
+    <DD>Create a tree with 33 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005160 (2**10 - 2 nodes)=20
+    <DD>Create a tree with 1022 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005162 (2**10 - 1 nodes)=20
+    <DD>Create a tree with 1023 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005164 (2**10 nodes)=20
+    <DD>Create a tree with 1024 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005166 (2**10 + 1 nodes)=20
+    <DD>Create a tree with 1025 nodes using randomly generated keys and =
+validate=20
+    it according to the above tree validation procedure.=20
+    <DT>005300 (General testing)=20
+    <DD>Incrementally by one, create trees consisting of 4 to 1026 nodes =
+using=20
+    randomly generated keys and validate them according to the above =
+tree=20
+    validation procedure.=20
+    <DT>005320 (100,000 nodes)=20
+    <DD>Create a tree with 100,000 nodes using randomly generated keys =
+and=20
+    validate it according to the above tree validation procedure. =
+</DD></DL>
+  <P><A name=3DDeletionCaveat><B>Caveat:</B> </A>Deleting all nodes from =
+a large=20
+  binary search tree is problematic in that the tree tends to become =
+unbalanced=20
+  to the point where it is unmanageable. To see why that is consider =
+this small=20
+  tree:=20
+  <P><IMG=20
+  =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/005caveat1.=
+jpg"=20
+  border=3D0>=20
+  <P>If we delete node 1536, then, according to the algorithm given in =
+your=20
+  textbook in Section 9.2.5 "Deletion from A Binary Search Tree," node =
+1792=20
+  becomes the right child of node 1024, and node 1280 becomes the left =
+child of=20
+  node 1600:=20
+  <P><IMG=20
+  =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/005caveat2.=
+jpg"=20
+  border=3D0>=20
+  <P>And suddenly a tree that had been balanced has a branch that =
+exceeds the=20
+  optimum length by 2; that may not sound like much, but note that it's =
+a factor=20
+  of almost 150%. A similar operation on a balanced tree of 100,000 =
+nodes (that=20
+  is, having an optimum depth of 17) we would wind up with a branch =
+having=20
+  length 25; if we continue to delete nodes at random we will eventually =
+have=20
+  branches with lengths in the thousands. This not only slows the =
+process down,=20
+  but, since we use a recursive algorithm to search the tree, locating a =
+node=20
+  will eventually cause an underflow on the frame stack. The solution to =
+this=20
+  problem is to occasionally rebalance the tree during the "delete all =
+nodes"=20
+  phase of the validation procedure.=20
+  <H4><A name=3DTestDriver>The Test Driver </A></H4>
+  <P>When I look at our test cases and our validation procedure I see =
+three=20
+  separate sequences:=20
+  <OL>
+    <LI>First, of course, is the sequence of test cases.=20
+    <LI>Second, consider that the test cases can be divided into groups =
+where=20
+    each case in a group is subject to a single test that can be run=20
+    iteratively, incrementing the size of the test tree by one with each =
+
+    iteration. One obvious example is test case 005300 which occupies a =
+group=20
+    all by itself; we are essentially executing the same test on 1023 =
+trees=20
+    composed of randomly generated keys and having size 4 to 1026. And =
+if we=20
+    consider this array of keys:=20
+    <BLOCKQUOTE><PRE>unsigned keys[] =3D { 16, 8, 32, 4 =
+};</PRE></BLOCKQUOTE>then test cases=20
+    005005 through 005025 can be executed in a loop of 5 iterations, =
+using=20
+    <I>keys[]</I> and an array size that starts at 0 and increments by =
+one with=20
+    each iteration.=20
+    <LI>Lastly is the sequence of steps in the validation procedure: =
+<I>create,=20
+    validate, traverse, retrieve, balance, validate, count, traverse, =
+retrieve,=20
+    delete, destroy. </I></LI></OL>I therefore propose dividing the test =
+cases=20
+  into groups and writing a test driver that will execute them using =
+three=20
+  nested loops:=20
+  <BLOCKQUOTE><PRE>for inx =3D 0 to last-group
+    for jnx =3D min-tree-size to max-tree-size
+        for knx =3D 0 to last-validation-step
+            execute step #knx</PRE></BLOCKQUOTE>
+  <P>I'll discuss each group, below. We will also have to discuss how we =
+will=20
+  control the <I>context</I> of each test, and where we will put the =
+timing and=20
+  memory-leak-detection logic.=20
+  <H4><A name=3DTestContext>Test Context </A></H4>
+  <P>We introduced the topic of an <I>operation context</I> back when we =
+talked=20
+  about the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html#Valida=
+tingATree"><I>BTREE_validate</I>=20
+  </A>method. Essentially a context is a struct which keeps track of all =
+the=20
+  parameters that we have to remember as we progress from one step to =
+another in=20
+  some operation. In this case <I>operation</I> refers to the sequence =
+of steps=20
+  in our validation procedure. What are the parameters that we have to =
+keep=20
+  track of? Some obvious ones are the <I>tree ID</I> and the <I>tree =
+size.</I>=20
+  Some of our test cases require trees built from arrays, so we will =
+need a=20
+  pointer to a <I>keys array.</I> If we look at the traversal logic we =
+used back=20
+  in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+traverse_test"><I>Testing=20
+  BTREE_delete_node</I> </A>we can predict that we will need to keep =
+track of=20
+  <I>visit result, last visit</I> and <I>number of visits;</I> and for =
+those=20
+  test cases requiring randomly generated keys we will need to keep =
+track of=20
+  <I>seed.</I> (Note: in our delete-node test driver we tracked <I>visit =
+
+  result,</I> <I>last visit</I> and <I>number of visits;</I> with global =
+
+  variables. By putting them in a context struct instead our test driver =
+will=20
+  respond to future changes much more flexibly. And, of course, it is=20
+  <I>much</I> cooler.)=20
+  <P>Some less obvious parameters pertain to those test cases requiring =
+large=20
+  numbers of randomly generated keys. In our discussion of randomly =
+generated=20
+  keys in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+RandomlyGeneratedKeys"><I>Testing=20
+  BTREE_delete_node</I> </A>you will recall that a random number =
+generator, even=20
+  a good one, will eventually produce duplicates if we push it far =
+enough; and,=20
+  of course, duplicate keys are not allowed in a binary search tree. So =
+we will=20
+  have to gracefully detect and ignore duplicate keys, and we will have =
+to keep=20
+  track of how many duplicates were detected during tree creation =
+because our=20
+  retrieval test is going to have to be prepared for failing to find =
+exactly=20
+  that many keys (you can take my word for that for now; we'll discuss =
+it more=20
+  thoroughly when we talk about the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+#get_test">retrieval=20
+  test </A>). One more thing we will have to monitor when generating =
+random keys=20
+  is how many duplicates are being sequentially produced. For a large =
+number of=20
+  keys it is entirely possible that a random number generator will start =
+
+  producing strings of 20 or 30 or 1000 duplicate keys before giving us =
+a unique=20
+  one (if you don't believe me try substituting the C Standard Library =
+function=20
+  <I>rand()</I> for Matsumoto and Nishimura's <I>Mersenne Twister</I> =
+which we=20
+  are currently using). If this happens creating a tree can get bogged =
+down,=20
+  even grind to a halt generating keys. So we are going to put a cap on =
+the=20
+  number of <I>retries</I> we will execute when attempting to add a key =
+to a=20
+  binary search tree; if <I>retries</I> are exceeded, we will fail the =
+test.=20
+  <P>Taking into account all of the above we wind up with a context that =
+looks=20
+  like this:=20
+  <BLOCKQUOTE><PRE>typedef struct test_ctx_s
+{
+    BTREE_ID_t      tree;
+    CDA_UINT32_t    *keys;
+    size_t          size;
+    CDA_UINT32_t    seed;
+    size_t          num_dupes;
+    int             max_retries;
+    CDA_BOOL_t      visit_result;
+    CDA_UINT32_t    last_visit;
+    size_t          num_visits;
+} TEST_CTX_t, *TEST_CTX_p_t;</PRE></BLOCKQUOTE>
+  <H4><A name=3DInnerLoop>The Inner Loop </A></H4>
+  <P>At its most basic, the inner loop of our test driver will traverse =
+a table=20
+  of validation procedures and call each, passing a test context. Each =
+entry in=20
+  our table will consist of the address of a validation procedure and a =
+comment,=20
+  and a validation procedure will be a function that takes a test =
+context and=20
+  returns a Boolean value:=20
+  <BLOCKQUOTE><PRE>typedef CDA_BOOL_t TEST_PROC_t( TEST_CTX_p_t ctx );
+typedef TEST_PROC_t *TEST_PROC_p_t;
+
+typedef struct step_desc_s
+{
+    TEST_PROC_p_t   proc;
+    const char      *comment;
+} STEP_DESC_t, *STEP_DESC_p_t;
+. . .
+static STEP_DESC_t  steps_[]    =3D
+{
+    { create_test,      "create tree"                                    =
+   },
+    { validate_test,    "verify via BTREE_validate"                      =
+   },
+    { traversal_test,   "verify traversal visits all nodes in sequence"  =
+   },
+    { get_test,         "verify all nodes can be retrieved"              =
+   },
+    { balance_test,     "balance tree"                                   =
+   },
+    { validate_test,    "verify via BTREE_validate"                      =
+   },
+    { verify_test,      "verify tree is balanced"                        =
+   },
+    { traversal_test,   "verify traversal visits all nodes in sequence"  =
+   },
+    { get_test,         "verify all nodes can be retrieved"              =
+   },
+    { delete_test,      "delete nodes one-by-one; verify tree is empty"  =
+   },
+    { destroy_test,     "destroy the tree"                               =
+   }
+};</PRE></BLOCKQUOTE>
+  <P>Construction of the test context is the job of the middle loop of =
+the test=20
+  driver; keeping that in mind, the inner loop will look something like =
+this=20
+  (later on we will have to add some timing and memory leak detection =
+logic):=20
+  <BLOCKQUOTE><PRE>for ( inx =3D ...
+{
+    . . .
+    for ( jnx =3D ...
+    {
+        TST_CTX_t   ctx;
+        . . .
+        for ( knx =3D 0 ; rcode &amp;&amp; knx &lt; CDA_CARD( steps_ ) ; =
+++knx )
+        {
+            printf( "        %s\n", steps_[knx].comment );
+            if ( rcode =3D steps_[knx].proc( &amp;ctx ) )
+                puts( "        PASSED" );
+            else
+                puts( "        FAILED" );
+        }
+     }
+ }</PRE></BLOCKQUOTE>
+  <H4><A name=3DMiddleLoop>The Middle Loop </A></H4>
+  <P>The middle loop will make use of a test descriptor that indicates =
+the range=20
+  of sizes for which a test is to be executed and, if necessary, the =
+address of=20
+  an array from which to obtain keys:=20
+  <BLOCKQUOTE><PRE>typedef struct test_desc_s
+{
+    CDA_UINT32_t    *keys;
+    size_t          min;
+    size_t          max;
+} TEST_DESC_t, *TEST_DESC_p_t;</PRE></BLOCKQUOTE>If, within a =
+descriptor, the=20
+  <I>keys</I> pointer is NULL, keys will be randomly generated. For =
+example,=20
+  test cases 005005 through 005025 will be described by a single =
+descriptor that=20
+  looks like this:=20
+  <BLOCKQUOTE><PRE>static CDA_UINT32_t k50xx_[]    =3D { 16, 8, 32, 4 };
+static TEST_DESC_t  d50xx_      =3D { k50xx_, 0, 4 };</PRE></BLOCKQUOTE>
+  <P>Test case 005110 will have a descriptor that looks like this:=20
+  <BLOCKQUOTE><PRE>static CDA_UINT32_t k5100_[]    =3D=20
+    { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+static TEST_DESC_t  d5100_      =3D { k5100_, 17, 17 =
+};</PRE></BLOCKQUOTE>
+  <P>And test cases 005120 through 005126 use randomly generated keys =
+and are=20
+  described this way:=20
+  <BLOCKQUOTE><PRE>static TEST_DESC_t  d512x_      =3D { NULL, 6, 9 =
+};</PRE></BLOCKQUOTE>
+  <P>Once it has a descriptor the middle loop will create a test context =
+and=20
+  loop from the <I>min</I> tree size to the <I>max</I> tree size =
+executing test=20
+  cases. Identifying the specific descriptor to use is the job of the =
+outer=20
+  loop; keeping this in mind, and remembering that we will add timing =
+and=20
+  leak-detection logic later, the middle loop looks like this:=20
+  <BLOCKQUOTE><PRE>#define MAX_RETRIES (5)
+. . .
+for ( inx =3D ...
+{
+    TEST_DESC_p_t       desc    =3D ...;
+    . . .
+    for ( jnx =3D desc-&gt;min ; rcode &amp;&amp; jnx &lt;=3D =
+desc-&gt;max ; ++jnx )
+    {
+        size_t      knx =3D 0;
+        TST_CTX_t   ctx;
+
+        ctx.tree =3D BTREE_NULL_ID;
+        ctx.keys =3D desc-&gt;keys;
+        ctx.size =3D jnx;
+        ctx.seed =3D 0;
+        ctx.num_dupes =3D 0;
+        ctx.max_retries =3D MAX_RETRIES;
+        ctx.visit_result =3D CDA_TRUE;
+        ctx.last_visit =3D 0;
+        ctx.num_visits =3D 0;
+
+        printf( "    #nodes =3D %u\n", jnx );
+        for ( knx =3D 0 ; rcode &amp;&amp; knx &lt; CDA_CARD( steps_ ) ; =
+++knx )
+        {
+            printf( "        %s\n", steps_[knx].comment );
+            if ( rcode =3D steps_[knx].proc( &amp;ctx ) )
+                puts( "        PASSED" );
+            else
+                puts( "        FAILED" );
+        }
+     }
+ }</PRE></BLOCKQUOTE>
+  <H4><A name=3DOuterLoop>The Outer Loop </A></H4>
+  <P>The outer loop will be driven by an array with members that contain =
+a=20
+  pointer to a test descriptor and a comment:=20
+  <BLOCKQUOTE><PRE>typedef struct group_desc_s
+{
+    TEST_DESC_p_t   test_desc;
+    const char      *comment;
+} GROUP_DESC_t, *GROUP_DESC_p_t;
+
+static GROUP_DESC_t groups_[]   =3D
+{
+    { &amp;d50xx_, "005005 - 005025: Empty Tree through Four Nodes" },
+    { &amp;d5100_, "005100: Left Degenerate"                        },
+    { &amp;d5110_, "005110: Right Degenerate"                       },
+    { &amp;d512x_, "005120 - 005126: ~2**3 nodes"                   },
+    { &amp;d514x_, "005140 - 005146: ~2**5 nodes"                   },
+    { &amp;d512x_, "005160 - 005166: ~2**10 nodes"                  },
+    { &amp;d5300_, "005300: General Testing"                        },
+    { &amp;d5320_, "005320: One Hundred Thousand Nodes"             }
+};</PRE></BLOCKQUOTE>
+  <P>It will simply traverse the array, extracting the descriptor in =
+each=20
+  element for use by the middle loop:=20
+  <BLOCKQUOTE><PRE>for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; CDA_CARD( =
+groups_ ) ; ++inx )
+{
+    size_t              jnx     =3D 0;
+    TEST_DESC_p_t       desc    =3D groups_[inx].test_desc;
+
+    puts( groups_[inx].comment );
+    for ( jnx =3D desc-&gt;min ; rcode &amp;&amp; jnx &lt;=3D =
+desc-&gt;max ; ++jnx )
+    {
+        size_t      knx =3D 0;
+        TST_CTX_t   ctx;
+
+        ctx.tree =3D BTREE_NULL_ID;
+        ctx.keys =3D desc-&gt;keys;
+        ctx.size =3D jnx;
+        ctx.seed =3D 0;
+        ctx.num_dupes =3D 0;
+        ctx.max_retries =3D MAX_RETRIES;
+        ctx.visit_result =3D CDA_TRUE;
+        ctx.last_visit =3D 0;
+        ctx.num_visits =3D 0;
+
+        printf( "    #nodes =3D %u\n", jnx );
+        for ( knx =3D 0 ; rcode &amp;&amp; knx &lt; CDA_CARD( steps_ ) ; =
+++knx )
+        {
+            printf( "        %s\n", steps_[knx].comment );
+            if ( rcode =3D steps_[knx].proc( &amp;ctx ) )
+                puts( "        PASSED" );
+            else
+                puts( "        FAILED" );
+        }
+     }
+ }</PRE></BLOCKQUOTE>
+  <H4><A name=3DLeakDetectionAndTiming>Leak Detection and Timing =
+</A></H4>
+  <P>Our leak-detection logic will be essentially the same as the logic =
+we=20
+  introduced in the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+CheckingForMemoryLeaks"><I>BTREE_delete_node</I>=20
+  </A>test driver. Immediately before beginning the inner loop (the loop =
+that=20
+  drives all the steps required to execute a test case) we will take a =
+snapshot=20
+  of the heap. After the inner loop has finished executing we'll take =
+another=20
+  snapshot and compare it to the first; if there are no memory leaks =
+they will=20
+  be the same:=20
+  <BLOCKQUOTE><PRE>for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; CDA_CARD( =
+groups_ ) ; ++inx )
+{
+    size_t              jnx     =3D 0;
+    . . .
+    for ( jnx =3D desc-&gt;min ; rcode &amp;&amp; jnx &lt;=3D =
+desc-&gt;max ; ++jnx )
+    {
+        size_t              knx =3D 0;
+        TEST_CTX_t          ctx;
+        <B>TST_HEAP_STATE_t    start_heap;
+        TST_HEAP_STATE_t    end_heap;</B>
+        . . .
+        <B>TST_get_heap_snapshot( &amp;start_heap );</B>
+        for ( knx =3D 0 ; rcode &amp;&amp; knx &lt; CDA_CARD( steps_ ) ; =
+++knx )
+        {
+            . . .
+        }
+
+        <B>TST_get_heap_snapshot( &amp;end_heap );
+        if ( rcode &amp;&amp;=20
+             TST_compare_heap_snapshots( &amp;start_heap, &amp;end_heap =
+) !=3D 0
+           )
+        {
+            printf( "    MEMORY LEAKS DETECTED\n" );
+            rcode =3D CDA_FALSE;
+        }</B>
+     }
+ }</PRE></BLOCKQUOTE>
+  <P>For timings we will use two timers from the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer.html">The =
+Timer=20
+  Module. </A>(Note: this should not be confused with the facility =
+developed as=20
+  part of the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/notes.html#timeractivit=
+y">Timer=20
+  Activity; </A>the facilities are similar but <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer.html">The =
+Timer=20
+  Module </A>keeps track of elapsed time in milliseconds.) We will run =
+two=20
+  timers; <I>timer</I> will be used in the inner loop to measure the =
+elapsed=20
+  time for each step in the test process. <I>o_timer</I> will be used =
+outside of=20
+  the outer loop to measure the time required to execute the entire test =
+suite:=20
+  <BLOCKQUOTE><PRE><B>TIMER_ID_t  o_timer =3D TIMER_create();
+TIMER_ID_t  timer   =3D TIMER_create();
+double      elapsed =3D 0;
+
+TIMER_start( o_timer );</B>
+for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; CDA_CARD( groups_ ) ; ++inx =
+)
+{
+    . . .
+    for ( jnx =3D desc-&gt;min ; rcode &amp;&amp; jnx &lt;=3D =
+desc-&gt;max ; ++jnx )
+    {
+        . . .
+        for ( knx =3D 0 ; rcode &amp;&amp; knx &lt; CDA_CARD( steps_ ) ; =
+++knx )
+        {
+            printf( "        %s\n", steps_[knx].comment );
+            <B>TIMER_start( timer );</B>
+            if ( rcode =3D steps_[knx].proc( &amp;ctx ) )
+            {
+                <B>elapsed =3D TIMER_stop( timer ) / 1000;
+                printf( "        (%.3lf seconds)\n", elapsed );</B>
+                puts( "        PASSED" );
+            }
+            else
+                puts( "        FAILED" );
+        }
+     }
+ }
+<B>elapsed =3D TIMER_stop( o_timer ) / 1000;
+printf( "Overall test time: %.3lf seconds\n", elapsed );
+
+TIMER_destroy( o_timer );
+TIMER_destroy( timer );</B></PRE></BLOCKQUOTE>
+  <P>Taking all of the above into account, the main engine behind our =
+test=20
+  driver looks like this:=20
+  <BLOCKQUOTE><PRE>CDA_BOOL_t TST_balance( void )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+    TIMER_ID_t  o_timer =3D TIMER_create();
+    TIMER_ID_t  timer   =3D TIMER_create();
+    size_t      inx     =3D 0;
+    double      elapsed =3D 0;
+
+    TIMER_start( o_timer );
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &amp;lt; CDA_CARD( groups_ ) =
+; ++inx )
+    {
+        size_t              jnx     =3D 0;
+        TEST_DESC_p_t       desc    =3D groups_[inx].test_desc;
+
+        puts( groups_[inx].comment );
+        for ( jnx =3D desc-&gt;min ; rcode &amp;&amp; jnx &amp;lt;=3D =
+desc-&gt;max ; ++jnx )
+        {
+            size_t              knx =3D 0;
+            TEST_CTX_t          ctx;
+            TST_HEAP_STATE_t    start_heap;
+            TST_HEAP_STATE_t    end_heap;
+
+            ctx.tree =3D BTREE_NULL_ID;
+            ctx.keys =3D desc-&gt;keys;
+            ctx.size =3D jnx;
+            ctx.seed =3D 0;
+            ctx.num_dupes =3D 0;
+            ctx.max_retries =3D MAX_RETRIES;
+            ctx.visit_result =3D CDA_TRUE;
+            ctx.last_visit =3D 0;
+            ctx.num_visits =3D 0;
+
+            printf( "    #nodes =3D %u\n", jnx );
+            TST_get_heap_snapshot( &amp;start_heap );
+            for ( knx =3D 0 ; rcode &amp;&amp; knx &amp;lt; CDA_CARD( =
+steps_ ) ; ++knx )
+            {
+                printf( "        %s\n", steps_[knx].comment );
+                TIMER_start( timer );
+                if ( rcode =3D steps_[knx].proc( &amp;ctx ) )
+                {
+                    elapsed =3D TIMER_stop( timer ) / 1000;
+                    printf( "        (%.3lf seconds)\n", elapsed );
+                    puts( "        PASSED" );
+                }
+                else
+                    puts( "        FAILED" );
+            }
+
+            TST_get_heap_snapshot( &amp;end_heap );
+            if ( rcode &amp;&amp;=20
+                 TST_compare_heap_snapshots( &amp;start_heap, =
+&amp;end_heap ) !=3D 0
+               )
+            {
+                printf( "    MEMORY LEAKS DETECTED\n" );
+                rcode =3D CDA_FALSE;
+            }
+        }
+    }
+    elapsed =3D TIMER_stop( o_timer ) / 1000;
+    printf( "Overall test time: %.3lf seconds\n", elapsed );
+
+    TIMER_destroy( o_timer );
+    TIMER_destroy( timer );
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <H4><A name=3DTheTestSubroutines>The Test Subroutines </A></H4>
+  <P>The next level of detail of our test driver is composed of ten =
+subroutines.=20
+  Eight of these were introduced briefly in our discussion of the test =
+driver's=20
+  <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+#InnerLoop">inner=20
+  loop; </A>they are <I>create_test, validate_test, traversal_test, =
+get_test,=20
+  balance_test, verify_test, delete_test </I>and <I>destroy_test.</I> =
+The other=20
+  two come from dividing <I>create_test</I> into separate subroutines =
+for=20
+  handling those test cases that obtain their keys from arrays, and =
+those that=20
+  require randomly generated keys, <I>create_tree_arr</I> and=20
+  <I>create_tree_rand.</I>=20
+  <BLOCKQUOTE>
+    <P><A name=3Dcreate_test></A><B><I>create_test, create_test_arr,=20
+    create_test_rand</I></B> <BR><I>create_test</I> distinguishes =
+between the=20
+    two classes of test cases by looking at the <I>keys</I> field of the =
+test=20
+    descriptor:=20
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t create_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+
+    if ( ctx-&gt;keys !=3D NULL )
+        rcode =3D create_tree_arr( ctx );
+    else
+        rcode =3D create_tree_rand( ctx );
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+    <P><I>create_tree_arr</I> is not substantially different from the=20
+    array-based schemes for building trees that we have seen in previous =
+test=20
+    drivers, for example <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+test_delete1"><I>test_delete1</I>=20
+    </A>in <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html"=
+>Testing=20
+    BTREE_delete_node. </A><I>create_tree_rand</I> is essentially the =
+same as <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+delete2_create"><I>delete2_create</I>=20
+    </A>in <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html"=
+>Testing=20
+    BTREE_delete_node, </A>except that we must now anticipate that the =
+random=20
+    number generator will occasionally hand us a duplicate key, so we =
+have to=20
+    insert <I>retry</I> logic to handle duplicates gracefully. We also =
+have to=20
+    keep track of the number of duplicates for later use in the=20
+    <I>delete_test:</I>=20
+    <BLOCKQUOTE><PRE>int             num_dupes   =3D 0;
+int             max_retries =3D ctx-&gt;max_retries;
+size_t          size        =3D ctx-&gt;size;
+. . .
+for ( inx =3D 1 ; rcode &amp;&amp; inx &lt; size ; ++inx )
+{
+    int retries =3D 0;
+
+    data =3D CDA_NEW( DATA_t );
+    data-&gt;position =3D (int)inx;
+    data-&gt;ctx =3D ctx;
+    do
+    {
+        data-&gt;key =3D RAND_irandom( rid );
+        if ( rcode =3D add( data, root ) )
+            retries =3D 0;
+        else
+        {
+            ++num_dupes;
+            ++retries;
+        }
+    } while ( !rcode &amp;&amp; retries &lt; max_retries );
+    if ( !rcode )
+        printf( "            Add failure, retries exceeded; "
+                    "position =3D %lu, retries =3D %d (line =3D %d)\n",
+                data-&gt;position,
+                retries,
+                __LINE__
+                );
+}
+ctx-&lt;num_dupes =3D num_dupes;</PRE></BLOCKQUOTE>
+    <P>As you can see from the above, one other change we made to the =
+create=20
+    logic is to add the test context to the <I>DATA_t</I> struct; this =
+is so=20
+    that it can be used by the visit proc during execution of the =
+traversal test=20
+    (see <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+#traversal_test"><I>traversal_test,</I>=20
+    </A>below):=20
+    <BLOCKQUOTE><PRE>typedef struct data_s
+{
+    int           position;
+    CDA_UINT32_t  key;
+    TEST_CTX_p_t  ctx;
+} DATA_t, *DATA_p_t;
+. . .
+static CDA_BOOL_t create_tree_rand( TEST_CTX_p_t ctx )
+{
+    . . .
+    if ( size &gt; 0 )
+    {
+        data =3D CDA_NEW( DATA_t );
+        RAND_init( rid, ctx-&gt;seed );
+        key =3D RAND_irandom( rid );
+        data-&gt;key =3D key;
+        data-&gt;position =3D 0;
+        data-&gt;ctx =3D ctx;
+        root =3D BTREE_add_root( tree, data );
+    }
+    . . .
+}</PRE></BLOCKQUOTE>
+    <P><A name=3Dvalidate_test></A><B><I>validate_test</I></B>=20
+    <BR><I>validate_test</I> consists of little more than a call to=20
+    <I>BTREE_validate</I>:=20
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t validate_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode   =3D CDA_TRUE;
+
+    CDA_ASSERT( ctx-&lt;tree !=3D BTREE_NULL_ID );
+    rcode   =3D BTREE_validate( ctx-&lt;tree );
+
+    return rcode;
+} </PRE></BLOCKQUOTE>
+    <P><A name=3Dtraversal_test></A><B><I>traversal_test</I></B> <BR>The =
+
+    <I>traversal_test</I> logic we have seen a couple of times before, =
+for=20
+    example in <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+traverse_test2"><I>traverse_test</I>=20
+    </A>in <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html"=
+>Testing=20
+    BTREE_delete_node. </A>The only difference this time is that =
+feedback from=20
+    the visit proc comes via the test context rather than global =
+variables:=20
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t traversal_test( TEST_CTX_p_t ctx =
+)
+{
+    CDA_BOOL_t      rcode =3D CDA_TRUE;
+
+    ctx-&gt;last_visit =3D 0;
+    ctx-&gt;num_visits =3D 0;
+    ctx-&gt;visit_result =3D CDA_TRUE;
+    BTREE_traverse_tree( ctx-&gt;tree, BTREE_INORDER, visit_proc );
+    rcode =3D ctx-&gt;visit_result;
+
+    if ( !rcode )
+        puts( "                data out of order" );
+
+    if ( ctx-&gt;num_visits !=3D ctx-&gt;size )
+    {
+        printf( "            num visits =3D %d; expected %d\n",=20
+                ctx-&gt;num_visits,
+                ctx-&gt;size );
+        rcode =3D CDA_FALSE;
+    }
+
+    return rcode;
+}
+. . .
+static void visit_proc( void *visit_data )
+{
+    DATA_p_t        data =3D visit_data;
+    TEST_CTX_p_t    ctx =3D data-&gt;ctx;
+    ++ctx-&gt;num_visits;
+
+    if ( ctx-&gt;num_visits &gt; 1 &amp;&amp; data-&gt;key &lt;=3D =
+ctx-&gt;last_visit )
+        ctx-&gt;visit_result =3D CDA_FALSE;
+    ctx-&gt;last_visit =3D data-&gt;key;
+}</PRE></BLOCKQUOTE>
+    <P><A name=3Dbalance_test></A><B><I>balance_test</I></B>=20
+    <BR><I>balance_test</I> consists simply of a call to =
+<I>BTREE_balance</I>:=20
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t balance_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       =3D CDA_TRUE;
+
+    BTREE_balance( ctx-&gt;tree );
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+    <P><A name=3Dverify_test></A><B><I>verify_test</I></B> =
+<BR><I>verify_test</I>=20
+    must follow a call to <I>BTREE_balance</I>; it verifies that a tree =
+has been=20
+    properly balanced (given the limitations of our balancing algorithm =
+as=20
+    explained in Section 9.3, of your textbook, "Building a Binary =
+Search=20
+    Tree"). It verifies that:=20
+    <OL>
+      <LI>The actual number of leaves in the tree differs from the =
+expected=20
+      number by no more than 1;=20
+      <LI>The number of nodes in the tree after balancing is the same as =
+the=20
+      number of nodes in the tree before balancing; and=20
+      <LI>The length of the longest branch in the tree does not exceed =
+the=20
+      optimal length: </LI></OL>
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t verify_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       =3D CDA_TRUE;
+    BTREE_ID_t      tree        =3D ctx-&gt;tree;
+    CDA_UINT32_t    leaves      =3D 0;
+    CDA_UINT32_t    nodes       =3D 0;
+    CDA_UINT32_t    size        =3D (CDA_UINT32_t)ctx-&gt;size;
+    CDA_UINT32_t    exp_leaves  =3D (size / 2) + (1 &amp; size);
+    CDA_UINT32_t    opt_path    =3D 0;
+    CDA_UINT32_t    act_path    =3D 0;
+
+    BTREE_compute_stats( tree );
+    leaves =3D BTREE_get_num_leaves( tree );
+    nodes =3D BTREE_get_num_nodes( tree );
+    opt_path =3D BTREE_get_optimum_path( tree );
+    act_path =3D BTREE_get_longest_path( tree );
+   =20
+    if ( abs( leaves - exp_leaves ) &gt; 1 )
+    {
+        const char  *fmt    =3D "            num leaves =3D %lu; =
+expected %lu\n";
+        printf( fmt, leaves, exp_leaves );
+        rcode =3D CDA_FALSE;
+    }
+    else if ( nodes !=3D ctx-&gt;size )
+    {
+        const char  *fmt    =3D=20
+            "            num nodes =3D %lu; expected =3D %lu (line =3D =
+%d)\n";
+        printf( fmt, nodes, ctx-&gt;size, __LINE__ );
+        rcode =3D CDA_FALSE;
+    }
+    else if ( act_path &gt; opt_path )
+    {
+        const char  *fmt    =3D=20
+            "            long path len =3D %lu; expected =3D %lu (line =
+=3D %d)\n";
+        printf( fmt, act_path, opt_path, __LINE__ );
+        rcode =3D CDA_FALSE;
+    }
+    else
+        rcode =3D CDA_TRUE;
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+    <P><A name=3Dget_test></A><B><I>get_test</I></B> <BR><I>get_test</I> =
+
+    sequentially searches for all the keys in a binary search tree. If =
+the=20
+    current test case uses an array of keys it obtains each key from the =
+array,=20
+    otherwise it uses a random number generator (note that, if =
+initialized with=20
+    the same seed, a random number generator always produces the same =
+sequence=20
+    of numbers). Since the random number generator will occasionally =
+produce=20
+    duplicate keys, the number of iterations we make will have to be =
+equal to=20
+    the size of the tree, plus the number of duplicates that were =
+detected=20
+    during the create operation. We will keep track of the average =
+number of=20
+    nodes that we have to visit to find a key so that we can later =
+compare the=20
+    before balance/after balance averages against the expected number of =
+visits=20
+    as predicted by your textbook in Section 9.3.6 "Random Search Trees =
+and=20
+    Optimality":=20
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t get_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       =3D CDA_TRUE;
+    BTREE_NODE_ID_t root        =3D BTREE_get_root( ctx-&gt;tree );
+    RAND_ID_t       rid         =3D RAND_create();
+    size_t          limit       =3D ctx-&gt;size + ctx-&gt;num_dupes;
+    int             count_accum =3D 0;
+    int             long_count  =3D 0;
+    size_t          inx         =3D 0;
+
+    RAND_init( rid, ctx-&gt;seed );
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; limit ; ++inx )
+    {
+        CDA_UINT32_t    key         =3D=20
+            ctx-&gt;keys !=3D NULL ? ctx-&gt;keys[inx] : RAND_irandom( =
+rid );
+        int             test_count  =3D 0;
+        int             pos         =3D get( key, root, NULL, =
+&amp;test_count );
+        if ( pos &lt; 0 )
+        {
+            const char  *fmt    =3D "            failed to retrieve data =
+for "
+                                  "key =3D %lu, idx =3D %d\n";
+            printf( fmt, key, inx );
+            rcode =3D CDA_FALSE;
+        }
+        else
+        {
+            count_accum +=3D test_count;
+            if ( test_count &gt; long_count )
+                long_count =3D test_count;
+        }
+    }
+
+    if ( rcode )
+    {
+        double      avg_count   =3D (double)count_accum / limit;
+        const char  *fmt        =3D=20
+            "            (avg #tests =3D %lf, longest #tests =3D %d)\n";
+        printf( fmt, avg_count,  long_count );
+    }
+
+    RAND_destroy( rid );
+    return rcode;
+} </PRE></BLOCKQUOTE>
+    <P><A name=3Ddelete_test></A><B><I>delete_test</I></B> =
+<BR><I>delete_test</I>=20
+    will sequentially discover every key in the binary search tree and =
+then=20
+    delete the node that contains it. Like <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+#get_test"><I>get_test</I>=20
+    </A>it will get the keys from an array if the test case demands it, =
+or from=20
+    a random number generator otherwise. If the tree was created using a =
+random=20
+    number generator that produced duplicate keys we can expect that we =
+will=20
+    have as many failed searches as there were duplicate keys produced =
+during=20
+    the create operation (our random number generator will produce =
+exactly the=20
+    same duplicate keys; the first time we get such a key our search =
+will=20
+    succeed and the node that contains it will be deleted, so every =
+other time=20
+    the random number generator produces the same key our search will =
+fail). So=20
+    we will keep track of the number of failed searches ("misses") and =
+compare=20
+    it to the number of duplicates detected by the create algorithm. =
+When all=20
+    the nodes have (presumably) been deleted we will verify that the =
+tree is=20
+    empty.=20
+    <P>Note that, per the <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+#DeletionCaveat">caveat=20
+    </A>to our validation procedure, we will have to occasionally =
+rebalance the=20
+    tree during the course of the test. (I chose to rebalance after =
+every ten=20
+    deletions. I didn't use any fancy mathematical algorithm to pick =
+that=20
+    figure, though no doubt one can be found; I merely ran a few tests =
+and noted=20
+    that rebalancing every ten times was more efficient than rebalancing =
+every=20
+    time, and rebalancing every twenty times was less efficient than =
+rebalancing=20
+    every ten times.) Here is the code for the test:=20
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t delete_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode       =3D CDA_TRUE;
+    BTREE_ID_t      tree        =3D ctx-&gt;tree;
+    RAND_ID_t       rid         =3D RAND_create();
+    size_t          limit       =3D ctx-&gt;size + ctx-&gt;num_dupes;
+    size_t          num_misses  =3D 0;
+    size_t          inx         =3D 0;
+    int             dcount      =3D 0;
+
+    RAND_init( rid, ctx-&gt;seed );
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; limit ; ++inx )
+    {
+        BTREE_NODE_ID_t root    =3D BTREE_get_root( ctx-&gt;tree );
+        BTREE_NODE_ID_t target  =3D NULL;
+        CDA_UINT32_t    key     =3D=20
+            ctx-&gt;keys !=3D NULL ? ctx-&gt;keys[inx] : RAND_irandom( =
+rid );
+        int             pos     =3D -1;
+       =20
+        CDA_ASSERT( root !=3D NULL );
+        pos =3D get( key, root, &amp;target, NULL );
+        if ( pos &lt; 0 )
+        {
+            /* We should expect exactly as many misses as num_dupes_. */
+            ++num_misses;
+        }
+        else
+        {
+            DATA_p_t    data    =3D BTREE_get_data( target );
+            BTREE_delete_node( target );
+            root =3D BTREE_get_root( ctx-&gt;tree );
+            if ( root !=3D NULL &amp;&amp; get( key, root, NULL, NULL ) =
+&gt;=3D 0 )
+            {
+                printf( "            deleted node found; key =3D %lu, =
+pos =3D %d\n",
+                        data-&gt;key,
+                        data-&gt;position
+                      );
+                rcode =3D CDA_FALSE;
+            }
+            else if ( ++dcount =3D=3D 10 )
+            {
+                BTREE_balance( tree );
+                dcount =3D 0;
+            }
+            else
+            {}
+
+            CDA_free( data );
+        }
+    }
+
+    /* Sanity check */
+    if ( rcode &amp;&amp; num_misses !=3D ctx-&gt;num_dupes )
+    {
+        printf( "            # misses (%u) does not match # dupes (%u) =
+(%d)\n",
+                num_misses,
+                ctx-&gt;num_dupes,
+                __LINE__
+              );
+        rcode =3D CDA_FALSE;
+    }
+
+    if ( rcode )
+        if ( !BTREE_is_empty( tree ) )
+        {
+            printf( "            tree not empty after deleting all =
+keys\n" );
+            rcode =3D CDA_FALSE;
+        }
+
+    RAND_destroy( rid );
+    return rcode;
+} </PRE></BLOCKQUOTE>
+    <P><A name=3Ddestroy_test></A><B><I>destroy_test</I></B>=20
+    <BR><I>destroy_test</I> does nothing more than call=20
+    <I>BTREE_destroy_tree</I>:=20
+    <BLOCKQUOTE><PRE>static CDA_BOOL_t destroy_test( TEST_CTX_p_t ctx )
+{
+    CDA_BOOL_t      rcode   =3D CDA_TRUE;
+
+    CDA_ASSERT( ctx-&gt;tree !=3D BTREE_NULL_ID );
+    BTREE_destroy_tree( ctx-&gt;tree, destroy_proc );
+
+    return rcode;
+} </PRE></BLOCKQUOTE></BLOCKQUOTE><A name=3DTestResults>
+  <H4>Test Results </H4>Let's take a quick look at some test results. I =
+ran the=20
+  test driver on two systems; Windows XP on an AMD Dual-Core 4200+ with =
+3 GBytes=20
+  of memory; and Linux on an 1.5GHertz I686 with 128 MBytes of memory. =
+Just to=20
+  get some timings I bumped test case 005320 up to 1,000,000 nodes (and =
+turned=20
+  off the delete-node test). The table below shows some results for =
+trees=20
+  consisting of 100,000 and 1,000,000 nodes.=20
+  <P>
+  <TABLE border=3D1>
+    <CAPTION align=3Dbottom><B>Sample Test Results</B></CAPTION>
+    <TBODY>
+    <TR>
+      <TH rowSpan=3D2>System/# Nodes=20
+      <TH rowSpan=3D2>Create<BR>Tree (secs)=20
+      <TH colSpan=3D2>Retrieve Before Balancing=20
+      <TH rowSpan=3D2>Balance<BR>Tree (secs)=20
+      <TH colSpan=3D2>Retrieve After Balancing=20
+      <TH rowSpan=3D2>Delete (secs) </TR>
+    <TR>
+      <TD>Secs=20
+      <TD>Avg Visits=20
+      <TD>Secs=20
+      <TD>Avg Visits </TD>
+    <TR>
+      <TD>Linux/100,000=20
+      <TD align=3Dright>.747=20
+      <TD align=3Dright>.662=20
+      <TD align=3Dright>20.719=20
+      <TD align=3Dright>.088=20
+      <TD align=3Dright>.658=20
+      <TD align=3Dright>15.93=20
+      <TD align=3Dright>443.505 </TD>
+    <TR>
+      <TD>XP/100,000=20
+      <TD align=3Dright>.390=20
+      <TD align=3Dright>.375=20
+      <TD align=3Dright>20.719=20
+      <TD align=3Dright>.063=20
+      <TD align=3Dright>.531=20
+      <TD align=3Dright>15.93=20
+      <TD align=3Dright>331.531 </TD>
+    <TR>
+      <TD>Linux/1,000,000=20
+      <TD align=3Dright>10.800=20
+      <TD align=3Dright>10.178=20
+      <TD align=3Dright>25.328=20
+      <TD align=3Dright>.971=20
+      <TD align=3Dright>11.253=20
+      <TD align=3Dright>18.981=20
+      <TD align=3Dright>*** </TD>
+    <TR>
+      <TD>XP/1,000,000=20
+      <TD align=3Dright>8.906=20
+      <TD align=3Dright>9.218=20
+      <TD align=3Dright>25.328=20
+      <TD align=3Dright>.719=20
+      <TD align=3Dright>11.297=20
+      <TD align=3Dright>18.981=20
+      <TD align=3Dright>*** </TD></TR></TBODY></TABLE>
+  <P>Of course, one of the most important results (not represented in =
+the above=20
+  table) is that all of the tests passed. Beyond that, some interesting=20
+  observations are:=20
+  <OL>
+    <LI>A half-second to balance a tree with 100,000 nodes, or =
+three-quarters of=20
+    a second to balance a tree with 1,000,000 nodes does not seem at all =
+
+    preposterous; generally, and, of course, depending on the =
+application, I=20
+    would say that balancing a tree is not a particularly expensive =
+operation.=20
+    <LI>A half-second to create a tree with 100,000 nodes, or 9 seconds =
+to=20
+    create a tree with 1,000,000 nodes bears a little more examination. =
+If you=20
+    are going to create a tree with a million nodes slowly, say, a few =
+at a time=20
+    over a period of a week or even a few hours, 9 seconds is =
+negligible. On the=20
+    other hand, if you are gathering and indexing data very quickly this =
+could=20
+    become a problem. A half-second to index 100,000 data samples is way =
+too=20
+    long if your samples are arriving at a rate of 500,000 per second =
+(and, for=20
+    many applications, 2,000,000 or more per second is common). For such =
+an=20
+    application you would need a new solution, such as:=20
+    <UL>
+      <LI>A faster platform;=20
+      <LI>Additional optimizations to the binary search tree logic;=20
+      <LI>A data structure that employs a more efficient indexing =
+algorithm; or=20
+      <LI>A whole new strategy, such as gathering samples first and =
+indexing=20
+      them later. </LI></UL>
+    <LI>The average number of visits required to locate a node in a =
+randomly=20
+    ordered tree of 100,000 nodes is 1.301 times greater than in the=20
+    corresponding balanced tree; for the 1,000,000 node test the figure =
+is=20
+    1.334. This aligns well with the figure of approximately 1.39 =
+predicted by=20
+    your textbook (Section 9.3.6, "Random Search Trees and Optimality"). =
+
+    <LI>The figure of 332 seconds (5.5 minutes) to delete everything =
+from a tree=20
+    with 100,000 nodes definitely stands out. It certainly lends =
+credence to the=20
+    DBAs' warning that deleting records from data bases (which typically =
+use=20
+    indexing structures similar to binary search trees) is inefficient. =
+If you=20
+    are developing an application that requires building a binary search =
+tree=20
+    and deleting lots of data from it, you would probably want to =
+consider using=20
+    a more efficient data structure. </LI></OL>
+  <P>The one thing I find puzzling is the contrast between the retrieval =
+time=20
+  before and after balancing; frequently it takes longer <I>after</I> =
+balancing=20
+  than before. This doesn't always happen so I'm pretty sure it's not a =
+bug in=20
+  the timer; and we've counted the average number visits before and =
+after=20
+  balancing and the figures match the what we expect, so we know that =
+the tree=20
+  really has been balanced. (I also know that the discrepancy is more =
+likely to=20
+  happen in optimized code than in debug code, and I'm not sure what to =
+make of=20
+  that, either.) For the moment (and after many hours of testing) I am =
+going to=20
+  take the position that our test is pretty much entirely compute-bound, =
+and the=20
+  situation has something to do with always maxing out our quantum (or =
+delta, or=20
+  time-slice, or whatever you'd like to call our allotted increment of =
+CPU time)=20
+  and sharing the CPU with other processes.=20
+  <P>The complete code for our test driver can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_balance_c.txt=
+">tst_balance.c.=20
+  </A>
+  <P><B><I>Next: <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer.html">Appen=
+dix A:=20
+  The Timer Module </A></I></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>
+
+------=_NextPart_000_004B_01C810FE.48555A70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/005caveat1.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCADZAvUDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKA
+CiiigAooooAKKKKACiiigAooooAKKKKACiiigArh/C/hTQNS0GO8vdJtbi5lmnLyyJlmPnOOTXcV
+zng+MTeDooizqHe4UsjbWGZX5BHQ+9ACP4O8IRxNK+j6asanBdkUAHOOv14pX8GeEo5EjfRtOV5M
+7FKAFsdcDvWBb2ltY2GkLfwE6RbarqIkE6mRVJlnEbPuyTwSAxzyw7kVmwf2cItK0q7g+zXxhgaa
+9njdnhiVy0UUXB2vjHoFzk5PFAHZ/wDCE+FN+z+xNP34zt8sZx61T0zSdP0bx5JBptpFaxSaYHdI
+l2hm83GSPWq2hxamPHs91qVnNHNcWJ3N5itHGol+RFwegH4kknAzga3/ADUP/uFf+1aAOgooooAK
+KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoo
+ooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAopGZUUsxAU
+DJJPAFZN34r8O2L7LvXdNhfONj3SBifQDOSaANeiuf8A+Ez0d/8Aj2+33nobTTriVT/wJUK/rR/w
+kd9L/wAenhbWZR/ek8iFfx3yBv0oA6Ciuf8At3iuf/VaHptuv9651Fiw/wCApEQf++qPsni2f/Wa
+tpNqv92GweRv++mlA/8AHaAOgrn/AAV/yKtt/wBdZ/8A0c9H/CPalN/x9eK9VYd0gjghX8xGW/8A
+Hv15rKX4T+DvNaWfTJLiV2LM8t1KdxJySVDBeTk9KAO1ornIfAPhOCJY49AsQi9B5ef50/8A4Qbw
+t/0AbH/v0KAOgrn/APmof/cK/wDatV7r4c+D7wDztAtMjoUBQ/mpBqGy+HGg6RO8+itf6XNINrPb
+XbsSOuMSFhj26UAddRXP/wBia5D/AMe3iu6f0F5aQSD/AMcVD+tHl+L4P+XnQ7z6wS23/s8lAHQU
+Vz/9qeJIf+Pjw1DL/wBeWorJ/wCjEjo/4Slov+Pzw/rlt6/6KJ8f9+Wf9KAOgorn/wDhNvDqf8fO
+ofYvX7dBJbY+vmquP/rH0rRstb0nUsfYdUsrrPTyLhHz+RoAv0UUUAFFFFABRRRQAUUUUAFFFFAB
+RRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFF
+FFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFYXinxhong7T
+ftus3iwqc+XEvzSSkdlXv9eg7kUAbtFcvYfEHw1eabaXTavZJNcQJMbVZ1klj3KDtZVycjPp2NWP
++EvspP8Aj0sNZuvePTJ1U/RnVVP4GgDoKK5/+3dYm/49vCl+vo13cwRg/wDfLu36Ued4vn+7Y6LZ
+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
+46K8L0L/AJeP+A/1ooA//9k=
+
+------=_NextPart_000_004B_01C810FE.48555A70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/005caveat2.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAE5ApUDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKA
+CiiigAooooAKKKKACiiigAooooAKKKKACiiigArh/DHhLw3qejNeX/h/Srq6lu7oyTz2UcjuftEg
+5YjJ4FdxXO+Dk8zwsEJYbrm7GVOCP9Ik6GgBJPBXgqKJpZPDOgJGv3nawhAH1O2kbwX4KRo1fwz4
+fVpDhAbCEFvp8vNYFvZxWVhp4vImOl2+u3rT/aA0gCfvwjOWySNxX5j3INZbHTPsdnpl1AILidCW
+vZ4nLW1oJ3aFIhg7ZNpGOm0YJ6KCAdt/wg/g3fs/4RbQd+M7f7Phzj1+7VKy0XStE8f28elaZZWC
+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
+KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo
+oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK5/wAF/wDI
+tJ/193f/AKUSV0Fcjr/h3w1ZW0lyPD1hcX91LsgiMYHnTuSRk9hnLMewDHtQB11Fcppvw78N2Wnx
+QT6VaXM4GZZniGXcnLHHYZJwOwwO1W/+EG8Lf9AGx/79CgDoK5+b/kodn/2Cp/8A0bDWPr3gjQbS
+OHVbTQrV/sZLT26RZ86E/fAHdhgMvcldv8RrodG0PQbAC+0ews4ftEQxNAg+dDyMH0PBoA16KKKA
+CiiigAooooAK5/wZ/wAi8/8A2EL7/wBK5a6CuT1/w/4asraa8bw/Y3F7cy7YY/LAM87ngE+5JJPY
+BiehoA6yiuT0v4eeHLLT4obnSrO5uOWmmaIfO5OSQOwyeB2GBVz/AIQbwt/0AbH/AL9CgDoK5+5/
+5KHpn/YKu/8A0bbVka94G0K2hh1Oy0K1kezYvNbJFnz4T99QO7AfMvfK46Ma39F0TQLIJqGjWFnF
+9oiG2eBAN8ZwRg+h4P5UAbFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB
+RRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFF
+FFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFc/pH/ABO9SbXn5tEUxaavYofvTfVy
+MA/3ACPvGvPfiPrPio/Eiz0Dw5a3F9bXGnJ9utEbajI0rA5fpHlVxu9G9a9bs/NFlAJoIreQIA0M
+T7ljOPug4GQPoKAJ6KKKACuf0z/iR6w+itxZ3G6fTz2XvJD+BO5R/dJA4Sugrk/iENcHhsy+H9KS
+/v4JFmi/f7HhZeQyLj5+4K5GQSOc4oA6yiuC+EOr6nrPgbz9ZkmfUUvJ0n84FWDb92CO2N2MdhxX
+e0AFFFFABRRRQAVz+l/8TzVW1x+bODdDpw7MOjzf8CxtU/3QSOHrz/4l634rj+IWnaH4at7i8jut
+OzeWsR2q0bSMCS/SM4UgP2ya9X09ZV063Wa2itZFjAMEL70jwPug4GQPoKALNFFFABXP6d/xI9af
+SG4srstPYHsjdZIfw5dR6FgMBK6CuV+IC62fDLvoGlx39/E6zRAz+W8Tqch0GCHPYrkZBI5zigDq
+qK4P4R63quveD57rW2kOpJfzRzrIhRkOQdu3tgMBjtXeUAFFFFABRRRQAUUUUAFFFFABRRRQAUUU
+UAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQ
+AUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAHD+GfCug6noxvL7Sr
+W4uZbu6LyyJuZsXEgGT9AK1ZPBvhGKJpZNG05I1+87IAB9TS+Dk8zwsEJYbrm7GVOCP9Ik6Guet7
+OKysNPF5Ex0u3129af7QGkAT9+EZy2SRuK/Me5BoA6A+DPCKyIh0XTg8mdimMZbHXHrQvgzwk8jx
+rounM6Y3qIwSuemR2rz9LScTwu6GJ4zbPZWz25aW5iW6kkjWJz/qsIVBGDgAZ2jmtzwtC6eMEn4M
+rm+E9ssBSS13zBwZZP8AloCVwvTrkZAzQBtafpGnaN49WHTbOK1jl0x2dIl2hiJVAJ/M11tc+/8A
+yUOH/sFSf+jUroKAOI8M+FdC1TR2vL7SrW5uZbu6LyypuZsTyAZP0ArUk8G+EYomlk0bTkjX7zsg
+AH1NL4OTzPCwQlhuubsZU4I/0iToa50vp+i+GCL2wa7dNZuxZxXLOy7jLIA8hO4lQpJ3EMemMnFA
+HRDwR4UwCND0/DdD5Q5pF8GeEmlaJdG04yIAWQRjKg9MisiDTII7TwfLa3Et0sN8w3pvSMAxzFiI
++iqG4GRwAAD61fCcM1v4ht0mSKS+zefbR9m2SQZkyC0g+8H465B4K4AoA17LR9O0Xx7BFptnFaRy
+6XM0ixLtDESxYJHtk/nXW1z83/JQ7P8A7BU//o2GugoA4jw34W0LVNLnvL/SrW5uZNQvd8sqbmbF
+zKBk+wAH4VqP4M8JRxtI+jacqL95mQAD6ml8Hp5nhuVCWG6/vxlTgj/SpehrFtLawsfDjRahARFH
+q959nmuo3njhbfKFklBbLLjIyT1I5zzQBtHwT4TUBzoengEgZMY5ycD9TSnwT4UDhDodhuIJC+WM
+kDGT+o/OuL+z6xJofh1n0+5ezsbq1+zhWCmRhcAeYyHBUFANq4woc56DG9psOqD4jreahZTK89lc
+JvEitHHGJI9ijB/E9yWPYcAFmy0fTtF8fW8Wm2cNrHLpczSLEu0MRLFgn6ZP5111c/N/yUOz/wCw
+VP8A+jYa6CgDiPDfhbQtV0ye9v8ASra5uZNQvd8sqbmbFzKBk+wAH4VrDwR4VJIGh2BKnBxEODS+
+DRnw7IOedQvun/X1LWNZ6dfRaNqWn2MFw8MurSrOTP8AvTDjJ2u5ySxwu7OcMSOQKANP/hEPBoVW
+/snTAHAZTtX5gehHqKePBnhJpmhXRtOMqgFkCDIB6ZFc7p2h2us6N4Ms7/RoN/2COW5lmgVn8uFE
+Cx7sEjc7q2MjgMD1NWdIm0i98aj7FFHaC0luNp2N515K2d7MxH+rHzYBPJAIACrkAvWmjabovj+y
+j0yyhtEm0u6MixLtDkS2+Cfpk/ma66ufuf8Akoemf9gq7/8ARttXQUAFFFFABRRRQAUUUUAFFFFA
+BRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAF
+FFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAc/wCC/wDkWk/6
++7v/ANKJK6CvkvVv+Q9q3/X/AHP/AKNaqlAH1/RXyBRQB9Pv/wAlDh/7BUn/AKNSugrwr4I/8jdq
+X/XgP/Rgr3WgDn/Bf/ItJ/193f8A6USV0FfJmsf8jBq//YQuf/RrVToA+v6K+QKKAPp+b/kodn/2
+Cp//AEbDXQV4R8E/+Ryv/wDsHn/0Yle70Ac/4M/5F5/+whff+lctdBXydrn/ACM2tf8AYTuv/Rz1
+RoA+v6K+QKKAPp+b/kodn/2Cp/8A0bDXQV4P8E/+R0vv+wc3/oxK94oA5/wZ/wAi8/8A2EL7/wBK
+5a6Cvk/Xf+Rm1r/sJXX/AKOeqFAH1/RXyBRQB9P3P/JQ9M/7BV3/AOjbaugrwT4K/wDI9XX/AGDJ
+P/RsVe90AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/Z
+
+------=_NextPart_000_004B_01C810FE.48555A70--

@@ -1,0 +1,1155 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Balancing a Binary Tree: Testing BTREE_delete_node
+Date: Wed, 17 Oct 2007 20:42:33 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Balancing a Binary Tree: Testing =
+BTREE_delete_node</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H3>Balancing a Binary Tree: Testing BTREE_delete_node </H3><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html"> =
+Home </A>]=20
+</B><B>[<A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html">=20
+Testing the Implementation ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_stats.html">=
+ Previous=20
+Page ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_recycle.html=
+"> Next=20
+Page ]</A> </B><BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B> <BR><BR><B>[Test Driver: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_delete_c.txt"=
+>tst_delete.c=20
+]</A> </B><BR><B>[TST Module Private Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tstp_h.txt">tstp.=
+h ]</A>=20
+</B><BR><B>[TST Module Public Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_h.txt">tst.h =
+]</A>=20
+</B><BR><B>[TST Module Principle Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_c.txt">tst.c =
+]</A>=20
+</B>
+<BLOCKQUOTE>
+  <P>Testing <I>BTREE_delete_node</I> will entail building a tree and =
+tearing it=20
+  down one node at a time, verifying that our tree remains sound after =
+each=20
+  deletion. Moreover, our algorithm for deleting a node presumes that it =
+is=20
+  being deleted from a binary search tree, so we will have to start out =
+building=20
+  a binary search tree, and verify after each deletion that the nodes in =
+the=20
+  tree remain in the proper order, and that we can successfully search =
+for each=20
+  remaining node. If possible, after we're done we should check for =
+memory leaks=20
+  to make sure all the deleted nodes were properly destroyed. That's =
+pretty much=20
+  it, except for the boundary conditions. Here are the low-end boundary=20
+  conditions that I can think of:=20
+  <UL>
+    <LI>A tree with just a root;=20
+    <LI>An incomplete tree consisting of two levels;=20
+    <LI>A complete tree consisting of two levels;=20
+    <LI>An incomplete tree consisting of three levels;=20
+    <LI>A complete tree consisting of three levels. </LI></UL>
+  <P>We also need to experiment with randomly created search trees =
+consisting of=20
+  many levels, search trees whose nodes are deleted in the same order =
+they are=20
+  created, and trees whose nodes are deleted in a random order (not the =
+order=20
+  they were created). Here are the test cases that I came up with:=20
+  <DL>
+    <DT>002010 (Root Alone)=20
+    <DD>Create a tree with just a root. Delete the root and verify that =
+the tree=20
+    is empty. Destroy the tree and check for memory leaks (if possible). =
+
+    <DT>002015 (Root and Left Child (1))=20
+    <DD>Create a tree with a root that has just a left child. Delete the =
+left=20
+    child and verify that the tree remains valid. Delete the root and =
+verify=20
+    that the tree is empty. Destroy the tree and check for memory leaks =
+(if=20
+    possible).=20
+    <DT>002020 (Root and Left Child (2))=20
+    <DD>Create a tree with a root that has just a left child. Delete the =
+root=20
+    and verify that the tree remains valid. Delete the (former) left =
+child and=20
+    verify that the tree is empty. Destroy the tree and check for memory =
+leaks=20
+    (if possible).=20
+    <DT>002025 (Root and Right Child (1))=20
+    <DD>Create a tree with a root that has just a right child. Delete =
+the right=20
+    child and verify that the tree remains valid. Delete the root and =
+verify=20
+    that the tree is empty. Destroy the tree and check for memory leaks =
+(if=20
+    possible).=20
+    <DT>002030 (Root and Right Child (2))=20
+    <DD>Create a tree with a root that has just a right child. Delete =
+the root=20
+    and verify that the tree remains valid. Delete the (former) right =
+child and=20
+    verify that the tree is empty. Destroy the tree and check for memory =
+leaks=20
+    (if possible).=20
+    <DT>002035 (Root and 2 Children (1))=20
+    <DD>Create a tree with a root that has two children which are =
+leaves. Delete=20
+    the right child and verify that the tree remains valid. Delete the =
+left=20
+    child and verify that the tree remains valid. Delete the root and =
+verify=20
+    that the tree is empty. Destroy the tree and check for memory leaks =
+(if=20
+    possible).=20
+    <DT>002040 (Root and 2 Children (2))=20
+    <DD>Create a tree with a root that has two children which are =
+leaves. Delete=20
+    the left child and verify that the tree remains valid. Delete the =
+right=20
+    child and verify that the tree remains valid. Delete the root and =
+verify=20
+    that the tree is empty. Destroy the tree and check for memory leaks =
+(if=20
+    possible).=20
+    <DT>002045 (Root and 2 Children (3))=20
+    <DD>Create a tree with a root that has two children which are =
+leaves. Delete=20
+    the root and verify that the tree remains valid. Delete the (former) =
+right=20
+    child and verify that the tree remains valid. Delete the (former) =
+left child=20
+    and verify that the tree is empty. Destroy the tree and check for =
+memory=20
+    leaks (if possible).=20
+    <DT>002050 (3 Levels, Incomplete (1))=20
+    <DD>Create a tree with 4 nodes in 3 levels. Delete the root and =
+verify that=20
+    the tree remains valid. Delete the remaining nodes in a random =
+order,=20
+    verifying after each deletion that the tree remains valid. When the =
+last=20
+    node has been deleted verify that the tree is empty. Destroy the =
+tree and=20
+    check for memory leaks (if possible).=20
+    <DT>002055 (3 Levels, Incomplete (2))=20
+    <DD>Create a tree with 5 nodes in 3 levels. Delete all the nodes in =
+a random=20
+    order, verifying after each deletion that the tree remains valid. =
+When the=20
+    last node has been deleted verify that the tree is empty. Destroy =
+the tree=20
+    and check for memory leaks (if possible).=20
+    <DT>002060 (3 Levels, Incomplete (3))=20
+    <DD>Create a tree with 6 nodes in 3 levels. Delete all the nodes in =
+a random=20
+    order, verifying after each deletion that the tree remains valid. =
+When the=20
+    last node has been deleted verify that the tree is empty. Destroy =
+the tree=20
+    and check for memory leaks (if possible).=20
+    <DT>002065 (3 Levels, Complete)=20
+    <DD>Create a tree with 7 nodes in 3 levels. Delete all the nodes in =
+a random=20
+    order, verifying after each deletion that the tree remains valid. =
+When the=20
+    last node has been deleted verify that the tree is empty. Destroy =
+the tree=20
+    and check for memory leaks (if possible).=20
+    <DT>002150 (Up to 6 Levels, Deleted in Order)=20
+    <DD>Incrementally by 1, create trees with 8 to 63 nodes having =
+randomly=20
+    ordered keys. Delete all the nodes in the order they were created, =
+verifying=20
+    after each deletion that the tree remains valid. When the last node =
+has been=20
+    deleted verify that the tree is empty. Destroy the tree and check =
+for memory=20
+    leaks (if possible).=20
+    <DT>002155 (Up to 6 Levels, Deleted in Random Order)=20
+    <DD>Incrementally by 1, create trees with 8 to 63 nodes having =
+randomly=20
+    ordered keys. Delete all the nodes in a random order, verifying =
+after each=20
+    deletion that the tree remains valid. When the last node has been =
+deleted=20
+    verify that the tree is empty. Destroy the tree and check for memory =
+leaks=20
+    (if possible).=20
+    <DT>002200 (10+ Levels)=20
+    <DD>Create a tree with 1030 nodes having randomly ordered keys. =
+Delete all=20
+    the nodes in a random order, verifying after each deletion that the =
+tree=20
+    remains valid. When the last node has been deleted verify that the =
+tree is=20
+    empty. Destroy the tree and check for memory leaks (if possible). =
+</DD></DL>
+  <P>Since we need to generate some random keys the first order of =
+business is=20
+  to find a good random number generator (note that <I>rand,</I> the =
+random=20
+  number generator included in the C Standard Library, is not good =
+enough). I=20
+  chose the <I>Mersenne Twister</I> designed by M. Matsumoto &amp; T. =
+Nishimura;=20
+  see their home page, <A=20
+  =
+href=3D"http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html">http://=
+www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html</A>for=20
+  a general description of the generator, and <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand.html"><I>The=
+ Rand=20
+  Module</I> </A>for a description of my adaptation.=20
+  <P>Our test cases can be divided into two categories, one dealing with =
+trees=20
+  built according to a specific topology, and one using randomly =
+constructed=20
+  trees. Our test driver, then, will utilize two creation algorithms, =
+one for=20
+  each category. We will discuss the specific-topology algorithm first.=20
+  <H4>Test Cases Requiring a Specific Topology </H4>
+  <P>The first category of test cases requires us to create a tree in a =
+specific=20
+  topology, and to tear it down in a specific order. We will start by =
+declaring=20
+  a test case descriptor that looks like this:=20
+  <BLOCKQUOTE><PRE>typedef struct create_desc1_s
+{
+    int *create_arr;
+    int *delete_arr;
+    int size;
+} CREATE_DESC1_t, *CREATE_DESC1_p_t;</PRE></BLOCKQUOTE>where =
+<I>create_arr</I>=20
+  is a pointer to an array of keys which, when used to build a binary =
+search=20
+  tree, will create a tree with the required shape; and =
+<I>delete_arr</I> is a=20
+  pointer to an array of keys which will delete the nodes of the tree in =
+the=20
+  required order. A descriptor of this type will be passed to a =
+subroutine which=20
+  will create a binary search tree using the now-familiar <I>add</I> =
+algorithm:=20
+  <A name=3Dtest_delete1></A>
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t test_delete1( CREATE_DESC1_p_t desc =
+)
+{
+    CDA_BOOL_t          rcode   =3D CDA_TRUE;
+    BTREE_ID_t          tree    =3D BTREE_NULL_ID;
+    DATA_p_t            data    =3D NULL;
+    BTREE_NODE_ID_t     root    =3D BTREE_NULL_NODE_ID;
+    CDA_UINT32_t        n_nodes =3D 0;
+    CDA_UINT32_t        s_path  =3D 0;
+    CDA_UINT32_t        l_path  =3D 0;
+    CDA_UINT32_t        o_path  =3D 0;
+    int                 inx     =3D 0;
+
+    tree    =3D BTREE_create_tree();
+    data    =3D CDA_NEW( DATA_t );
+    root    =3D BTREE_add_root( tree, data );
+
+    data-&gt;key =3D desc-&gt;create_arr[0];
+    data-&gt;position =3D 0;
+    for ( inx =3D 1 ; inx &lt; desc-&gt;size ; ++inx )
+    {
+        data =3D CDA_NEW( DATA_t );
+        data-&gt;key =3D desc-&gt;create_arr[inx];
+        data-&gt;position =3D inx;
+        rcode =3D add( data, root );
+        CDA_ASSERT( rcode );
+    }
+    . . .
+}</PRE></BLOCKQUOTE>
+  <P>(A quick note about the above code: as we will soon see we will =
+have to=20
+  modify the <I>add</I> utility to watch for duplicate keys and return =
+an error=20
+  if it finds one. For this first category of tests we should never =
+encounter a=20
+  duplicate key, so we use an assertion to verify that each add is =
+successful.)=20
+  <P>Next we perform a series of "sanity" checks. We know that each tree =
+used=20
+  for this category of test case will be balanced, so we check with the=20
+  statistics facility and verify that 1) we have the correct number of =
+nodes; 2)=20
+  the longest path differs from the shortest path by no more than one; =
+3) the=20
+  length of the longest path is equal to the optimum path length; and 4) =
+the=20
+  constructed tree is a valid binary search tree.=20
+  <BLOCKQUOTE><PRE>    . . .
+    BTREE_compute_stats( tree );
+    n_nodes =3D BTREE_get_num_nodes( tree );
+    s_path =3D BTREE_get_shortest_path( tree );
+    l_path =3D BTREE_get_longest_path( tree );
+    o_path =3D BTREE_get_optimum_path( tree );
+    if ( n_nodes !=3D desc-&gt;size )
+    {
+        printf( "    ??? Unexpected tree size %lu (line %d)\n",
+                n_nodes,
+                __LINE__
+              );
+        rcode =3D CDA_FALSE;
+    }
+    else if ( (l_path - s_path) &gt; 1 )
+    {
+        printf( "    ??? Unbalanced tree, short path =3D %lu, long path =
+=3D %lu "
+                "(line %d)\n",
+                s_path,
+                l_path,
+                __LINE__
+              );
+        rcode =3D CDA_FALSE;
+    }
+    else if ( l_path !=3D o_path )
+    {
+        printf( "    ??? Unexpected height %lu (line %d)\n",
+                l_path,
+                __LINE__
+              );
+        rcode =3D CDA_FALSE;
+    }
+    else=20
+        rcode =3D delete1_validate( tree, desc, 0 );
+    . . .</PRE></BLOCKQUOTE><A name=3Dtraverse_test>
+  <P>To validate the tree we first check <I>BTREE_validate</I>, then =
+perform an=20
+  in-order traversal and verify that the key stored in each node that we =
+visit=20
+  is greater than the key stored in the previously visited node; we keep =
+track=20
+  of how many nodes have been deleted and verify that all of the =
+remaining nodes=20
+  are visited; and we verify that a search for the key of a deleted node =
+will=20
+  fail.=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t   visit_result_       =3D CDA_TRUE;
+static CDA_UINT32_t last_visit_         =3D 0;
+static CDA_UINT32_t visit_key1_         =3D 0;
+static CDA_UINT32_t visit_key2_         =3D 0;
+. . .
+static CDA_BOOL_t=20
+delete1_validate( BTREE_ID_t tree, CREATE_DESC1_p_t desc, int =
+num_deletes )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+
+    if ( !(rcode =3D BTREE_validate( tree )) )
+        printf( "    BTREE_validate failed after %d deletes\n", =
+num_deletes );
+    else if ( !(rcode =3D traverse_test( tree )) )
+        printf( "    traverse test failed after %d deletes\n", =
+num_deletes );
+    else
+    {
+        BTREE_NODE_ID_t root    =3D BTREE_get_root( tree );
+        int             inx     =3D num_deletes;
+        for ( inx =3D num_deletes ; inx &lt; desc-&gt;size ; ++inx )
+        {
+            int             idx =3D desc-&gt;delete_arr[inx];
+            CDA_UINT32_t    key =3D desc-&gt;create_arr[idx];
+            if ( get( key, root, NULL ) &lt; 0 )
+            {
+                const char* fmt =3D=20
+                    "    key validate (%lu) failed after %d deletes\n";
+                printf( fmt, key, num_deletes );
+                rcode =3D CDA_FALSE;
+            }
+        }
+    }
+
+    return rcode;
+}
+. . .<A name=3Dtraverse_test2></A>
+static CDA_BOOL_t traverse_test( BTREE_ID_t tree )
+{
+    CDA_BOOL_t rcode =3D CDA_TRUE;
+
+    last_visit_ =3D 0;
+    visit_result_ =3D CDA_TRUE;
+
+    BTREE_traverse_tree( tree, BTREE_INORDER, visit_proc );
+    if ( !(rcode =3D visit_result_) )
+        printf( "    keys out of order: %lu followed by %lu\n",=20
+                visit_key1_,
+                visit_key2_
+              );
+
+    return rcode;
+}
+
+static void visit_proc( void *visit_data )
+{
+    DATA_p_t data =3D visit_data;
+
+    /* If we get an out-of-order nodes, record only the first one. */
+    if ( visit_result_ &amp;&amp; data-&gt;key &lt;=3D last_visit_ )
+    {
+        visit_result_ =3D CDA_FALSE;
+        visit_key1_ =3D last_visit_;
+        visit_key2_ =3D data-&gt;key;
+    }
+
+    last_visit_ =3D data-&gt;key;
+}</PRE></BLOCKQUOTE>
+  <P>To search for a key in the tree we use the same algorithm that is =
+discussed=20
+  in the <I>binary search tree</I> section of your notes with the =
+exception that=20
+  our search routine will also return the ID of the node in which the =
+key is=20
+  located:=20
+  <BLOCKQUOTE><PRE>static int=20
+get( CDA_UINT32_t key, BTREE_NODE_ID_t node, BTREE_NODE_ID_t *node_ret )
+{
+    DATA_p_t        node_data =3D BTREE_get_data( node );
+    BTREE_NODE_ID_t next_node =3D BTREE_NULL_ID;
+    int             strc      =3D 0;
+    int             rcode     =3D -1;
+
+    if ( key =3D=3D node_data-&gt;key )
+    {
+        rcode =3D node_data-&gt;position;
+        if ( node_ret !=3D NULL )
+            *node_ret =3D node;
+    }
+    else if ( key &lt; node_data-&gt;key )
+    {
+        next_node =3D BTREE_get_left( node );
+        if ( next_node =3D=3D BTREE_NULL_ID )
+            ;
+        else
+            rcode =3D get( key, next_node, node_ret );
+    }
+    else
+    {
+        next_node =3D BTREE_get_right( node );
+        if ( next_node =3D=3D BTREE_NULL_ID )
+            ;
+        else
+            rcode =3D get( key, next_node, node_ret );
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>To complete the subroutine for the first category of test cases, =
+after=20
+  validating the initial tree we search for and delete each node in the =
+tree in=20
+  the order specified by the <I>delete_arr</I> field of the=20
+  <I>CREATE_DESC1_t</I> descriptor; after each delete we verify the =
+return value=20
+  from <I>BTREE_delete_node</I> and validate what remains of the tree:=20
+  <BLOCKQUOTE><PRE>    . . .
+    else=20
+        rcode =3D delete1_validate( tree, desc, 0 );
+
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; desc-&gt;size ; ++inx )
+    {
+        BTREE_NODE_ID_t node    =3D BTREE_NULL_NODE_ID;
+        int             idx     =3D desc-&gt;delete_arr[inx];
+        CDA_UINT32_t    key     =3D desc-&gt;create_arr[idx];
+        int             pos     =3D 0;
+       =20
+        root =3D BTREE_get_root( tree );
+        pos =3D get( key, root, &amp;node );
+        if ( pos &lt; 0 )
+        {
+            printf( "    search failed for key %lu\n", =
+desc-&gt;delete_arr[inx] );
+            rcode =3D CDA_FALSE;
+        }
+        else
+        {
+            data =3D BTREE_get_data( node );
+            CDA_free( data );
+            if ( BTREE_delete_node( node ) !=3D BTREE_NULL_ID )
+            {
+                printf( "    BTREE_delete_node failed to return"
+                        "BTREE_NULL_ID\n" );
+                rcode =3D CDA_FALSE;
+            }
+            else
+                rcode =3D delete1_validate( tree, desc, inx + 1 );
+        }
+    }
+    . . .</PRE></BLOCKQUOTE>
+  <P>After all nodes are deleted, we verify that the tree is empty and =
+perform=20
+  cleanup (note that we have not yet introduced the code to check for =
+memory=20
+  leaks; we will discuss that at the end of this section):=20
+  <BLOCKQUOTE><PRE>    . . .
+    if ( rcode )
+        if ( !BTREE_is_empty( tree ) )
+        {
+            printf( "    tree not empty following all deletions\n" );
+            rcode =3D CDA_FALSE;
+        }
+
+    BTREE_destroy_tree( tree, destroy_proc );
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <H4><A name=3DRandomlyGeneratedKeys>Test Cases Requiring Randomly =
+Generated Keys=20
+  </A></H4>
+  <P>For the second category of test cases, those requiring a tree built =
+from=20
+  randomly generated keys, we will need a new test descriptor:=20
+  <BLOCKQUOTE><PRE>typedef struct create_desc2_s
+{
+    int         min;
+    int         max;
+    int         seed;
+    CDA_BOOL_t  random_delete;
+} CREATE_DESC2_t, *CREATE_DESC2_p_t;</PRE></BLOCKQUOTE>
+  <P>The <I>min</I> and <I>max</I> fields specify minimum and maximum =
+tree=20
+  sizes; our test driver will create and test trees of all sizes between =
+
+  <I>min</I> and <I>max.</I> The <I>seed</I> field tells the test driver =
+how to=20
+  seed the random number generator; this gives us the opportunity to =
+create=20
+  trees of many different shapes for each test case. The =
+<I>random_delete</I>=20
+  field tells the test driver whether to delete the nodes in the tree in =
+the=20
+  order they were created or in some random order.=20
+  <P>The base code for the test logic is fairly straightforward; for =
+each=20
+  integer between <I>min</I> and <I>max</I> we call a subroutine to =
+create a=20
+  tree, and another subroutine to delete each node in the tree, =
+validating the=20
+  state of the tree after each delete. The create subroutine keeps track =
+of all=20
+  the keys in an array; the delete subroutine uses the array to delete =
+the=20
+  associated nodes either in order or randomly, as required by the test =
+case.=20
+  After all nodes are deleted we verify that the tree is empty:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t test_delete2( CREATE_DESC2_p_t desc =
+)
+{
+    CDA_BOOL_t          rcode   =3D CDA_TRUE;
+    int                 inx     =3D 0;
+
+    for ( inx =3D desc-&gt;min ; rcode &amp;&amp; inx &lt;=3D =
+desc-&gt;max ; ++inx )
+    {
+        int         *keys   =3D CDA_calloc( inx, sizeof(int) );
+        BTREE_ID_t  tree    =3D=20
+            delete2_create( inx, desc-&gt;seed, keys, =
+desc-&gt;random_delete );
+        rcode =3D delete2_delete( tree, inx, keys );
+
+        if ( rcode &amp;&amp; !BTREE_is_empty( tree ) )
+        {
+            printf( "    tree (size %d) not empty following all =
+deletions\n",
+                    inx
+                  );
+            rcode =3D CDA_FALSE;
+        }
+
+        BTREE_destroy_tree( tree, destroy_proc );
+        CDA_free( keys );
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>The create subroutine uses the RAND module to generate a sequence =
+of keys=20
+  which it uses to build a binary search tree using the <I>add</I> =
+subroutine.=20
+  Note that we cannot guarantee that the random number generator will =
+not=20
+  produce duplicate keys, so the <I>add</I> subroutine has been modified =
+to=20
+  detect duplicates and return an error if one is found. One reason we =
+chose the=20
+  <I>Mersenne Twister,</I> however, is because it is known to generate =
+duplicate=20
+  values very rarely; in fact, experimentation has shown that, for each =
+of our=20
+  test cases, no duplicates are generated, so our code simply uses an =
+assertion=20
+  to validate the result returned by <I>add.</I> If, in the future, we =
+add test=20
+  cases requiring larger trees we may have to modify our logic so that =
+it=20
+  handles duplicates gracefully (in fact, we will do that when we write =
+a test=20
+  driver for <I>BTREE_balance</I>; see <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+">Testing=20
+  BTREE_balance </A>for details). Each generated key is stored in an =
+array for=20
+  later use by the delete subroutine. The keys are stored either in =
+order or=20
+  "randomly" within the array depending on whether the test case =
+requires an=20
+  in-order or random delete strategy. The algorithm for storing keys =
+"randomly"=20
+  is very simple; we count each key as it is generated, and odd-numbered =
+keys=20
+  are stored beginning at the start of the array, while even-numbered =
+keys are=20
+  stored beginning at the midpoint. This may not be very sophisticated, =
+but if=20
+  suffices for the requirements of our test cases. Here is the code for =
+the=20
+  create logic: <A name=3Ddelete2_create></A>
+  <BLOCKQUOTE><PRE>static BTREE_ID_t=20
+delete2_create( int size, int seed, int *keys, CDA_BOOL_t rand_del )
+{
+    BTREE_ID_t      tree    =3D BTREE_create_tree();
+    RAND_ID_t       rid     =3D RAND_create();
+    DATA_p_t        data    =3D NULL;
+    BTREE_NODE_ID_t root    =3D BTREE_NULL_NODE_ID;
+    int             mid     =3D size / 2;
+    int             inx     =3D 0;
+
+    RAND_init( rid, seed );
+    if ( size &gt; 0 )
+    {
+        data =3D CDA_NEW( DATA_t );
+        data-&gt;key =3D RAND_irandom( rid );
+        data-&gt;position =3D 0;
+        if ( rand_del )
+            keys[mid] =3D data-&gt;key;
+        else
+            keys[0] =3D data-&gt;key;
+        root =3D BTREE_add_root( tree, data );
+    }
+
+    for ( inx =3D 1 ; inx &lt; size ; ++inx )
+    {
+        CDA_BOOL_t  result  =3D CDA_TRUE;
+        int         jnx     =3D inx;
+
+        data =3D CDA_NEW( DATA_t );
+        data-&gt;key =3D RAND_irandom( rid );
+        data-&gt;position =3D 0;
+       =20
+        if ( rand_del )
+            if ( inx &amp; 1 )
+                jnx =3D inx / 2;
+            else
+                jnx =3D mid + inx / 2;
+
+        keys[jnx] =3D data-&gt;key;
+        result =3D add( data, root );
+        CDA_ASSERT( result );
+    }
+
+    RAND_destroy( rid );
+    return tree;
+}</PRE></BLOCKQUOTE>
+  <P>The delete subroutine validates the tree then searches for each key =
+in the=20
+  tree and deletes the associated node. It checks the return value of=20
+  BTREE_delete_node and re-validates the tree after each deletion:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t delete2_delete( BTREE_ID_t tree, =
+int size, int *keys )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+    int         inx     =3D 0;
+
+    rcode =3D delete2_validate( tree, size, keys, 0 );
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; size ; ++inx )
+    {
+        BTREE_NODE_ID_t root    =3D BTREE_get_root( tree );
+        BTREE_NODE_ID_t node    =3D BTREE_NULL_NODE_ID;
+
+        if ( get( keys[inx], root, &amp;node ) &lt; 0 )
+        {
+            printf( "key %lu, position %d not found (line %d)\n",
+                    keys[inx],
+                    inx,
+                    __LINE__
+                  );
+            rcode =3D CDA_FALSE;
+        }
+        else=20
+        {
+            DATA_p_t    data    =3D BTREE_get_data( node );
+            CDA_free( data );
+            if ( BTREE_delete_node( node ) !=3D BTREE_NULL_ID )
+            {
+                printf( "    BTREE_delete_node failed to return "
+                        "BTREE_NULL_ID\n"
+                      );
+                rcode =3D CDA_FALSE;
+            }
+            else
+            {
+                rcode =3D delete2_validate( tree, size, keys, inx + 1 );
+            }
+        }
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>The validation logic calls <I>BTREE_validate</I>, then executes the =
+
+  traversal test that we saw <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+traverse_test">above,=20
+  </A>verifying that an in-order traversal of the tree finds keys in =
+order from=20
+  smallest to largest. Finally it verifies that each key remaining in =
+the tree=20
+  can be searched for successfully:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t=20
+delete2_validate( BTREE_ID_t tree, int size, int *arr, int num_deletes )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+
+    if ( !(rcode =3D BTREE_validate( tree )) )
+        printf( "    BTREE_validate failed after %d deletes\n", =
+num_deletes );
+    else if ( !(rcode =3D traverse_test( tree )) )
+        printf( "    traverse test failed after %d deletes\n", =
+num_deletes );
+    else
+    {
+        BTREE_NODE_ID_t root    =3D BTREE_get_root( tree );
+        int             inx     =3D num_deletes;
+        for ( inx =3D num_deletes ; inx &lt; size ; ++inx )
+        {
+            CDA_UINT32_t    key =3D arr[inx];
+            if ( get( key, root, NULL ) &lt; 0 )
+            {
+                const char* fmt =3D=20
+                    "    key validate (%lu) failed after %d deletes\n";
+                printf( fmt, key, num_deletes );
+                rcode =3D CDA_FALSE;
+            }
+        }
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE><A name=3Dtop_level>
+  <H4>The Top-Level Driver </H4>
+  <P>Now we have to write the code to call the two categories of test =
+drivers.=20
+  Once again it will all be table-driven. We'll start with a couple of =
+more=20
+  descriptors that hold a comment and a pointer to one of the two =
+descriptors=20
+  that describe one of the two categories of test cases:=20
+  <BLOCKQUOTE><PRE>typedef struct test_desc1_s
+{
+    CREATE_DESC1_p_t    desc;
+    const char          *comment;
+} TEST_DESC1_t, *TEST_DESC1_p_t;
+
+typedef struct test_desc2_s
+{
+    CREATE_DESC2_p_t    desc;
+    const char          *comment;
+} TEST_DESC2_t, *TEST_DESC2_p_t;</PRE></BLOCKQUOTE>
+  <P>Next we'll need to declare a descriptor for each test case, and =
+compile=20
+  them into two tables, one for each category of test case:=20
+  <BLOCKQUOTE><PRE>/* Creates a tree with just a root. */
+static int  create_arr002010_[] =3D { 100 };
+static int  delete_arr002010_[] =3D { 0 };
+static CREATE_DESC1_t   desc002010_ =3D
+    { create_arr002010_, delete_arr002010_, CDA_CARD( create_arr002010_ =
+) };
+
+/*Creates a tree with a root and a left child. */
+static int  create_arr002015_[] =3D { 100, 50 };
+static int  delete_arr002015_[] =3D { 1, 0 };
+static CREATE_DESC1_t   desc002015_ =3D
+    { create_arr002015_, delete_arr002015_, CDA_CARD( create_arr002015_ =
+) };
+. . .
+/* Create trees with 8 to 63 nodes; non-random delete. */
+static CREATE_DESC2_t   desc002150_ =3D { 8, 63, 0, CDA_FALSE };
+
+/* Create trees with 8 to 63 nodes; random delete. */
+static CREATE_DESC2_t   desc002155_ =3D { 8, 63, 0, CDA_TRUE };
+. . .
+static TEST_DESC1_t test_descs1_[]   =3D
+{
+    { &amp;desc002010_, "002010: Root Alone"               },
+    { &amp;desc002015_, "002015: Root and Left Child (1)"  },
+    . . .
+};
+
+static TEST_DESC2_t test_descs2_[]  =3D
+{
+    { &amp;desc002150_, "002150: Up to 6 Levels, Ordered Delete"   },
+    { &amp;desc002155_, "002155: Up to 6 Levels, Random Delete"    },
+    { &amp;desc002200_, "002200: 10+ Levels"                       }
+};</PRE></BLOCKQUOTE>
+  <P>Finally our top-level code will execute one loop for all the=20
+  specific-topology test cases, and a second loop for the random-key =
+test cases.=20
+  The loop that executes the random-key test cases has an inner loop =
+that=20
+  executes each test case five times, each time with a different random =
+number=20
+  generator seed:=20
+  <BLOCKQUOTE><PRE>CDA_BOOL_t TST_delete( void )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+    int         inx     =3D 0;
+
+    /* Run through all the fixed-topology tests once. */
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; CDA_CARD( test_descs1_ ) =
+; ++inx )
+    {
+        puts( test_descs1_[inx].comment );
+        if ( rcode =3D test_delete1( test_descs1_[inx].desc ) )
+            puts( "PASSED" );
+        else
+            puts( "FAILED" );
+    }
+
+    /* Run through all the random-toplogy tests 5 times, using a=20
+     * different random number generator seed each time.
+     */
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &lt; CDA_CARD( test_descs2_ ) =
+; ++inx )
+    {
+        CREATE_DESC2_p_t    desc    =3D test_descs2_[inx].desc;
+        int                 jnx     =3D 0;
+
+        for ( jnx =3D 0 ; rcode &amp;&amp; jnx &lt; 5 ; ++jnx )
+        {
+            printf( "%s, seed =3D %d\n", test_descs2_[inx].comment, jnx =
+);
+            desc-&gt;seed =3D jnx;
+            if ( rcode =3D test_delete2( test_descs2_[inx].desc ) )
+                puts( "PASSED" );
+            else
+                puts( "FAILED" );
+        }
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE><A name=3DCheckingForMemoryLeaks>
+  <H4>Checking for Memory Leaks </H4>This leaves us with one problem to =
+solve:=20
+  how to check for memory leaks. This is a tricky problem because how we =
+do=20
+  this, and whether we can do it at all, depends on what our operating=20
+  environment is and what third-party tools we may have chosen to assist =
+us. I=20
+  suppose we could write our own heap-management logic and build-in our =
+own=20
+  diagnostic tools; that would be an interesting project but we'll leave =
+it for=20
+  another time. For now we will just describe a solution using tools =
+provided by=20
+  the Microsoft Visual C++ product.=20
+  <P>The functions we are interested in are part of Microsoft's <I>Heap =
+State=20
+  Reporting</I> facility. They are <I>_CrtMemCheckpoint, =
+_CrtMemDifference=20
+  </I>and <I>_CrtDumpMemoryLeaks. </I><I>_CrtMemCheckpoint</I> takes a =
+snapshot=20
+  of the heap state, and <I>_CrtMemDifference</I> compares two snapshots =
+and=20
+  returns TRUE if they are "significantly different" (to us, =
+"significantly=20
+  different" means that there is more memory allocated in one than in =
+the=20
+  other). As it's name implies, <I>_CrtDumpMemoryLeaks</I> produces a =
+list of=20
+  allocated blocks of memory. Our strategy will be to take heap =
+snapshots before=20
+  and after each test and compare them; if they are different we will =
+report an=20
+  error. Right before we terminate the test driver we will print memory =
+leak=20
+  diagnostics. One more thing about Microsoft's heap diagnostic =
+facility:=20
+  references to the heap reporting functions are automatically removed =
+in=20
+  release code. This occasionally causes annoying compiler errors or =
+warnings in=20
+  release builds, so we will make all our code compile conditionally =
+based on=20
+  whether or not <I>NDEBUG</I> is defined.=20
+  <P>We will encapsulate our code in the TST module. This has the =
+advantage of=20
+  1) making the code reusable by other test drivers; 2) making it =
+necessary to=20
+  write all the conditional compilation logic a single time; and 3) =
+making it=20
+  possible to easily change the underlying code should we wish to =
+implement the=20
+  same facility in another operating system and/or using a third party =
+product.=20
+  The first thing we have to do is encapsulate some public declarations =
+in=20
+  tst.h:=20
+  <BLOCKQUOTE><PRE>#ifndef TST_H
+#define TST_H
+
+#include &lt;cda.h&gt;
+
+#ifdef _WIN32
+#include &lt;crtdbg.h&gt;
+typedef _CrtMemState TST_HEAP_STATE_t, *TST_HEAP_STATE_p_t;
+#else
+typedef int TST_HEAP_STATE_t, *TST_HEAP_STATE_p_t;
+#endif /* #ifdef _WIN32 */
+. . .
+#endif /* #ifndef TST_H */</PRE></BLOCKQUOTE>
+  <P>In the above code _WIN32 is a macro that is automatically defined =
+when we=20
+  compile code using the Microsoft C/C++ compiler. So if we are =
+compiling in=20
+  Microsoftland <I>TST_HEAP_STATE_t</I> is equivalent to =
+<I>_CrtMemState,</I> a=20
+  buffer required by <I>_CrtMemCheckpoint</I> =
+and<I>_CrtMemDifference;</I> if we=20
+  are compiling under some other operating system =
+<I>TST_HEAP_STATE_t</I> is=20
+  merely equivalent to <I>int</I> (it doesn't matter what it's =
+equivalent to; it=20
+  just has to be declared).=20
+  <P>Our executable code will go in tst.c. It will start out like this:=20
+  <BLOCKQUOTE><PRE>#if defined( _WIN32 ) &amp;&amp; !defined( NDEBUG )
+#include &lt;crtdbg.h&gt;
+
+CDA_BOOL_t TST_heap_reporting_available( void )
+{
+    return CDA_TRUE;
+}
+. . .
+      /******************************************/
+#else /* !defined( WIN32 ) || defined( NDEBUG ) */
+      /******************************************/
+CDA_BOOL_t TST_heap_reporting_available( void )
+{
+    return CDA_FALSE;
+}
+. . .
+#endif /* #if defined( _WIN32 ) &amp;&amp; !defined( NDEBUG ) =
+*/</PRE></BLOCKQUOTE>
+  <P>That is, if we are using a Microsoft compiler and we are compiling =
+for=20
+  debug define a function named <I>TST_heap_reporting_available</I> that =
+will=20
+  return CDA_TRUE, otherwise define it to be a function that will return =
+
+  CDA_FALSE. There are three other functions that will be conditionally=20
+  compiled: <I>TST_get_heap_snapshot,</I> which puts a snapshot of the =
+heap in a=20
+  TST_HEAP_STATE_t buffer owned by the caller; =
+<I>TST_compare_heap_snapshots</I>=20
+  which compares two snapshots owned by the caller and returns 0 if the=20
+  snapshots are equal and non-0 if they are not; and=20
+  <I>TST_dump_curr_mem_stats</I> which prints memory leak diagnostics to =
+stdout:=20
+
+  <BLOCKQUOTE><PRE>void TST_get_heap_snapshot( TST_HEAP_STATE_p_t state =
+)
+{
+    _CrtMemCheckpoint( state );
+}
+
+int TST_compare_heap_snapshots( TST_HEAP_STATE_p_t old_state,
+                                TST_HEAP_STATE_p_t new_state
+                              )
+{
+    int             rcode           =3D 0;
+    _CrtMemState    diff;
+
+    if ( _CrtMemDifference( &amp;diff, old_state, new_state ) )
+        rcode =3D 1;
+    else
+        rcode =3D 0;
+
+    return rcode;
+}
+
+void TST_dump_curr_mem_stats( void )
+{
+    _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
+    _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDOUT);
+    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
+    _CrtDumpMemoryLeaks();
+}</PRE></BLOCKQUOTE>
+  <P>(As you can see there is a little more to the Microsoft facility =
+than the=20
+  functions we discussed; if you're interested, you can look them up in =
+your=20
+  compiler documentation or on the Microsoft web site.)=20
+  <P>If we are not using a Microsoft compiler, or if we are compiling =
+for a=20
+  release build these three functions will look like this:=20
+  <BLOCKQUOTE><PRE>void TST_dump_curr_mem_stats( void )
+{
+    printf( "    (TST_dump_curr_mem_stats not enabled.)\n" );
+}
+
+void TST_get_heap_snapshot( TST_HEAP_STATE_p_t state )
+{
+}
+
+CDA_BOOL_t TST_compare_heap_snapshots( TST_HEAP_STATE_p_t state1,
+                                       TST_HEAP_STATE_p_t state2
+                                     )
+{
+    int rcode   =3D 0;
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>The public declarations and executable code for the above facility =
+can be=20
+  found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_h.txt">tst.h =
+</A>and=20
+  <A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_c.txt">tst.c,=
+=20
+  </A>respectively.=20
+  <P>Now we can add memory leak detection code to our test driver, first =
+in the=20
+  subroutine that handles test cases requiring trees with a specific =
+topology:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t test_delete1( CREATE_DESC1_p_t desc =
+)
+{
+    CDA_BOOL_t          rcode   =3D CDA_TRUE;
+    . . .
+    TST_HEAP_STATE_t    old_state;
+
+    TST_get_heap_snapshot( &amp;old_state );
+
+    . . .
+    [most test case execution code goes here]
+    . . .
+
+    BTREE_destroy_tree( tree, destroy_proc );
+    if ( rcode )
+    {
+        TST_HEAP_STATE_t    new_state;
+        TST_get_heap_snapshot( &amp;new_state );
+        if ( TST_compare_heap_snapshots( &amp;old_state, &amp;new_state =
+) !=3D 0 )
+        {
+            puts( "    memory leaks detected" );
+            rcode =3D CDA_FALSE;
+        }
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>... and in the subroutine that handles test cases requiring =
+randomly=20
+  generated keys:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t test_delete2( CREATE_DESC2_p_t desc =
+)
+{
+    CDA_BOOL_t          rcode   =3D CDA_TRUE;
+    int                 inx     =3D 0;
+    TST_HEAP_STATE_t    old_state;
+
+    TST_get_heap_snapshot( &amp;old_state );
+    for ( inx =3D desc-&amp;gt;min ; rcode &amp;&amp; inx &amp;lt;=3D =
+desc-&amp;gt;max ; ++inx )
+    {
+        int         *keys   =3D CDA_calloc( inx, sizeof(int) );
+        BTREE_ID_t  tree    =3D=20
+            delete2_create( inx, desc-&amp;gt;seed, keys, =
+desc-&amp;gt;random_delete );
+        rcode =3D delete2_delete( tree, inx, keys );
+
+        if ( rcode &amp;&amp; !BTREE_is_empty( tree ) )
+        {
+            printf( "    tree (size %d) not empty following all =
+deletions\n",
+                    inx
+                  );
+            rcode =3D CDA_FALSE;
+        }
+
+        BTREE_destroy_tree( tree, destroy_proc );
+        CDA_free( keys );
+        if ( rcode )
+        {
+            TST_HEAP_STATE_t    new_state;
+            TST_get_heap_snapshot( &amp;new_state );
+            if ( TST_compare_heap_snapshots( &amp;old_state, =
+&amp;new_state ) !=3D 0 )
+            {
+                puts( "    memory leaks detected" );
+                rcode =3D CDA_FALSE;
+            }
+        }
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>The call to <I>TST_dump_curr_mem_stats</I> will come from our =
+<I>main</I>=20
+  function right before we terminate the test driver, for example:=20
+  <BLOCKQUOTE><PRE>int main( int argc, char **argv )
+{
+    int result  =3D EXIT_SUCCESS;
+
+    if ( !TST_delete() )
+        result =3D EXIT_FAILURE;
+    else
+    {
+        printf( "Dumping memory stats\n" );
+        TST_dump_curr_mem_stats();
+    }
+
+    return result;
+}</PRE></BLOCKQUOTE>
+  <P>The complete code for our test driver can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_delete_c.txt"=
+>tst_delete.c.=20
+  </A>
+  <P><B><I>Next: <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_recycle.html=
+">Testing=20
+  the Recycling Logic </A></I></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>

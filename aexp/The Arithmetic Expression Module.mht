@@ -1,0 +1,624 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: The Arithmetic Expression Module
+Date: Wed, 17 Oct 2007 20:58:22 -0700
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----=_NextPart_000_0069_01C81100.740C8970"
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0069_01C81100.740C8970
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/aexp/index.html
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>The Arithmetic Expression Module</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252"><LINK=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/sub.css" =
+rel=3DStylesheet>
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H1>The Arithmetic Expression Module</H1><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/doc/html/index.htm=
+l">Reference=20
+</A>]</B> <BR><BR><B>[AEXP Module Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexp.c">aexp.c. =
+</A>]</B>=20
+<BR><B>[AEXP Module Source File File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexp_token.c">aexp=
+_token.c=20
+</A>]</B> <BR><B>[AEXP Module Public Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexp.h">aexp.h. =
+</A>]</B>=20
+<BR><B>[AEXP Module Private Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexpp.h">aexpp.h. =
+</A>]</B>=20
+
+<BLOCKQUOTE>
+  <P>The Arithmetic Expression (AEXP) Module allows for encapsulation =
+and=20
+  evaluation of arithmetic expressions in <I>infix</I> notation, such as =
+"2 * (3=20
+  + 5)." It incorporates constants, such as PI, and common mathematical=20
+  functions, such as cosine and natural logarithm. The module =
+implementation is=20
+  based loosely on the "Interactive Expression Evaluator" described in =
+your=20
+  textbook, <I>Data structures and Program Design in C, Second Edition, =
+</I>by=20
+  Robert Kruse et al. (Prentice Hall, New Jersey, 1997).=20
+  <P>The overall flow of the logic is as follows:=20
+  <OL>
+    <LI>The user instantiates an AEXP object, specifying an arithmetic=20
+    expression (as a string) and the length of the arithmetic =
+expression.=20
+    Requiring the length of the expression string gives the user the =
+option of=20
+    specifying a non-null-terminated string. This is particularly useful =
+in the=20
+    case where the expression to be evaluated is embedded in a longer =
+string,=20
+    such as "The value of the expression '3 + (2 * 24)' is."=20
+    <LI>We make a copy of the expression string and store it internally; =
+the=20
+    internal copy will be null-terminated.=20
+    <LI>We parse the expression string into an array of tokens.=20
+    <LI>The array of tokens is translated into a new array, representing =
+the=20
+    expression in <I>postfix</I> notation (i.e. <I>Reverse Polish =
+Notation,</I>=20
+    or <I>RPN</I>).=20
+    <LI>The tokenized expression in postfix form is evaluated. =
+</LI></OL>
+  <P>Following is a more detailed description of the process and its=20
+  implementation. <A name=3Dtokenization>
+  <H3>Tokenization </H3>
+  <P>Identifying a token in a string consists of two steps: parsing the =
+string=20
+  into <I>words</I> and mapping the <I>words</I> to <I>tokens.</I> <A=20
+  name=3Dstring_parsing>
+  <H4>Parsing the String </H4>A <I>word</I> is parsed from the string. A =
+
+  <I>word</I> is a sequence of one or more ASCII characters that fall =
+into one=20
+  of the following patterns:=20
+  <OL>
+    <LI><I>Number</I><BR>A number is a string of digits optionally =
+including a=20
+    single period (decimal point). Each of the following is a number:=20
+    <P class=3Dcode>3 &nbsp; &nbsp; &nbsp; 4.1 &nbsp; &nbsp; &nbsp; .77 =
+</P>
+    <LI><I>Word</I><BR>Any sequence of alphanumeric characters beginning =
+with an=20
+    alphabetic character. (I know, this is confusing; this means that we =
+can=20
+    have a <I>word</I> word as opposed to, say, a <I>number</I> word.) A =
+word of=20
+    this type must correspond to a recognizable constant (such as =
+<I>pi</I>) or=20
+    function (such as <I>sin</I>).=20
+    <LI><I>Symbol</I><BR>A sequence of one or two non-alphanumeric,=20
+    non-whitespace characters. </LI></OL>
+  <P>In this module a <I>word</I> is described by the AEXP__WORD_t =
+struct=20
+  declared in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexpp.h">aexpp.h: =
+
+</A></P><PRE class=3Dcode>typedef struct aexp__word_s
+{
+    const char      *str;
+    size_t          len;
+    AEXP__TOKEN_p_t token;
+    double          value;
+} AEXP__WORD_t, *AEXP__WORD_p_t;</PRE>
+  <P>Where:=20
+  <DL class=3Dcode>
+    <DT>str=20
+    <DD>is a pointer to the first character of the word.=20
+    <DT>len=20
+    <DD>is the length of the word (note that a word is <I>not</I>=20
+    null-terminated).=20
+    <DT>token=20
+    <DD>is a pointer to a struct that describes the token corresponding =
+to a=20
+    word (assuming the word corresponds to a valid token; see below).=20
+    <DT>value=20
+    <DD>is the value of the word. The value of a <I>number</I> word or =
+of a word=20
+    corresponding to a constant (such as <I>pi</I>) is the value of the =
+number=20
+    or constant. The value of a <I>symbol</I> word or a word =
+corresponding to a=20
+    function, is the value obtained by evaluating that portion of the=20
+    expression. A special case is made for left and right parenthsis=20
+    <I>symbols</I> words; these words are discarded in the process that =
+converts=20
+    the prefix token array into a postfix token array, and are never =
+assigned a=20
+    value. For example, the expression: <PRE class=3Dcode>3 + cos( 0 =
+)</PRE>consists of 6 words:=20
+    <UL>
+      <LI><I>3</I> and <I>0</I> have the values 3 and 0;=20
+      <LI><I>cos</I> has the value of the cosine of 0, which is 1;=20
+      <LI><I>+</I> has the value of 3 + 1, or 4;=20
+      <LI><I>(</I> and <I>)</I> have no value. </LI></UL></DD></DL><A=20
+  name=3Dtoken_mapping>
+  <H4>Token Mapping </H4>
+  <P>Words are mapped to tokens via a hash table. The word is the key =
+and the=20
+  value is a pointer to a struct of type AEXP__TOKEN_t, declared in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexpp.h">aexpp.h: =
+
+</A></P><PRE class=3Dcode>typedef struct aexp__token_s
+{
+    const char*          name;
+    AEXP__TOKEN_TYPE_e_t type;
+    int                  priority;
+    double               value;
+    AEXP__EVALUATE_p_t   evaluate;
+} AEXP__TOKEN_t, *AEXP__TOKEN_p_t;</PRE>
+  <P>Where:=20
+  <DL class=3Dcode>
+    <DT>name=20
+    <DD>is the name of the token. Note that <I>name</I> may consist of a =
+symbol,=20
+    such as "*" (for the multiplication operator token) as well as more=20
+    recognizable names such as "pi" and "radians." The special name "x" =
+is used=20
+    for all numeric constants (e.g. 10 and 3.14). The unary plus and =
+unary minus=20
+    operators have special internal names denoted by AEXP__UP and =
+AEXP__UM,=20
+    respectively.=20
+    <DT>type=20
+    <DD>specifies the type of the token. Possible values (as declared in =
+<A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexpp.h">aexpp.h=20
+    </A>are:=20
+    <DL class=3Dcode>
+      <DT>AEXP__NONE=20
+      <DD>This value is only used to label invalid tokens.=20
+      <DT>AEXP__END_EXPR=20
+      <DD>This value is presently not used by the module.=20
+      <DT>AEXP__LEFT_PAREN=20
+      <DD>Denotes a left parenthesis.=20
+      <DT>AEXP__RIGHT_PAREN=20
+      <DD>Denotes a right parenthesis.=20
+      <DT>AEXP__UNARY_OP=20
+      <DD>Denotes a unary operator. Unary plus, unary minus and, =
+presently, all=20
+      functions have this type.=20
+      <DT>AEXP__BINARY_OP=20
+      <DD>Denotes a binary operator.=20
+      <DT>AEXP__OPERAND=20
+      <DD>This value applies to the internal constants <I>e</I> and =
+<I>pi,</I>=20
+      and to all numeric constants. </DD></DL>
+    <DT>priority=20
+    <DD>the priority of the token. Priority is only relevant to tokens =
+of type=20
+    AEXP__UNARY_OP and AEXP__BINARY_OP. All other tokens are arbitrarily =
+
+    assigned a priority of 0. The priority of the operators follows the =
+usual=20
+    conventions:=20
+    <UL>
+      <LI>The highest priority is assigned to unary operators (note =
+that, in=20
+      this context, a function such as <I>sin</I> is considered a unary=20
+      operator). All unary operators have the same priority.=20
+      <LI>Exponentiation has the second highest priority.=20
+      <LI>The third highest priority is assigned to the multiplication =
+and=20
+      division operators.=20
+      <LI>The lowest priority is given to the addition and subtraction=20
+      operators. </LI></UL>
+    <DT>value=20
+    <DD>is the value of the token, if the token has an intrinsic value. =
+For=20
+    example, the token <I>pi</I> has a value beginning with 3.14; the =
+symbols=20
+    for addition and multiplication, + and *, on the other hand, have no =
+
+    intrinsic value.=20
+    <DT>evaluate=20
+    <DD>is the address of a function that is used to evaluate the =
+subexpression=20
+    consisting of an operator and its operand(s). Tokens that are not =
+operators=20
+    have an <I>evaluate</I> value of NULL. </DD></DL>
+  <P>Following is a portion of the table of token values used by the =
+module; the=20
+  full table can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexp_token.c">aexp=
+_token.c:=20
+  </A></P><PRE class=3Dcode style=3D"FONT-SIZE: 85%">static =
+AEXP__TOKEN_t tokens_[] =3D
+{
+    { "(",       AEXP__LEFT_PAREN,  0, 0,        null_eval   },
+    { ")",       AEXP__RIGHT_PAREN, 0, 0,        null_eval   },
+    { AEXP__UM,  AEXP__UNARY_OP,    7, 0,        negate_eval },
+    { AEXP__UP,  AEXP__UNARY_OP,    7, 0,        pos_eval    },
+    { "abs",     AEXP__UNARY_OP,    7, 0,        abs_eval    },
+    { "sqrt",    AEXP__UNARY_OP,    7, 0,        sqrt_eval   },
+    . . .
+    { "**",      AEXP__BINARY_OP,   6, 0,        raise_eval  },
+    { "x",       AEXP__OPERAND,     0, 0.0,      null_eval   },
+    { "pi",      AEXP__OPERAND,     0, AEXP__PI, null_eval   },
+    { "e",       AEXP__OPERAND,     0, AEXP__E,  null_eval   }
+};</PRE><A name=3Dpostfix-conversion>
+  <H3>Conversion to Postfix Form </H3>
+  <P>After the string is fully parsed the expression consists of an =
+array of=20
+  tokens arranged in infix order. The next step is to translate this =
+array into=20
+  a new array in postfix order. A complete discussion of the postfix =
+expression=20
+  form (also known as <I>reverse polish notation</I>) can be found =
+elsewhere,=20
+  such as <A=20
+  =
+href=3D"http://en.wikipedia.org/wiki/Reverse_polish_notation">Wikipedia. =
+</A>.=20
+  For this discussion let's just look at a couple of examples: </P>
+  <P class=3Dcaption>Infix to Postfix Conversion </P><PRE =
+class=3Dexample>Infix expression:   3  +  4  *  2
+Postfix expression: 3  4  2  *  +
+(Priority of * forces 4 * 2 to evaluate first.)
+
+Infix expression:   (3  +  4)  *  2
+Postfix expression: 3  4  +  2  *
+(Parentheses force 3 + 4 to evaluate first.)
+
+Infix expression:   (3  +  4)  *  (2  -  1)
+Postfix expression: 3  4  +  2  1  -  *
+
+Infix expression:   3  *  log(  10  )
+Postfix expression: 3  10  log  *
+(Priority of unary operator <I>log</I> forces log( 10 ) to evaluate =
+first.)
+
+Infix expression:   log(  10  )  *  3
+Postfix expression: 10  log  3  *</PRE>
+  <P>To perform the conversion we will use a stack and a simplified form =
+of <A=20
+  href=3D"http://en.wikipedia.org/wiki/Shunting_yard_algorithm">Edsger =
+Dijkstra's=20
+  "Shunting Yard" algorithm </A>which is expressed (absent error =
+checking) as=20
+  follows: </P><PRE class=3Dcode>while infix array is not traversed
+    next token
+    if token is an operand
+        add token to postfix array
+    else if token is a left parenthesis
+        push token onto stack
+    else if token is a right parenthesis
+        pop token from stack
+        while token is not a left paren
+            add token to postfix array
+            pop token from stack
+        <I>(note: left and right parens are discarded)</I>
+    else=20
+        <I>(token must be an operator)</I>
+        set termination flag to false
+        while !flag AND stack is not empty
+            peek at top of stack
+            if top-token is a left parenthesis
+                set flag to TRUE
+            else if top-token priority &lt; token priority
+                set flag to TRUE
+            else
+                pop top-token from stack
+                add top-token to postfix array
+        <I>(end while !flag AND stack is not empty)</I>
+        push token onto stack
+<I>(end while infix array is not traversed)</I>
+while stack is not empty
+    pop token from stack
+    add token to postfix array</PRE>
+  <P>The complete implementation of this algorithm is found in <A=20
+  href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexp.c">aexp.c =
+</A>
+  <H3>Evaluation of the Postfix Expression </H3>Once the expression has =
+been=20
+  successfully converted to postfix form it may be evaluated. The =
+algorithm for=20
+  doing so is relatively straightforward; once again, a stack will be =
+employed;=20
+  we will also need a temporary array, (denoted <I>ops</I>) suitable for =
+holding=20
+  two tokens to store operands pending subexpression evaluation. The =
+algorithm=20
+  (with error checking omitted) is as follows: <PRE class=3Dcode>while =
+the postfix array is not traversed
+    next token
+    if token is an operand
+        push the token's value onto stack
+    else
+        <I>(token must be an operator)</I>
+        if token is a binary operator
+            pop a token from the stack to ops[1]
+        pop a token from the stack to ops[0]
+        invoke the token's <I>evaluator</I> passing ops
+        push the resulting value onto the stack
+<I>(end while postfix array is not traversed)</I>
+<I>(Note: there should be exactly one value left on the stack.)</I>
+pop the last value off the stack
+flag this value as the value of the expression</PRE><A=20
+  name=3Dexpression_representation>
+  <H3>Expression Representation </H3>
+  <P>The overall expression is described by the AEXP__EXPR_t struct =
+which is=20
+  declared in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexpp.h">aexpp.h: =
+
+</A></P><PRE class=3Dcode>typedef struct aexp__expr_s
+{
+    char        *expr_str;
+    size_t      len;
+    CDA_BOOL_t  valid;
+    VEC_ID_t    infix;
+    VEC_ID_t    postfix;
+    double      value;
+    const char  *bad_str;
+    size_t      bad_str_len;
+    int         errnum;
+} AEXP__EXPR_t, *AEXP__EXPR_p_t;</PRE>
+  <P>Where:=20
+  <DL class=3Dcode>
+    <DT>expr_str=20
+    <DD>is a pointer to a buffer that holds the expression string. This =
+buffer=20
+    is allocated at the time the expression struct is created; the =
+string=20
+    provided by the caller is copied into the buffer.=20
+    <DT>len=20
+    <DD>is the length of the expression string.=20
+    <DT>valid=20
+    <DD>is initially true and is set to false any time the expression is =
+
+    determined to be invalid.=20
+    <DT>infix=20
+    <DD>is the array (expressed as a <A=20
+    href=3D"http://faculty.washington.edu/jstraub/dsa/vec/index.html" =
+)>vector=20
+    </A>to hold the tokens parsed from the expression string.=20
+    <DT>postifx=20
+    <DD>is the array (expressed as a <A=20
+    href=3D"http://faculty.washington.edu/jstraub/dsa/vec/index.html" =
+)>vector=20
+    </A>to hold the tokens in the postfix form of the expression string =
+(see <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/index.html#postfix=
+-conversion"><I>Conversion=20
+    to Postfix Form </I></A>).=20
+    <DT>value=20
+    <DD>holds the value of the expression.=20
+    <DT>bad_str=20
+    <DD>if parsing fails, points to the first character that can't be =
+parsed in=20
+    <I>expr_str.</I>=20
+    <DT>bad_str_len=20
+    <DD>is the length of <I>bad_str.</I>=20
+    <DT>errnum=20
+    <DD>if an evaluation error occurs, holds the value of <I>errno</I> =
+at the=20
+    time the evaluation fails. </DD></DL><A name=3Derror-checking>
+  <H3>Notes on Error Checking </H3>
+  <P>Extensive error checking takes place while parsing and evaluating =
+an=20
+  expression string. Below are a few notes regarding this process.=20
+  <OL>
+    <LI>Floating Point Numbers<BR>When checking floating point numbers =
+(type=20
+    <I>double</I>) it is necessary to make sure that the number is valid =
+before=20
+    using it in an operation, such as comparing it to zero. This is done =
+with=20
+    the <I>isnan</I> facility (for <I>is not a number</I>) declared in =
+math.h.=20
+    In Microsoft, this facility is named <I>_isnan,</I> so <A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/aexp/aexpp.h">aexpp.h=20
+    </A>declares the macro <I>ISNAN</I> which is equivalent to =
+<I>_isnan</I> in=20
+    Microsoft environments, but equivalent to <I>isnan</I> elsewhere: =
+<PRE class=3Dcode>// isnan in Microsoftland is _isnan
+#if defined( _WIN32 )=20
+#define ISNAN _isnan
+#else
+#define ISNAN isnan
+#endif</PRE>
+    <LI>Once parsing is successfully completed, and before postfix =
+conversion=20
+    takes place, the infix expression must undergo the following =
+validations:=20
+    <OL><BR>
+      <LI>Matching Parentheses<BR>An expression must have the same =
+number of=20
+      left and right parentheses. Moreover, every right parenthesis must =
+be=20
+      preceded by a left parenthesis. <BR>&nbsp; <BR>
+      <LI>Last Position<BR>The last position in an expression must be =
+occupied=20
+      by one of the following token types:=20
+      <UL><BR>
+        <LI>AEXP_OPERAND=20
+        <LI>AEXP_RIGHT_PAREN </LI></UL><BR>
+      <LI>Leading Position<BR>A <I>leading position</I> is a position =
+within an=20
+      expression at which a subexpression may begin. Here are some =
+examples:=20
+      <P class=3Dcaption>Leading Positions=20
+      <TABLE class=3Dexample cellPadding=3D3 border=3D1>
+        <TBODY>
+        <TR>
+          <TH align=3Dleft>Expression</TH>
+          <TH align=3Dleft>Leading Positions</TH></TR>
+        <TR>
+          <TD class=3Dexample>3 + 4 * 6</TD>
+          <TD class=3Dexample>3, 4, 6</TD></TR>
+        <TR>
+          <TD class=3Dexample>(3 + 4) * 6</TD>
+          <TD class=3Dexample>left-paren, 3, 4, 6</TD></TR>
+        <TR>
+          <TD class=3Dexample>-3 + 7</TD>
+          <TD class=3Dexample>unary minus, 3, =
+7</TD></TR></TBODY></TABLE>
+      <P><I>Leading positions</I> within an expression occur at the =
+following=20
+      positions:=20
+      <UL>
+        <LI>The beginning of the expression;=20
+        <LI>Immediately following a unary or binary operator; and=20
+        <LI>Immediately following a left parenthesis. </LI></UL>
+      <P>Not every token may occupy a leading position. For example, a =
+binary=20
+      operator may not occupy a leading position. Each of the following=20
+      expressions is invalid because a leading position is occupied by =
+an=20
+      invalid token: </P>
+      <P class=3Dcaption>Invalid tokens in Leading Positions=20
+      <TABLE class=3Dexample cellPadding=3D3 border=3D1>
+        <TBODY>
+        <TR>
+          <TD class=3Dexample>* 6 + 7</TD>
+          <TD>Binary operator * incorrectly occupies leading position =
+</TD></TR>
+        <TR>
+          <TD class=3Dexample>6 + * 7</TD>
+          <TD>Binary operator * incorrectly occupies leading position =
+</TD></TR>
+        <TR>
+          <TD class=3Dexample>6 + * ) 5</TD>
+          <TD>Right parenthesis incorrectly occupies leading position=20
+        </TD></TR></TBODY></TABLE>
+      <P>The following token types may correctly occupy leading =
+positions:=20
+      <UL>
+        <LI>AEXP_OPERAND=20
+        <LI>AEXP_UNARY_OP=20
+        <LI>AEXP_LEFT_PAREN </LI></UL>
+      <P>If it is valid for a token type to occupy a leading position, =
+that=20
+      token type may <I>not</I> occupy a non-leading position. Each of =
+the=20
+      following expressions is invalid because a leading-position token =
+type=20
+      occupies a non-leading position: </P>
+      <P class=3Dcaption>Invalid tokens in Non-Leading Positions=20
+      <TABLE class=3Dexample cellPadding=3D3 border=3D1>
+        <TBODY>
+        <TR>
+          <TD class=3Dexample>6 5 + 7</TD>
+          <TD>Operand 5 incorrectly occupies non-leading position =
+</TD></TR>
+        <TR>
+          <TD class=3Dexample>6 ( + 13</TD>
+          <TD>Left parenthesis incorrectly occupies non-leading position =
+
+</TD></TR>
+        <TR>
+          <TD class=3Dexample>+ -6 * 21</TD>
+          <TD>Unary operator - incorrectly occupies non-leading position =
+
+        </TD></TR></TBODY></TABLE>
+      <P>The following token types may correctly occupy non-leading =
+positions:=20
+      <UL>
+        <LI>AEXP_BINARY_OP=20
+        <LI>AEXP_RIGHT_PAREN </LI></UL>
+      <P>To verify leading positions:=20
+      <BLOCKQUOTE>For each position in an expression, if the position is =
+a=20
+        leading position verify that it is occupied by a token type =
+valid for a=20
+        leading position, otherwise verify that it is occupied by a =
+token type=20
+        valid for a non-leading position. =
+</BLOCKQUOTE></LI></OL></LI></OL></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2007 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>
+
+------=_NextPart_000_0069_01C81100.740C8970
+Content-Type: text/css;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/sub.css
+
+BODY {
+	BORDER-RIGHT: black thick ridge; PADDING-RIGHT: 10px; =
+BACKGROUND-POSITION: left bottom; BORDER-TOP: black thick ridge; =
+PADDING-LEFT: 10px; BACKGROUND-ATTACHMENT: fixed; PADDING-BOTTOM: 10px; =
+BORDER-LEFT: black thick ridge; PADDING-TOP: 10px; BORDER-BOTTOM: black =
+thick ridge; BACKGROUND-REPEAT: no-repeat; FONT-FAMILY: arial, =
+helvetica, sans-serif; BACKGROUND-COLOR: #f5f5f5; -moz-border-radius: =
+8px 8px 8px 8px
+}
+BODY.ref-frame {
+	BORDER-RIGHT: medium none; BORDER-TOP: medium none; MARGIN-LEFT: 5%; =
+BORDER-LEFT: medium none; WIDTH: 90%; BORDER-BOTTOM: medium none; =
+BACKGROUND-COLOR: #00ffaa
+}
+TABLE.ref-frame {
+	BORDER-COLLAPSE: collapse; empty-cells: show
+}
+H3 {
+	counter-increment: section; counter-reset: subsection
+}
+H3:unknown {
+	content: counter( section ) ". "
+}
+H4 {
+	counter-increment: subsection; counter-reset: subsubsection
+}
+H4:unknown {
+	content: counter( section ) "." counter( subsection ) ". "
+}
+#logo {
+	BACKGROUND-POSITION: center center; FLOAT: left; BACKGROUND-IMAGE: =
+url(backg_small.gif); WIDTH: 32pt; BOTTOM: -2px; BACKGROUND-REPEAT: =
+no-repeat; POSITION: relative; HEIGHT: 27pt
+}
+P.caption {
+	FONT-WEIGHT: bold; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 2%; WIDTH: 94%; =
+FONT-FAMILY: Arial, Verdana, sans-serif; WHITE-SPACE: normal; =
+counter-increment: example
+}
+P.caption:unknown {
+	content: "Example " counter( example ) ". "
+}
+P.code {
+	PADDING-LEFT: 6px; MARGIN-LEFT: 5%; FONT-FAMILY: "Courier New", =
+Courier, "Lucida Console", monospace
+}
+PRE.code {
+	PADDING-LEFT: 6px; MARGIN-LEFT: 5%; WIDTH: 90%; FONT-FAMILY: "Courier =
+New", Courier, "Lucida Console", monospace
+}
+PRE.example {
+	BORDER-RIGHT: black 2px solid; PADDING-RIGHT: 6px; BORDER-TOP: black =
+2px solid; MARGIN-TOP: 4px; PADDING-LEFT: 6px; FONT-SIZE: 90%; =
+MARGIN-BOTTOM: 4px; PADDING-BOTTOM: 4px; MARGIN-LEFT: 2%; BORDER-LEFT: =
+black 2px solid; WIDTH: 94%; PADDING-TOP: 4px; BORDER-BOTTOM: black 2px =
+solid; FONT-FAMILY: "Courier New", Courier, "Lucida Console", monospace; =
+BACKGROUND-COLOR: #cfcfcf
+}
+DL.code > DT {
+	FONT-WEIGHT: bold; FONT-STYLE: italic
+}
+
+------=_NextPart_000_0069_01C81100.740C8970--

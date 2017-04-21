@@ -1,0 +1,39 @@
+#ifndef TIMER_H
+#define TIMER_H
+
+#include <cda.h>
+#include <stdlib.h>
+
+#define TIMER_NULL_ID (NULL)
+
+typedef struct timer__control_s *TIMER_ID_t;
+
+TIMER_ID_t TIMER_create(
+    void
+);
+
+TIMER_ID_t TIMER_destroy(
+    TIMER_ID_t timer
+);
+
+double TIMER_start(
+    TIMER_ID_t timer
+);
+
+double TIMER_stop(
+    TIMER_ID_t timer
+);
+
+double TIMER_restart(
+    TIMER_ID_t timer
+);
+
+double TIMER_get_elapsed_secs(
+    TIMER_ID_t timer
+);
+
+double TIMER_get_elapsed_msecs(
+    TIMER_ID_t timer
+);
+
+#endif

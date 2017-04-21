@@ -1,0 +1,714 @@
+#include <rand.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cda.h>
+#include <btree.h>
+#include <tstp.h>
+
+/* Descriptor for creating and destroying trees with a
+ * specific topology:
+ *
+ * create_arr ->
+ *     array of keys to create.
+ * delete_arr ->
+ *     array of indexes into create array, which determines
+ *     the order in which nodes are deleted.
+ * size ==
+ *     the size of create_arr and delete_arr.
+ */
+typedef struct create_desc1_s
+{
+    int *create_arr;
+    int *delete_arr;
+    int size;
+} CREATE_DESC1_t, *CREATE_DESC1_p_t;
+
+/* Descriptor for creating and destroying randomly created trees;
+ * describes a sequence of trees having sizes min to max.
+ *
+ * min == 
+ *     minimum size of tree to create.
+ * max ==
+ *     maximum size of tree to create.
+ * seed ==
+ *     seed for random number generator used to create keys.
+ * random_delete ==
+ *     TRUE if tree nodes are to be deleted in an order different
+ *     from the one they were created in, FALSE otherwise.
+ */
+typedef struct create_desc2_s
+{
+    int         min;
+    int         max;
+    int         seed;
+    CDA_BOOL_t  random_delete;
+} CREATE_DESC2_t, *CREATE_DESC2_p_t;
+
+/* Descriptor for test sequence:
+ *
+ * proc ->
+ *     test function to call
+ * desc ->
+ *     descriptor to pass to test function
+ * comment ->
+ *     descriptive comment to display when starting test.
+ */
+typedef struct test_desc1_s
+{
+    CREATE_DESC1_p_t    desc;
+    const char          *comment;
+} TEST_DESC1_t, *TEST_DESC1_p_t;
+
+/* Descriptor for test sequence:
+ *
+ * proc ->
+ *     test function to call
+ * desc ->
+ *     descriptor to pass to test function
+ * comment ->
+ *     descriptive comment to display when starting test.
+ */
+typedef struct test_desc2_s
+{
+    CREATE_DESC2_p_t    desc;
+    const char          *comment;
+} TEST_DESC2_t, *TEST_DESC2_p_t;
+
+typedef struct data_s
+{
+    int           position;
+    CDA_UINT32_t  key;
+} DATA_t, *DATA_p_t;
+
+static CDA_BOOL_t test_delete1( 
+    CREATE_DESC1_p_t desc
+);
+
+static CDA_BOOL_t test_delete2( 
+    CREATE_DESC2_p_t desc
+);
+
+static CDA_BOOL_t delete1_validate(
+    BTREE_ID_t          tree,
+    CREATE_DESC1_p_t    desc,
+    int                 num_deletes
+);
+
+static CDA_BOOL_t delete2_validate(
+    BTREE_ID_t  tree,
+    int         size,
+    int         *arr,
+    int         num_deletes
+);
+
+static BTREE_ID_t delete2_create( 
+    int         size,
+    int         seed,
+    int         *keys,
+    CDA_BOOL_t  rand_del
+);
+
+static CDA_BOOL_t delete2_delete(
+    BTREE_ID_t  tree,
+    int         size,
+    int         *keys
+);
+
+static CDA_BOOL_t delete_node(
+    BTREE_NODE_ID_t node
+);
+
+static CDA_BOOL_t add(
+    DATA_p_t        data,
+    BTREE_NODE_ID_t node
+);
+
+static int get(
+    CDA_UINT32_t    key,
+    BTREE_NODE_ID_t node,
+    BTREE_NODE_ID_t *node_ret
+);
+
+static CDA_BOOL_t traverse_test(
+    BTREE_ID_t  tree
+);
+
+static BTREE_DESTROY_PROC_t destroy_proc;
+static BTREE_VISIT_PROC_t   visit_proc;
+
+static CDA_BOOL_t   visit_result_       = CDA_TRUE;
+static CDA_UINT32_t last_visit_         = 0;
+static CDA_UINT32_t visit_key1_         = 0;
+static CDA_UINT32_t visit_key2_         = 0;
+
+/* Creates a tree with just a root. */
+static int  create_arr002010_[] = { 100 };
+static int  delete_arr002010_[] = { 0 };
+static CREATE_DESC1_t   desc002010_ =
+    { create_arr002010_, delete_arr002010_, CDA_CARD( create_arr002010_ ) };
+
+/*Creates a tree with a root and a left child. */
+static int  create_arr002015_[] = { 100, 50 };
+static int  delete_arr002015_[] = { 1, 0 };
+static CREATE_DESC1_t   desc002015_ =
+    { create_arr002015_, delete_arr002015_, CDA_CARD( create_arr002015_ ) };
+
+/*Creates a tree with a root and a left child. */
+static int  create_arr002020_[] = { 100, 50 };
+static int  delete_arr002020_[] = { 0, 1 };
+static CREATE_DESC1_t   desc002020_ =
+    { create_arr002020_, delete_arr002020_, CDA_CARD( create_arr002020_ ) };
+
+/* Creates a tree with a root and a right child. */
+static int  create_arr002025_[] = { 100, 150 };
+static int  delete_arr002025_[] = { 1, 0 };
+static CREATE_DESC1_t   desc002025_ =
+    { create_arr002025_, delete_arr002025_, CDA_CARD( create_arr002025_ ) };
+
+/* Creates a tree with a root and a right child. */
+static int  create_arr002030_[] = { 100, 150 };
+static int  delete_arr002030_[] = { 0, 1 };
+static CREATE_DESC1_t   desc002030_ =
+    { create_arr002030_, delete_arr002030_, CDA_CARD( create_arr002030_ ) };
+
+/* Creates a tree with a root and two children. */
+static int  create_arr002035_[] = { 100, 50, 150 };
+static int  delete_arr002035_[] = { 2, 1, 0 };
+static CREATE_DESC1_t   desc002035_ =
+    { create_arr002035_, delete_arr002035_, CDA_CARD( create_arr002035_ ) };
+
+/* Creates a tree with a root and two children. */
+static int  create_arr002040_[] = { 100, 50, 150 };
+static int  delete_arr002040_[] = { 1, 2, 0 };
+static CREATE_DESC1_t   desc002040_ =
+    { create_arr002040_, delete_arr002040_, CDA_CARD( create_arr002040_ ) };
+
+/* Creates a tree with a root and two children. */
+static int  create_arr002045_[] = { 100, 50, 150 };
+static int  delete_arr002045_[] = { 0, 1, 2 };
+static CREATE_DESC1_t   desc002045_ =
+    { create_arr002045_, delete_arr002045_, CDA_CARD( create_arr002045_ ) };
+
+/* Creates a tree with 4 nodes in 3 levels. */
+static int  create_arr002050_[] = { 100, 50, 150, 200 };
+static int  delete_arr002050_[] = { 3, 2, 0, 1 };
+static CREATE_DESC1_t   desc002050_ =
+    { create_arr002050_, delete_arr002050_, CDA_CARD( create_arr002050_ ) };
+
+/* Creates a tree with 5 nodes in 3 levels. */
+static int  create_arr002055_[] = { 100, 50, 150, 200, 75  };
+static int  delete_arr002055_[] = { 4, 3, 0, 1, 2  };
+static CREATE_DESC1_t   desc002055_ =
+    { create_arr002055_, delete_arr002055_, CDA_CARD( create_arr002055_ ) };
+
+/* Creates a tree with 6 nodes in 3 levels. */
+static int  create_arr002060_[] = { 100, 50, 150, 200, 75, 125  };
+static int  delete_arr002060_[] = { 3, 0, 1, 5, 4, 2  };
+static CREATE_DESC1_t   desc002060_ =
+    { create_arr002060_, delete_arr002060_, CDA_CARD( create_arr002060_ ) };
+
+/* Creates a tree with 7 nodes in 3 levels. */
+static int  create_arr002065_[] = { 100, 50, 150, 200, 75, 125, 25  };
+static int  delete_arr002065_[] = { 2, 1, 4, 3, 6, 5, 0  };
+static CREATE_DESC1_t   desc002065_ =
+    { create_arr002065_, delete_arr002065_, CDA_CARD( create_arr002065_ ) };
+
+/* Create trees with 8 to 63 nodes; non-random delete. */
+static CREATE_DESC2_t   desc002150_ = { 8, 63, 0, CDA_FALSE };
+
+/* Create trees with 8 to 63 nodes; random delete. */
+static CREATE_DESC2_t   desc002155_ = { 8, 63, 0, CDA_TRUE };
+
+/* Create a tree with 1030 nodes; random delete. */
+static CREATE_DESC2_t   desc002200_ = { 1030, 1030, 0, CDA_TRUE };
+
+static TEST_DESC1_t test_descs1_[]   =
+{
+    { &desc002010_, "002010: Root Alone"               },
+    { &desc002015_, "002015: Root and Left Child (1)"  },
+    { &desc002020_, "002020: Root and Left Child (2)"  },
+    { &desc002025_, "002025: Root and Right Child (1)" },
+    { &desc002030_, "002030: Root and Right Child (2)" },
+    { &desc002035_, "002035: Root and 2 Children (1)"  },
+    { &desc002040_, "002040: Root and 2 Children (2)"  },
+    { &desc002045_, "002045: Root and 2 Children (3)"  },
+    { &desc002050_, "002050: 3 Levels Incomplete (1)"  },
+    { &desc002055_, "002055: 3 Levels Incomplete (2)"  },
+    { &desc002060_, "002060: 3 Levels Incomplete (3)"  },
+    { &desc002065_, "002065: 3 Levels Complete"        }
+};
+
+static TEST_DESC2_t test_descs2_[]  =
+{
+    { &desc002150_, "002150: Up to 6 Levels, Ordered Delete"   },
+    { &desc002155_, "002155: Up to 6 Levels, Random Delete"    },
+    { &desc002200_, "002200: 10+ Levels"                       }
+};
+
+CDA_BOOL_t TST_delete( void )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    size_t      inx     = 0;
+
+    /* Run through all the fixed-topology tests once. */
+    for ( inx = 0 ; rcode && inx < CDA_CARD( test_descs1_ ) ; ++inx )
+    {
+        puts( test_descs1_[inx].comment );
+        if ( rcode = test_delete1( test_descs1_[inx].desc ) )
+            puts( "PASSED" );
+        else
+            puts( "FAILED" );
+    }
+
+    /* Run through all the random-toplogy tests 5 times, using a 
+     * different random number generator seed each time.
+     */
+    for ( inx = 0 ; rcode && inx < CDA_CARD( test_descs2_ ) ; ++inx )
+    {
+        CREATE_DESC2_p_t    desc    = test_descs2_[inx].desc;
+        int                 jnx     = 0;
+
+        for ( jnx = 0 ; rcode && jnx < 5 ; ++jnx )
+        {
+            printf( "%s, seed = %d\n", test_descs2_[inx].comment, jnx );
+            desc->seed = jnx;
+            if ( rcode = test_delete2( test_descs2_[inx].desc ) )
+                puts( "PASSED" );
+            else
+                puts( "FAILED" );
+        }
+    }
+
+    return rcode;
+}
+
+/* Handle those test cases in which a very specific tree topology
+ * is required; e.g. test case #2015, "Create a tree with a root that
+ * has just a left child... ."
+ *
+ * The descriptor argument contains a pointer to a "create array" and a
+ * "delete array." Each element of the create array is a key to be added
+ * to the tree; each element of the delete array is an index into the
+ * create array, and determines the order in which the nodes are deleted.
+ */
+static CDA_BOOL_t test_delete1( CREATE_DESC1_p_t desc )
+{
+    CDA_BOOL_t          rcode   = CDA_TRUE;
+    BTREE_ID_t          tree    = BTREE_NULL_ID;
+    DATA_p_t            data    = NULL;
+    BTREE_NODE_ID_t     root    = BTREE_NULL_NODE_ID;
+    CDA_UINT32_t        n_nodes = 0;
+    CDA_UINT32_t        s_path  = 0;
+    CDA_UINT32_t        l_path  = 0;
+    CDA_UINT32_t        o_path  = 0;
+    int                 inx     = 0;
+    TST_HEAP_STATE_t    old_state;
+
+    TST_get_heap_snapshot( &old_state );
+    tree    = BTREE_create_tree();
+    data    = CDA_NEW( DATA_t );
+    root    = BTREE_add_root( tree, data );
+
+    data->key = desc->create_arr[0];
+    data->position = 0;
+    for ( inx = 1 ; inx < desc->size ; ++inx )
+    {
+        data = CDA_NEW( DATA_t );
+        data->key = desc->create_arr[inx];
+        data->position = inx;
+        rcode = add( data, root );
+        CDA_ASSERT( rcode );
+    }
+
+    /* Sanity checks...
+     * Note: for the test cases handled by this routine, the actual height
+     * of a tree should always be the same as the optimum height.
+     */
+    BTREE_compute_stats( tree );
+    n_nodes = BTREE_get_num_nodes( tree );
+    s_path = BTREE_get_shortest_path( tree );
+    l_path = BTREE_get_longest_path( tree );
+    o_path = BTREE_get_optimum_path( tree );
+    if ( n_nodes != (CDA_UINT32_t)desc->size )
+    {
+        printf( "    ??? Unexpected tree size %lu (line %d)\n",
+                n_nodes,
+                __LINE__
+              );
+        rcode = CDA_FALSE;
+    }
+    else if ( (l_path - s_path) > 1 )
+    {
+        printf( "    ??? Unbalanced tree, short path = %lu, long path = %lu "
+                "(line %d)\n",
+                s_path,
+                l_path,
+                __LINE__
+              );
+        rcode = CDA_FALSE;
+    }
+    else if ( l_path != o_path )
+    {
+        printf( "    ??? Unexpected height %lu (line %d)\n",
+                l_path,
+                __LINE__
+              );
+        rcode = CDA_FALSE;
+    }
+    else 
+        rcode = delete1_validate( tree, desc, 0 );
+
+    for ( inx = 0 ; rcode && inx < desc->size ; ++inx )
+    {
+        BTREE_NODE_ID_t node    = BTREE_NULL_NODE_ID;
+        int             idx     = desc->delete_arr[inx];
+        CDA_UINT32_t    key     = desc->create_arr[idx];
+        int             pos     = 0;
+        
+        root = BTREE_get_root( tree );
+        pos = get( key, root, &node );
+        if ( pos < 0 )
+        {
+            printf( "    search failed for key %lu\n", desc->delete_arr[inx] );
+            rcode = CDA_FALSE;
+        }
+        else
+            if ( rcode = delete_node( node ) )
+                rcode = delete1_validate( tree, desc, inx + 1 );
+    }
+
+    if ( rcode )
+        if ( !BTREE_is_empty( tree ) )
+        {
+            printf( "    tree not empty following all deletions\n" );
+            rcode = CDA_FALSE;
+        }
+
+    BTREE_destroy_tree( tree, destroy_proc );
+    if ( rcode )
+    {
+        TST_HEAP_STATE_t    new_state;
+        TST_get_heap_snapshot( &new_state );
+        if ( TST_compare_heap_snapshots( &old_state, &new_state ) != 0 )
+        {
+            puts( "    memory leaks detected" );
+            rcode = CDA_FALSE;
+        }
+    }
+
+    return rcode;
+}
+
+/* Handle those cases in which a tree is built from randomly generated
+ * keys...
+ *
+ * The descriptor specifies a range of tree sizes, and whether or not
+ * nodes should be deleted in the order they are created. The test is
+ * executed for one tree of each size in the indicated range. Note that
+ * the create subroutine keeps track of all the keys added to a tree by
+ * storing each key in an array; the keys are stored either in the order
+ * of creation, or in a pseudo-random order, depending on whether or not
+ * the descriptor an in-order delete strategy.
+ */
+static CDA_BOOL_t test_delete2( CREATE_DESC2_p_t desc )
+{
+    CDA_BOOL_t          rcode   = CDA_TRUE;
+    int                 inx     = 0;
+    TST_HEAP_STATE_t    old_state;
+
+    TST_get_heap_snapshot( &old_state );
+    for ( inx = desc->min ; rcode && inx <= desc->max ; ++inx )
+    {
+        int         *keys   = CDA_calloc( inx, sizeof(int) );
+        BTREE_ID_t  tree    = 
+            delete2_create( inx, desc->seed, keys, desc->random_delete );
+        rcode = delete2_delete( tree, inx, keys );
+
+        if ( rcode && !BTREE_is_empty( tree ) )
+        {
+            printf( "    tree (size %d) not empty following all deletions\n",
+                    inx
+                  );
+            rcode = CDA_FALSE;
+        }
+
+        BTREE_destroy_tree( tree, destroy_proc );
+        CDA_free( keys );
+        if ( rcode )
+        {
+            TST_HEAP_STATE_t    new_state;
+            TST_get_heap_snapshot( &new_state );
+            if ( TST_compare_heap_snapshots( &old_state, &new_state ) != 0 )
+            {
+                puts( "    memory leaks detected" );
+                rcode = CDA_FALSE;
+            }
+        }
+    }
+
+    return rcode;
+}
+
+/* Creates a tree using randomly generated keys. Each key is stored in the
+ * array indicated by "keys." If rand_del is FALSE, the keys will be stored
+ * in the order they are created; if rand_del is TRUE the keys will be 
+ * stored in random positions in the array, according to a very simple
+ * random distribution algorithm.
+ *
+ * According to the random distribution algorithm, the first key (key #0)
+ * is stored at approximately the mid point of the array. Subsequently
+ * odd-numbered keys are stored sequentially from the beginning of the
+ * array, and even numbered keys are stored sequentially from the mid
+ * point.
+ */
+static BTREE_ID_t 
+delete2_create( int size, int seed, int *keys, CDA_BOOL_t rand_del )
+{
+    BTREE_ID_t      tree    = BTREE_create_tree();
+    RAND_ID_t       rid     = RAND_create();
+    DATA_p_t        data    = NULL;
+    BTREE_NODE_ID_t root    = BTREE_NULL_NODE_ID;
+    int             mid     = size / 2;
+    int             inx     = 0;
+
+    RAND_init( rid, seed );
+    if ( size > 0 )
+    {
+        data = CDA_NEW( DATA_t );
+        data->key = RAND_irandom( rid );
+        data->position = 0;
+        if ( rand_del )
+            keys[mid] = data->key;
+        else
+            keys[0] = data->key;
+        root = BTREE_add_root( tree, data );
+    }
+
+    for ( inx = 1 ; inx < size ; ++inx )
+    {
+        CDA_BOOL_t  result  = CDA_TRUE;
+        int         jnx     = inx;
+
+        data = CDA_NEW( DATA_t );
+        data->key = RAND_irandom( rid );
+        data->position = 0;
+        
+        if ( rand_del )
+            if ( inx & 1 )
+                jnx = inx / 2;
+            else
+                jnx = mid + inx / 2;
+
+        keys[jnx] = data->key;
+        result = add( data, root );
+        CDA_ASSERT( result );
+    }
+
+    RAND_destroy( rid );
+    return tree;
+}
+
+/* Delete nodes from a tree. The "keys" array contains the key of each
+ * node to delete; nodes are deleted in the order that the corresponding
+ * keys are found in the array.
+ */
+static CDA_BOOL_t delete2_delete( BTREE_ID_t tree, int size, int *keys )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    int         inx     = 0;
+
+    rcode = delete2_validate( tree, size, keys, 0 );
+    for ( inx = 0 ; rcode && inx < size ; ++inx )
+    {
+        BTREE_NODE_ID_t root    = BTREE_get_root( tree );
+        BTREE_NODE_ID_t node    = BTREE_NULL_NODE_ID;
+
+        if ( get( keys[inx], root, &node ) < 0 )
+        {
+            printf( "key %lu, position %d not found (line %d)\n",
+                    keys[inx],
+                    inx,
+                    __LINE__
+                  );
+            rcode = CDA_FALSE;
+        }
+        else 
+            if ( rcode = delete_node( node ) )
+                rcode = delete2_validate( tree, size, keys, inx + 1 );
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t 
+delete1_validate( BTREE_ID_t tree, CREATE_DESC1_p_t desc, int num_deletes )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    if ( !(rcode = BTREE_validate( tree )) )
+        printf( "    BTREE_validate failed after %d deletes\n", num_deletes );
+    else if ( !(rcode = traverse_test( tree )) )
+        printf( "    traverse test failed after %d deletes\n", num_deletes );
+    else
+    {
+        BTREE_NODE_ID_t root    = BTREE_get_root( tree );
+        int             inx     = num_deletes;
+        for ( inx = num_deletes ; inx < desc->size ; ++inx )
+        {
+            int             idx = desc->delete_arr[inx];
+            CDA_UINT32_t    key = desc->create_arr[idx];
+            if ( get( key, root, NULL ) < 0 )
+            {
+                const char* fmt = 
+                    "    key validate (%lu) failed after %d deletes\n";
+                printf( fmt, key, num_deletes );
+                rcode = CDA_FALSE;
+            }
+        }
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t 
+delete2_validate( BTREE_ID_t tree, int size, int *arr, int num_deletes )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    if ( !(rcode = BTREE_validate( tree )) )
+        printf( "    BTREE_validate failed after %d deletes\n", num_deletes );
+    else if ( !(rcode = traverse_test( tree )) )
+        printf( "    traverse test failed after %d deletes\n", num_deletes );
+    else
+    {
+        BTREE_NODE_ID_t root    = BTREE_get_root( tree );
+        int             inx     = num_deletes;
+        for ( inx = num_deletes ; inx < size ; ++inx )
+        {
+            CDA_UINT32_t    key = arr[inx];
+            if ( get( key, root, NULL ) < 0 )
+            {
+                const char* fmt = 
+                    "    key validate (%lu) failed after %d deletes\n";
+                printf( fmt, key, num_deletes );
+                rcode = CDA_FALSE;
+            }
+        }
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t delete_node( BTREE_NODE_ID_t node )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    DATA_p_t    data    = BTREE_get_data( node );
+
+    if ( BTREE_delete_node( node ) != BTREE_NULL_ID )
+    {
+        printf( "    BTREE_delete_node failed to return BTREE_NULL_ID\n" );
+        rcode = CDA_FALSE;
+    }
+
+    CDA_free( data );
+    return rcode;
+}
+
+static CDA_BOOL_t add( DATA_p_t data, BTREE_NODE_ID_t node )
+{
+    CDA_BOOL_t      rcode     = CDA_TRUE;
+    DATA_p_t        node_data = BTREE_get_data( node );
+    BTREE_NODE_ID_t next_node = BTREE_NULL_ID;
+
+    if ( data->key == node_data->key )
+        rcode = CDA_FALSE;
+    else if ( data->key < node_data->key )
+    {
+        next_node = BTREE_get_left( node );
+        if ( next_node == BTREE_NULL_NODE_ID )
+            BTREE_add_left( node, data );
+        else
+            rcode = add( data, next_node );
+    }
+    else
+    {
+        next_node = BTREE_get_right( node );
+        if ( next_node == BTREE_NULL_NODE_ID )
+            BTREE_add_right( node, data );
+        else
+            rcode = add( data, next_node );
+    }
+
+    return rcode;
+}
+
+static int 
+get( CDA_UINT32_t key, BTREE_NODE_ID_t node, BTREE_NODE_ID_t *node_ret )
+{
+    DATA_p_t        node_data = BTREE_get_data( node );
+    BTREE_NODE_ID_t next_node = BTREE_NULL_ID;
+    int             strc      = 0;
+    int             rcode     = -1;
+
+    if ( key == node_data->key )
+    {
+        rcode = node_data->position;
+        if ( node_ret != NULL )
+            *node_ret = node;
+    }
+    else if ( key < node_data->key )
+    {
+        next_node = BTREE_get_left( node );
+        if ( next_node == BTREE_NULL_ID )
+            ;
+        else
+            rcode = get( key, next_node, node_ret );
+    }
+    else
+    {
+        next_node = BTREE_get_right( node );
+        if ( next_node == BTREE_NULL_ID )
+            ;
+        else
+            rcode = get( key, next_node, node_ret );
+    }
+
+    return rcode;
+}
+
+static CDA_BOOL_t traverse_test( BTREE_ID_t tree )
+{
+    CDA_BOOL_t rcode = CDA_TRUE;
+
+    last_visit_ = 0;
+    visit_result_ = CDA_TRUE;
+
+    BTREE_traverse_tree( tree, BTREE_INORDER, visit_proc );
+    if ( !(rcode = visit_result_) )
+        printf( "    keys out of order: %lu followed by %lu\n", 
+                visit_key1_,
+                visit_key2_
+              );
+
+    return rcode;
+}
+
+static void visit_proc( void *visit_data )
+{
+    DATA_p_t data = visit_data;
+
+    /* If we get an out-of-order nodes, record only the first one. */
+    if ( visit_result_ && data->key <= last_visit_ )
+    {
+        visit_result_ = CDA_FALSE;
+        visit_key1_ = last_visit_;
+        visit_key2_ = data->key;
+    }
+
+    last_visit_ = data->key;
+}
+
+static void destroy_proc( void *data )
+{
+    CDA_free( data );
+}

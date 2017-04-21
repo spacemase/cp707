@@ -1,0 +1,9 @@
+#ifndef STACK_CALC_H
+#define STACK_CALC_H
+
+long StackCalc(
+    const char *expr,
+    const char **end
+);
+
+#endif

@@ -1,0 +1,118 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Appendix A: The Timer Module
+Date: Wed, 17 Oct 2007 20:42:57 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/timer.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Appendix A: The Timer Module</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H3>Appendix A: The Timer Module </H3><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html"> =
+Home </A>]=20
+</B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+">=20
+Previous Page ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand.html"> Next =
+Page=20
+]</A> </B><BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B> <BR><BR><B>[Timer Module Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer_c.txt">time=
+r.c ]</A>=20
+</B><BR><B>[Timer Module Public Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer_h.txt">time=
+r.h ]</A>=20
+</B><BR><B>[Timer Module Private Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timerp_h.txt">tim=
+erp.h=20
+]</A> </B>
+<BLOCKQUOTE>
+  <P>This is a simple module that measures the elapsed time, in =
+milliseconds,=20
+  between two events. A timer ID must first be obtained by calling=20
+  <I>TIMER_create;</I> when the ID is no longer needed it must be =
+destroyed by=20
+  calling <I>TIMER_destroy.</I> Events are signaled by invoking one of =
+the=20
+  methods <I>TIMER_start,</I> <I>TIMER_restart,</I> <I>TIMER_stop,</I>=20
+  <I>TIMER_get_elapsed_secs</I> or <I>TIMER_get_elapsed_msecs.</I>=20
+  <DL>
+    <DT><I>Timer_start</I>=20
+    <DD>This method sets the elapsed time to 0 and signals an initiating =
+event.=20
+    <DT><I>TIMER_stop</I>=20
+    <DD>This method signals a terminal event.=20
+    <DT><I>TIMER_restart</I>=20
+    <DD>This method restarts the timer after it has been stopped without =
+
+    resetting the elapsed time. If the timer has not been started and =
+stopped=20
+    invoking it is the same as invoking <I>TIMER_start.</I>=20
+    <DT><I>TIMER_get_elapsed_secs, TIMER_get_elapsed_msecs</I>=20
+    <DD>These methods return the elapsed time in seconds and =
+milliseconds,=20
+    respectively, between the last pair of initiating and terminating =
+events. If=20
+    there has not been a terminating event, these methods return the =
+elapsed=20
+    time between the last initiating event and the time of invocation; =
+they do=20
+    not stop the timer or reset the elapsed time. </DD></DL>
+  <P>The module uses the POSIX <I>timeb</I> facility to record elapsed =
+time in=20
+  milliseconds. The <I>timeb</I> facility includes the <I>struct =
+timeb</I> type=20
+  and the <I>ftime</I> function; in Microsoft Windows XP=99 these are =
+given the=20
+  names <I>struct _timeb</I> and <I>_ftime.</I> Conditionally compiled =
+code in=20
+  <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timerp_h.txt">tim=
+erp.h=20
+  </A>maps the Windows names to the standard POSIX names:=20
+  <BLOCKQUOTE><PRE>#ifdef _WIN32
+#define ftime _ftime
+#define timeb _timeb
+#endif</PRE></BLOCKQUOTE>
+  <P>Note that the macro <I>_WIN32</I> is automatically defined whenever =
+you=20
+  compile code with a WIN32 compiler, such as that provided with =
+Microsoft=20
+  Visual Studio .NET=99.=20
+  <P>This module has been tested in both Microsoft Windows XP=99 and =
+Linux. It=20
+  should function correctly in any fairly recent Windows or Unix =
+environment.=20
+  The complete code for the timer module can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer_c.txt">time=
+r.c=20
+  </A>, <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer_h.txt">time=
+r.h=20
+  </A>and <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timerp_h.txt">tim=
+erp.h.=20
+  </A>
+  <P><B><I>Next: <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand.html">Append=
+ix B:=20
+  The Rand Module </A></I></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>

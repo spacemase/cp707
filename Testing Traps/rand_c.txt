@@ -1,0 +1,143 @@
+/************************** MERSENNE.CPP ******************** AgF 2001-10-18 *
+*  Random Number generator 'Mersenne Twister'                                *
+*                                                                            *
+*  This random number generator is described in the article by               *
+*  M. Matsumoto & T. Nishimura, in:                                          *
+*  ACM Transactions on Modeling and Computer Simulation,                     *
+*  vol. 8, no. 1, 1998, pp. 3-30.                                            *
+*  Details on the initialization scheme can be found at                      *
+*  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html                  *
+*                                                                            *
+*  Experts consider this an excellent random number generator.               *
+*                                                                            *
+*  © 2001 - 2004 A. Fog.                                                     *
+*  GNU General Public License www.gnu.org/copyleft/gpl.html                  *
+*****************************************************************************/
+
+#include <randp.h>
+#include <math.h>
+#include <cda.h>
+
+/* Period parameters */  
+#define MERS_N 624
+#define MERS_M 397
+#define MATRIX_A 0x9908b0dfUL   /* constant vector a */
+#define UPPER_MASK 0x80000000UL /* most significant w-r bits */
+#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
+
+RAND_ID_t RAND_create( void )
+{
+    RAND__CONTROL_p_t   rid = CDA_NEW( RAND__CONTROL_t );
+    rid->mt = CDA_calloc( MERS_N, sizeof(*rid->mt) );
+
+    return rid;
+}
+
+RAND_ID_t RAND_destroy( RAND_ID_t rid )
+{
+    CDA_free( rid->mt );
+    CDA_free( rid );
+    return RAND_NULL;
+}
+
+void RAND_init( RAND_ID_t rid, CDA_UINT32_t seed )
+{
+    CDA_UINT32_t    *mt  = rid->mt;
+    int             mti = 0;
+
+    mt[0]= seed & 0xffffffffUL;
+    for ( mti = 1 ; mti < MERS_N ; mti++ )
+    {
+        mt[mti] = (812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
+        /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
+        /* In the previous versions, MSBs of the seed affect   */
+        /* only MSBs of the array mt[].                        */
+        /* 2002/01/09 modified by Makoto Matsumoto             */
+        mt[mti] &= 0xffffffffUL;
+        /* for >32 bit machines */
+    }
+
+    rid->mti = mti;
+}
+
+void RAND_init_by_array(RAND_ID_t rid, CDA_UINT32_t seeds[], int length )
+{
+    /* seed by more than 32 bits */
+    RAND_init( rid, 19650218UL );
+    if (length > 0) 
+    {
+        CDA_UINT32_t    *mt     = rid->mt;
+        int             i       = 0;
+        int             j       = 0;
+        int             k       = (MERS_N > length ? MERS_N : length);
+
+        for ( ; k > 0 ; k-- )
+        {
+            mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1664525UL))
+                    + seeds[j] + j;
+            i++;
+            j++;
+            if ( i >= MERS_N )
+            {
+                mt[0] = mt[MERS_N-1];
+                i = 1;
+            }
+
+            if ( j >= length )
+                j=0;
+        }
+
+        for ( k = MERS_N-1 ; k > 0 ; k-- )
+        {
+            mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1566083941UL)) - i;
+            if ( ++i >= MERS_N )
+            {
+                mt[0] = mt[MERS_N-1];
+                i=1;
+            }
+        }
+        
+        mt[0] = 0x80000000UL;
+    }
+} /* MSB is 1; assuring non-zero initial array */
+
+CDA_UINT32_t RAND_irandom( RAND_ID_t rid )
+{
+    static unsigned long mag01[2]={0x0UL, MATRIX_A};
+    CDA_UINT32_t    *mt = rid->mt;
+    int             mti = rid->mti;
+    CDA_UINT32_t    y;
+    /* mag01[x] = x * MATRIX_A  for x=0,1 */
+
+    if (mti >= MERS_N) { /* generate N words at one time */
+        int kk;
+
+        if (mti == MERS_N+1)   /* if init_genrand() has not been called, */
+            RAND_init( rid, 5489UL ); /* a default initial seed is used */
+
+        for (kk=0;kk<MERS_N-MERS_M;kk++) {
+            y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
+            mt[kk] = mt[kk+MERS_M] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        }
+        for (;kk<MERS_N-1;kk++) {
+            y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
+            mt[kk] = mt[kk+(MERS_M - MERS_N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        }
+        y = (mt[MERS_N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
+        mt[MERS_N-1] = mt[MERS_M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+
+        mti = 0;
+    }
+  
+    y = mt[mti++];
+
+    /* Tempering */
+    y ^= (y >> 11);
+    y ^= (y << 7) & 0x9d2c5680UL;
+    y ^= (y << 15) & 0xefc60000UL;
+    y ^= (y >> 18);
+
+    rid->mti = mti;
+    return y;
+
+}

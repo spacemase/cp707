@@ -1,0 +1,145 @@
+#include <btreep.h>
+#include <cda.h>
+
+#define ODD( n ) ((n) & 1)
+
+typedef struct context_s
+{
+    int                 count;
+    BTREE__NODE_p_t     nodes[30];
+} CONTEXT_t, *CONTEXT_p_t;
+
+static void traverse( 
+    BTREE__NODE_p_t      node
+);
+
+static void insert_node( 
+    BTREE__NODE_p_t      node
+);
+
+static int get_level(
+    int node_num
+);
+
+static void connect_subtrees(
+    BTREE__CONTROL_p_t tree
+);
+
+BTREE_ID_t BTREE_balance( BTREE_ID_t tree )
+{
+    int         inx     = 0;
+    CONTEXT_t   context;
+
+    context.count = 0;
+    for ( inx = 0 ; inx < (int)CDA_CARD( context.nodes ) ; ++inx )
+        context.nodes[inx] = NULL;
+    tree->context = &context;
+    traverse( tree->root );
+    CDA_ASSERT( tree->root == NULL );
+
+    connect_subtrees( tree );
+
+    tree->context = NULL;
+
+    return tree;
+}
+
+typedef struct data_s
+{
+    int           position;
+    CDA_UINT32_t  key;
+} DATA_t, *DATA_p_t;
+static void traverse( BTREE__NODE_p_t node )
+{
+    if ( node != NULL )
+    {
+DATA_p_t data = node->data;
+int      pos  = data->position;
+        traverse( node->left ); 
+        insert_node( node );                   
+        traverse( node->right );
+        CDA_ASSERT( BTREE_is_leaf( node ) );
+        BTREE__recycle_node( node );
+    }
+}
+
+static void insert_node( BTREE__NODE_p_t node )
+{
+DATA_p_t data = node->data;
+int      pos  = data->position;
+    CONTEXT_p_t     context = node->tree->context;
+    BTREE__NODE_p_t *nodes  = context->nodes;
+    int             level   = get_level( ++context->count );
+    BTREE__NODE_p_t next    = BTREE__new_node( node->tree, node->data );
+
+    next->left = nodes[level - 1];
+    next->right = NULL;
+    next->data = node->data;
+    next->tree = node->tree;
+    next->parent = NULL;
+    nodes[level] = next;
+
+    if ( next->left != NULL )
+        next->left->parent = next;
+
+    if ( nodes[level + 1] != NULL )
+    {
+        BTREE__NODE_p_t temp = nodes[level + 1];
+        if ( temp->right == NULL )
+        {
+            temp->right = next;
+            next->parent = temp;
+        }
+    }
+}
+
+static int get_level( int node_num )
+{
+    int level   = 0;
+    int inx     = node_num;
+    for ( level = 0 ; !ODD( inx ) ; ++level )
+        inx /= 2;
+
+    ++level;
+    return level;
+}
+
+static void connect_subtrees( BTREE__CONTROL_p_t tree )
+{
+    CONTEXT_p_t     context     = tree->context;
+    BTREE__NODE_p_t *nodes      = context->nodes;
+    BTREE__NODE_p_t node        = NULL;
+    int             inx         = 0;
+
+    for ( inx = CDA_CARD( context->nodes ) - 1 ; 
+          inx > 0 && nodes[inx] == NULL        ; /* Kruse: inx > 2 */
+          --inx
+        )
+        ;
+
+    tree->root = nodes[inx];
+    while ( inx > 2 )
+    {
+        if ( nodes[inx]->right != NULL )
+        {
+            --inx;
+        }
+        else
+        {
+            int jnx = inx - 1;
+            node = nodes[inx]->left;
+            do
+            {
+                node = node->right;
+            } while  ( node != NULL && node == nodes[--jnx] );
+
+            /* Kruse: if ( jnx > 1 ) */ 
+            if ( jnx > 0 && nodes[jnx]->parent == NULL )
+            {
+                nodes[inx]->right = nodes[jnx];
+                nodes[jnx]->parent = nodes[inx];
+            }
+            --inx; /* Kruse: inx = jnx; */
+        }
+    }
+}

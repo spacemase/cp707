@@ -1,0 +1,69 @@
+#include <tstp.h>
+#include <stdio.h>
+#include <cda.h>
+
+#if defined( _WIN32 ) && !defined( NDEBUG )
+#include <crtdbg.h>
+
+CDA_BOOL_t TST_heap_reporting_available( void )
+{
+    return CDA_TRUE;
+}
+
+void TST_get_heap_snapshot( TST_HEAP_STATE_p_t state )
+{
+    _CrtMemCheckpoint( state );
+}
+
+int TST_compare_heap_snapshots( TST_HEAP_STATE_p_t old_state,
+                                TST_HEAP_STATE_p_t new_state
+                              )
+{
+    int             rcode           = 0;
+    _CrtMemState    diff;
+
+    if ( _CrtMemDifference( &diff, old_state, new_state ) )
+        rcode = 1;
+    else
+        rcode = 0;
+
+    return rcode;
+}
+
+void TST_dump_curr_mem_stats( void )
+{
+    _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
+    _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDOUT);
+    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
+    _CrtDumpMemoryLeaks();
+}
+
+      /******************************************/
+#else /* !defined( WIN32 ) || defined( NDEBUG ) */
+      /******************************************/
+CDA_BOOL_t TST_heap_reporting_available( void )
+{
+    return CDA_FALSE;
+}
+
+void TST_dump_curr_mem_stats( void )
+{
+    printf( "    (TST_dump_curr_mem_stats not enabled.)\n" );
+}
+
+void TST_get_heap_snapshot( TST_HEAP_STATE_p_t state )
+{
+}
+
+CDA_BOOL_t TST_compare_heap_snapshots( TST_HEAP_STATE_p_t state1,
+                                       TST_HEAP_STATE_p_t state2
+                                     )
+{
+    CDA_BOOL_t  rcode   = CDA_FALSE;
+
+    return rcode;
+}
+#endif /* #if defined( _WIN32 ) && !defined( NDEBUG ) */

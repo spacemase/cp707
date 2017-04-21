@@ -1,0 +1,1634 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Balancing a Binary Tree: Testing The Recycling Logic
+Date: Wed, 17 Oct 2007 20:42:42 -0700
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----=_NextPart_000_0022_01C810FE.43A69F70"
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/test_recycle.html
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Balancing a Binary Tree: Testing The Recycling =
+Logic</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H3>Balancing a Binary Tree: Testing The Recycling Logic </H3><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html"> =
+Home </A>]=20
+</B><B>[<A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test.html">=20
+Testing the Implementation ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html"=
+>=20
+Previous Page ]</A> </B><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+"> Next=20
+Page ]</A> </B><BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B> <BR><BR><B>[Test Driver: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_recycle_c.txt=
+">tst_recycle.c=20
+]</A> </B>
+<BLOCKQUOTE>
+  <P>To test the recycling logic we will use a white-box test driver =
+like the=20
+  one introduced in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_validate.htm=
+l">Testing=20
+  BTREE_validate. </A>The main idea will be to create a tree, add and =
+delete=20
+  nodes from the tree using both <I>BTREE_destroy_subtree</I> and=20
+  <I>BTREE__recycle</I> node, and verify that the tree's unused queue is =
+the=20
+  expected length after each operation. We will want to destroy the tree =
+with at=20
+  least two nodes left on the unused queue, then check for memory leaks =
+(if=20
+  possible). Here are our test cases; each one builds on the previous =
+test case:=20
+
+  <TABLE cellSpacing=3D3 cols=3D2 border=3D0>
+    <TBODY>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004010 (Add Root (1))=20
+          <DD>Add a root node to a tree with an empty unused =
+queue.<BR>Verify=20
+          that the unused queue remains empty. </DD></DL></TD>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004010.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004015 (Add Left (1))=20
+          <DD>Add a left child to the root node.<BR>Verify that the =
+unused queue=20
+          remains empty. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004015.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004020 (Add Right (1))=20
+          <DD>Add a right child to the root node.<BR>Verify that the =
+unused=20
+          queue remains empty. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004020.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004025 (Destroy Left (1))=20
+          <DD>Destroy the root node's left child.<BR>Verify that the =
+unused=20
+          queue remains empty. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004025.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004030 (Destroy Root (1))=20
+          <DD>Destroy the root node.<BR>Verify that the unused queue =
+remains=20
+          empty. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004030.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004035 (Add Root (2))=20
+          <DD>Add a root node to the tree.<BR>Verify that the unused =
+queue=20
+          remains empty. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004035.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004040 (Add Left (2))=20
+          <DD>Add a left child to the root node.<BR>Verify that the =
+unused queue=20
+          remains empty. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004040.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004045 (Add Right (2))=20
+          <DD>Add a right child to the root node.<BR>Verify that the =
+unused=20
+          queue remains empty. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004045.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004050 (Recycle Left (1))=20
+          <DD>Recycle the root's left child.<BR>Verify that the unused =
+queue has=20
+          a length of 1. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004050.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004055 (Destroy Right (2))=20
+          <DD>Destroy the root's right child.<BR>Verify that the unused =
+queue=20
+          has a length of 1. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004055.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004060 (Recycle Root (1))=20
+          <DD>Recycle the root.<BR>Verify that the unused queue has a =
+length of=20
+          2. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004060.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004065 (Add Root (3))=20
+          <DD>Add a root node to the tree.<BR>Verify that the unused =
+queue has a=20
+          length of 1. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004065.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004070 (Add Left (3))=20
+          <DD>Add a left child to the root node.<BR>Verify that the =
+unused queue=20
+          has a length of 0. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004070.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004075 (Add Right (3))=20
+          <DD>Add a right child to the root node.<BR>Verify that the =
+unused=20
+          queue has a length of 0. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004075.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004080 (Add Left/Left)=20
+          <DD>Add a left child to the root's left child.<BR>Verify that =
+the=20
+          unused queue has a length of 0. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004080.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004085 (Add Left/Right)=20
+          <DD>Add a right child to the root's left child.<BR>Verify that =
+the=20
+          unused queue has a length of 0. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004085.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004090 (Recycle Left (2))=20
+          <DD>Recycle the root's left child.<BR>Verify that the unused =
+queue has=20
+          a length of 3. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004090.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004095 (Add Right/Right)=20
+          <DD>Add a right child to the root's right child.<BR>Verify =
+that the=20
+          unused queue has a length of 2. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004095.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004100 (Recycle Root (2))=20
+          <DD>Recycle the root node.<BR>Verify that the unused queue has =
+a=20
+          length of 5. </DD></DL>
+      <TD align=3Dleft><IMG=20
+        =
+src=3D"http://faculty.washington.edu/jstraub/dsa/btree/images/004100.jpg"=
+=20
+        border=3D0> </TD></TR>
+    <TR>
+      <TD align=3Dleft>
+        <DL>
+          <DT>004300 (Destroy Tree)=20
+          <DD>Destroy the tree.<BR>Verify that there are no memory leaks =
+(if=20
+          possible). </DD></DL>
+        <DL></DL>
+      <TD align=3Dleft></TD></TR></TBODY></TABLE>
+  <P>Our test driver will, once again, be table-driven. For a test =
+descriptor we=20
+  will use this:=20
+  <BLOCKQUOTE><PRE>typedef CDA_BOOL_t TEST_PROC_t( BTREE_ID_t tree, int =
+parent, int exp_count );
+typedef TEST_PROC_t *TEST_PROC_p_t;
+
+typedef struct test_desc_s
+{
+    TEST_PROC_p_t   proc;
+    int             parent;
+    int             exp_count;
+    const char      *comment;
+} TEST_DESC_t, *TEST_DESC_p_t;</PRE></BLOCKQUOTE>
+  <P>Where:=20
+  <DL>
+    <DT>TEST_PROC_t:=20
+    <DD>is the type of a function that can execute a test case.=20
+    <DT>tree:=20
+    <DD>is the target of a test operation, such as "add root."=20
+    <DT>proc:=20
+    <DD>is a pointer to a function that will execute a test case, for =
+example=20
+    "add left child."=20
+    <DT>parent:=20
+    <DD>is the parent or node against which to execute the test case, =
+for=20
+    example "add left child" to parent, or "destroy node."=20
+    <DT>exp_count:=20
+    <DD>is the expected length of the tree's unused queue after the test =
+
+    operation is executed.=20
+    <DT>comment:=20
+    <DD>is a comment to print prior to executing a test case. </DD></DL>
+  <P>To validate the actual vs. expected unused queue length we will use =
+two=20
+  simple functions, one to determine the actual length of the queue, and =
+one to=20
+  compare the actual length to the expected length and to print a =
+diagnostic if=20
+  they don't match; note that the diagnostic includes the line number =
+from which=20
+  the validation originates:=20
+  <BLOCKQUOTE><PRE>static int count_recycled( BTREE_ID_t tree )
+{
+    int             count   =3D 0;
+    BTREE_NODE_ID_t node    =3D tree-&gt;unused;
+
+    while ( node !=3D NULL )
+    {
+        ++count;
+        node =3D node-&gt;right;
+    }
+
+    return count;
+}
+
+static CDA_BOOL_t validate_recycled_count( BTREE_ID_t tree, int exp, int =
+line )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+    int         act     =3D count_recycled( tree );
+
+    if ( act !=3D exp )
+    {
+        printf( "Recycle count mismatch: "
+                    "expected =3D %d, actual =3D %d (line %d)\n",
+                exp,
+                act,
+                line
+              );
+        rcode =3D CDA_FALSE;
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>We will have five functions capable of executing a test case; they =
+are=20
+  <I>add_root, add_left, add_right, destroy_node </I>and =
+<I>recycle_node. </I>As=20
+  we did with our <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_validate.htm=
+l"><I>BTREE_validate</I>=20
+  test driver </A>we will keep a shadow copy of the tree in an internal =
+array,=20
+  so if we pass parent =3D 1 to the <I>add_right</I> function, the =
+function will=20
+  add a right child to the root's left child, then update the internal =
+array:=20
+  <BLOCKQUOTE><PRE>#define LEFT( inx )     (2 * (inx) + 1)
+#define RIGHT( inx )    (2 * (inx) + 2)
+#define PARENT( inx )   (((inx) - 1) / 2)
+. . .
+static BTREE_NODE_ID_t  nodes_[100];
+. . .
+static CDA_BOOL_t add_right( BTREE_ID_t tree, int parent, int exp_count =
+)
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+    int         right    =3D RIGHT( parent );
+
+    CDA_ASSERT( parent &lt; CDA_CARD( nodes_ ) );
+    CDA_ASSERT( nodes_[parent] !=3D BTREE_NULL_ID );
+    CDA_ASSERT( nodes_[right] =3D=3D BTREE_NULL_ID );
+    nodes_[right] =3D BTREE_add_right( nodes_[parent], NULL );
+    rcode =3D validate_recycled_count( tree, exp_count, __LINE__ );
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P><I>destroy_node</I> and <I>recycle_node</I> will destroy or recycle =
+a=20
+  subtree, respectively, then update the internal array; note that, in =
+these=20
+  cases, updating the internal array is a little tricky, because every =
+node=20
+  associated with the destroyed or recycled subtree has to be updated. =
+To=20
+  facilitate this, we will use the <I>null_subtree</I> function:=20
+  <BLOCKQUOTE><PRE>static CDA_BOOL_t recycle_node( BTREE_ID_t tree, int =
+node, int exp_count )
+{
+    CDA_BOOL_t  rcode   =3D CDA_TRUE;
+
+    CDA_ASSERT( node &lt; CDA_CARD( nodes_ ) );
+    CDA_ASSERT( nodes_[node] !=3D BTREE_NULL_NODE_ID );
+    BTREE__recycle_node( nodes_[node] );
+    null_subtree( node );
+    rcode =3D validate_recycled_count( tree, exp_count, __LINE__ );
+
+    return rcode;
+}
+
+static void null_subtree( int node )
+{
+    if ( node &lt; CDA_CARD( nodes_ ) &amp;&amp; nodes_[node] !=3D =
+BTREE_NULL_NODE_ID )
+    {
+        null_subtree( LEFT( node ) );
+        null_subtree( RIGHT( node ) );
+        nodes_[node] =3D BTREE_NULL_NODE_ID;
+    }
+}</PRE></BLOCKQUOTE>
+  <P>To drive the test we will compile an array of descriptors that says =
+what=20
+  function to execute, what to use for a parent/node and what the length =
+of the=20
+  unused queue should be when the test is complete:=20
+  <BLOCKQUOTE><PRE>static TEST_PROC_t add_root;
+static TEST_PROC_t add_left;
+static TEST_PROC_t add_right;
+static TEST_PROC_t destroy_node;
+static TEST_PROC_t recycle_node;
+. . .
+static TEST_DESC_t      test_descs_[]   =3D
+{
+    { add_root,     0,          0, "004010: Add root (1)"       },
+    { add_left,     0,          0, "004015: Add left (1)"       },
+    { add_right,    0,          0, "004020: Add right (1)"      },
+    { destroy_node, LEFT( 0 ),  0, "004025: Destroy left (1)"   },
+    { destroy_node, 0,          0, "004030: Destroy root (1)"   },
+    { add_root,     0,          0, "004035: Add root (2)"       },
+    { add_left,     0,          0, "004040: Add left (2)"       },
+    . . .
+};</PRE></BLOCKQUOTE>
+  <P>Our top level code will initialize the internal node array and =
+execute the=20
+  test cases in the <I>test_descs_</I> array:=20
+  <BLOCKQUOTE><PRE>CDA_BOOL_t TST_recycle( void )
+{
+    CDA_BOOL_t          rcode   =3D CDA_TRUE;
+    BTREE_ID_t          tree    =3D BTREE_NULL_ID;
+    int                 inx     =3D 0;
+    TST_HEAP_STATE_t    old_state;
+
+    TST_get_heap_snapshot( &amp;old_state );
+    tree =3D BTREE_create_tree();
+    for ( inx =3D 0 ; inx &amp;lt; CDA_CARD( nodes_ ) ; ++inx )
+        nodes_[inx] =3D BTREE_NULL_NODE_ID;
+
+    for ( inx =3D 0 ; rcode &amp;&amp; inx &amp;lt; CDA_CARD( =
+test_descs_ ) ; ++inx )
+    {
+        printf( "%2d: %s\n", inx, test_descs_[inx].comment );
+        rcode =3D test_descs_[inx].proc( tree,=20
+                                       test_descs_[inx].parent,
+                                       test_descs_[inx].exp_count
+                                     );
+        if ( rcode )
+            puts( "PASSED" );
+        else
+            puts( "FAILED" );
+    }
+    . . .
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>Finally, the top level code will execute the last test case, =
+"destroy the=20
+  tree and check for memory leaks," using the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html#=
+CheckingForMemoryLeaks">heap=20
+  analysis facility </A>that we introduced with the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_delete.html"=
+><I>BTREE_delete_node</I>=20
+  test driver: </A>
+  <BLOCKQUOTE><PRE>    . . .
+    BTREE_destroy_tree( tree, NULL );
+    if ( rcode )
+    {
+        TST_HEAP_STATE_t    new_state;
+
+        puts( "004300: Destroy tree" );
+        TST_get_heap_snapshot( &amp;new_state );
+        if ( TST_compare_heap_snapshots( &amp;old_state, &amp;new_state =
+) =3D=3D 0 )
+            puts( "PASSED" );
+        else
+        {
+            puts( "FAILED" );
+            rcode =3D CDA_FALSE;
+        }
+    }
+
+    return rcode;
+}</PRE></BLOCKQUOTE>
+  <P>The complete code for our test driver can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/tst_recycle_c.txt=
+">tst_recycle.c.=20
+  </A>
+  <P><B><I>Next: <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/test_balance.html=
+">Testing=20
+  BTREE_balance </A></I></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004010.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwLPQtL1vxdrZ1Sxgu/Ji
+thF5y7tgIcnHpW/VDw9/yNviD/rna/8AoL0AVxoHgRiwGl6cdqsxIg4wGKHnGD8ysMe1Wbfwj4Ou
+zKINEsGMUhjf9xjDA4PXrznnpxWvBoWl2u77PZRQhkaMrGNq7WJJ4HHVj+eKs29pBamUwx7TK5kf
+knLHk9fft7mgDkPCsMdtY31tCgSGHUruONB0RRM2APQCt2sbw5/qtU/7Ct5/6OatmgAooooAKKKK
+ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA
+KKKKACiiigAooooAKKKKACiiigAooooAKzL/AMOaHqtx9o1HRtOvJwoXzLi1SRsDoMsCcc1p0UAY
+X/CFeFP+hY0X/wAAIv8A4mj/AIQrwp/0LGi/+AEX/wATW7RQBBZ2Npp1qlrY2sFrbpnbFBGERcnJ
+wBwOanoooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK
+KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAorCGlw634zvba8uL8QW
++n28kcdtfz24DNJMGJEbrkkIvXPSqs2h2qXMkceleIpI41lLP/bt8MlWIUKN/wA24AHr374oA6ei
+uW/sa1a4MaaR4jMfmxIJG1y+UFXBJbBf+HAz255Iq3aeFrafQzeNaa19s3Pttf7evkyA5A5aQYyA
+DkgUAb1FcZ4Z1fX38N2BOiyXP7vHnSX6lnwSMktkk+5rUXXtQh1Cxtr/AEVraO8mMCSi5STDbHfk
+DthDQBv0UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUA
+FFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAZl9oFjf3v2yR72K4MYiL2t/PbllB
+JAPluucFm6+pqD/hGLL/AJ/dc/8AB5e//Ha2qKAMX/hGLL/n91z/AMHl7/8AHaP+EYsv+f3XP/B5
+e/8Ax2tqigCvY2VvptjDZWiFIIVCIpYsQPckkn6k1zviC213+1tKeyhS+gS+Myl2CfZ/3MqYbHVM
+sDn73Uc5GOqooAito5YraNJ5zPKB88hULuP0HQf5yetS0UUAFFFFABRRRQAUUUUAFFFFABRRRQAU
+UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRR
+RQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFF
+AH//2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004015.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwJNG0vWvHQh1XTbO/ij0
+3dGl1AsoQmXBIDA4Nb9Y0d9aWPjxnu7qC3Q6Xw00gQH9770ASf8ACO+APtLW48OaE0quyFV0yM/M
+oUsMhMZG9fxOOvFSWvhXwLeyOkHhnQ2ZArMDpkY4ZQw6p6EfTPNXYZ/C0NwbmG60uOVpGlLJOg3M
+wAJODyTtX8s1NBqPh+2keSHUNPRnChiLleQAAO/oAPwFAHP6DY2ema14ks7C1gtLWO+j2QQRiNFz
+bQk4UcDJJP41vVi6PcQ3XiHxPNbzRzRNfRYeNgyn/RYe4raoAKKKKACiiigAooooAKKKKACiiigA
+ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooqK5urezt2uLqeKCFMbpJXCqOcc
+k8UAS0Vlf8JR4f8A+g7pn/gXH/jVW48ceFbXIk8Q6aSOqx3Kuw/BSTQBv0Vytt8Q9A1C4+zaZJd6
+hcYz5dvayZx9WAH61d/trVpv+Pfwxer6NdXEEYP/AHy7H9KAN2isLzfFU3Sz0e0HYtcyTn8QET+f
+br6H9n+I5v8AX6/awj0tNP2kfi7vn8vwoA3aKwv+Ecmk/wCPrxDrM/qBKkI/8hItH/CH6I3+vtpr
+v/r8upbjP/fxj/kD0oA0bvV9N0/P23ULS2x186ZU/mazv+Ex0Bv+PfUFu/T7FG9xn6eWGzVy00DR
+tPx9i0mwtsdPJtkT+QrRoAwv+ElMv/HpoetXPp/ovk5/7/FMfj/jR/afiCb/AFHhxIv+vy/RP/Ra
+yVu0UAYW3xXN/wAtdFs/+2ctzj/x6Oj+yNam/wBf4mnj9rS0hT/0NXrdooAwv+EXgk/4+tU1i59c
+38kQP4RFRQPBnhssHm0a0uXHRrtPPb83ya3aKAKA0PSFUKul2QAGABbpx+lL/Ymlf9Ayy/8AAdf8
+KvUUARW9rb2kZjtoIoUJyVjQKCfXAqWiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKK
+ACiiigAooooAKKKKACiiigAooooAKKKKACsXxOqvY2KsoZTqtiCCMg/6THW1WH4rlS30u1uJWCQw
+6lZSSOeiKtxGST7ADNAG3fX2jaff29jLbwtczgGONUTJywUcHHUn9D6VDDqekym12aYwS5YbX8hN
+o3BCC3PGfMUfWmv438JyKVfXNPZSMEGUEEUn/CaeEdyt/bWnZXlT5g44xx+HFAFbXreCHxR4eMUM
+cZJuclFAz+7Fadc/f69pWt+KtCXTL+C7aEXDSCFt2wFAAT6c10FABRRRQAUUUUAFFFFABRRRQAUU
+UUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRR
+QAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUVjahJqdz4
+j0/StOvILQTWlzcySS25mJ8t4VAA3Lj/AFpP4Cq9yuq2tz9nfxPamYSiIqukscEruyf3vTHNAHQ0
+Vyr3t+rIF8TwSF4vNXZozHcvfH7zkgAkj+pAqzZxa1e213cx+IrcQ2rYZjpJJYeWsmQBKT91xxjP
+tQB0NFchonjW1ls5l1GeeWeK5mh8yHTZ1DqrkKdu04OAMjPFasXizR5riKATXCPK4jTzbOaNSxOA
+NzIByfegDaooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKMUAFFFFABR
+RRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQBl6hpt9Nq1pqenX8dpcW8E1uf
+Nt/NVkkaNjxuXBBiX8zSCLxOGLDXNPDHqf7LOT/5FrVooAyBb+JVxjWtOGOBjS/fP/PX1pwj8ULn
+brunjJycaYev/f2tWigDP0bTpNMs5I57kXE0s8txJIsewFncscLk4HPrWF4y1T7CLJLuB1tzqFq8
+U6AvuIlUshAGQ3GQOc9ueK62kKhhggEZzzQBBZTT3Fqstzb/AGeRskRFtxUZ43Y4zjGQMgHuetWK
+KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooxQAUUYooA//Z
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004020.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwZ9KsNZ8cQW+pWkV1DHp
+sjpHKNyhvMQZA9cVvVkwTRQ+P4zLKkYOluAXYD/lqlAAfDvgUXLW/wDZWneYrsjAQ5AZQrMCcYGA
+y/njrUtt4V8GXcrxwaLYM6BWYeRjhgCOo54I+mRWnFaaFBdG5hFpHKZGlJSQAF2CgkgHBJ2r+Iz1
+qa3/ALJtJXlgmt0dwqsfOzwoAHU8cAfkKAOa0OyttN13xFZWUKQWsd1EUiQYVcwRk4HbJrdrH02R
+JfFHiV43V1NzDgqcj/j3jrYoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK
+KACiiigAooooAKKKKACiiigAoopk00VvE0s8qRRr1d2CgfiaAH0VR/tvSv8AoJ2X/gQv+NU7jxf4
+atWKza/piOOqG7Td+Wc0AbVFc3H460G4m8mymur2XGQlrZTSZH1C4/Wp/wC3r+X/AI9vDOqP6PK0
+MS/+PSbv/HaAN2isL7X4nm/1ek6Zbr/env3dh/wFY8f+Pf40fZPE83+s1fTbdf7sFgzMP+BNJj/x
+2gDdorC/sC+l/wCPnxNqrj+5EIYl/DbHu/8AHqP+ER0t/wDj4bULo/8ATxqE8g/75L7R+AoA1ri8
+tbNN9zcwwL6yuFH61lt4x8OBikes2k7jgpbSecwPphMmpbfwt4ftH32+iadG/wDfW2TcfqcZrVVV
+RQqqFUdABgCgDD/4Sm3k/wCPXTdYufTbp8kYP0MgUH65xR/bGszf8e/hm5T0N3dQxj/xxnP6Vu0U
+AYW/xXN/y76NafWaW4/9ljo/s3xDN/r/ABFFF/156eqf+jGkrdooAwv+EaaT/j713Wrj1/0kQ/8A
+olUpjeCPDksiyXWmreuvRr6V7k/+RGaugooAyR4W8PKABoOlgDgAWcf+FRXHg7wzdR7JtA00jsRb
+IpH0IGa26KAOct/BGjWCsNN+3aeGO4raX0yKT67N23PTt2qb+wtSi/49vE+ogdkniglX/wBFhv8A
+x6t2igDC+z+KYfu6lpNyPSSykib/AL6EhH/jtH27xLD/AK3RLGYettqByf8AgLxqB+dbtFAGF/wk
+N1F/x9eHNXh/2kWKYfh5cjH9KP8AhL9HT/j4e7tD3+12U0IH4ugH45xW7RQBl2viTQr44tNZ0+dv
+7sdyjH8ga1AQRkciq11p1jfDF3Z29wPSaJX/AJisw+DfDwOYdKgtT62mYP8A0WRQBuUVhf8ACMJH
+/wAeusa1b+n+nNN/6N30f2VrsP8Ax7+JXl9PtllG/wCfl+XQBu0Vhf8AFVwf9AW8/wC/ttn/ANGY
+/wDr+3J/auuw/wDHx4baX1+xXscn5eZ5dAG7RWC3imOBS15pGs2oAySbJpgP+/W+o4fHnhaXrrlp
+D/18t5P/AKHigDoqKzYvEOiTpvh1jT5F9UuUI/Q1NFq2nTyrHFqFrJIxwqpMpJ+gzQBcooooAKKK
+KACiiigAooooAKKKKACiiigAooooAKw/FMaTafZRyorxvqliGVhkEfaY+CK3KwvFk8NrpdpcXEqQ
+wQ6lZSSSyMFVFFzGSxJ4AA70Aat8nhrT7yGzm02xNzOMxxLbx7jyFHX1J4+h9DUUSeHWNq8WgQbL
+sqRKLOMKAQhBYn13gDuTmnyeNfBUwxL4m0BxgjDX8J4PX+Km/wDCZeCN0bf8JJ4ezF/qz9uh+Ttx
+83HQUAU9a06ysvFPh9rWzt4Gb7QGMUSqSNg64FbFc/qHiDRda8V6DHpWsaffvELhpFtblJSg2AZI
+UnAroKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiig
+DK8Uf8ilrP8A14z/APotquG08O6dplk93p1ivnCONf8ARlJZiB7VT8T8+E9Z/wCvGf8A9FtUlt4z
+8GPYWqT+JdBYoiMFe/hO1gAQeW4IIoAQP4Vt4TKuiWqKyPI22zj/AIW2tnHfg/UA4qPxfpOm2uk2
+k1vp9rDKup2OHjhVSP8ASY+4FPHiX4fBmYa34YBZPLYi7t+Vzu2nnpnnHrVHxP4q8O6rp9nZ6dr+
+l3l0+p2RWG3vI5HYC4jJwqkk4AJ/CgDoaKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAo
+oooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii
+igAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKK
+ACiiigAooooAKKKKACiiigDBvtMstX8b6TaajbR3NsNOvZfKlGV3iS1AbHqAzD8TTrnwdpovDHb+
+EtNMCzL+9ZF+aPbk4GQQd3HP1wau6jommau0TajYwXJi3CMyoCVzjOPrgfkKpf8ACG+G/wDoC2f/
+AH7FAFOTwmjITD4K0lG+zhgJNp/e7hleG6Yz/j2q7YeCtMe1vXvPDGlrcBz9miKBVI2LgFhuON+4
+bsZ77e1J/wAIb4b/AOgLZ/8AfsUf8Ib4b/6Atn/37FAGL4bbxFZ21/a2ei6OsEN/OixnVJVEfz/d
+X/Rz8o7Hj6CtO41nX9PNvJf6Ppq20tzDbs0GpSSOvmOqAhTAoOCw7itqw0+z0u1FtY20VvACWCRr
+gZPJNcz43+3Wtta3NtIksMmoWYNvMxUK4nTaysASAcYI/EcghgDr6KrWME9vaqlzcm4nJLPJt2jJ
+5wo7KOgHPHUk81ZoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//Z
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004025.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwbrS7HWfHFna6laxXUCa
+bPIsco3KG8yIZx64JrerJjmih+IFq0siRg6XOAWYD/lrFQAreHPAy3BgOlad5iuY2Hk8BhtyCeg+
++n4sB1p9t4X8FXkhjg0awZwobHkY4IVu49GUn03DPWtRbTQUumuUWzSZpDKzK4G5jtJJweeVU89x
+nrU0A0m2mM0MtushUKT5oPAAHr6Ko99o9KAOZ0axtdM8Q+ILKxgS3tY5YSkUYwqkxKTge9b1Y9hJ
+HL4s8RPG6uvmW/KnI/1K1sUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFF
+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
+RRQAUUUUAFFFFAH/2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004030.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABTAYsDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK5e/1jULDX7safpWp6pbQ
+xLJexwtERFlTtMYeQMSQvKAYPUYOQ3UVn+H+PFniHjP7u14/4C9AFWDW9TureOeDwnq8sMihkdLi
+yIYHoQftFVrzxFq8Mq2kHhDVmv5kZoYnntMHHUsVnO1egye5A6kVVn1nX9EuZGs9IAku45Z203aX
+8phI+ZRtJ+XaELAfeLZUbjtbp/C0Uhtrm8ndLie4lLfbFGBOgJ2FeThMYwAccnvkkAzvDdy13pbS
+S/avtInkjuFudu5ZFYqwAVmUKCOApIx3JyTr1jeHP9Vqn/YVvP8A0c1bNABRRRQAUUUUAFFFFABR
+RRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFF
+FABRRRQAUUUUAFFFFABRRRQAVy9xq2o6D4n1D7Ho8mozajDEbdY541CmMMGL7iCF+Yc9OQOprqKh
+jtYIria4SMCabHmP1LYGAPoPTpyfU0AZGmapqdgsksvhnULi9nIa4uGuLcFyOgA8z5VGThe3uSSa
+cviHWdDvJbu08Iak2nSbpLm3SeBtj9S8ah85P8SgYJOeDnd1NFAHF+HPE9rDp8895aajbC7u57pD
+9hlkQJJIWX50Ur0I71tReLvDssgjGt2CSHpHJOqP/wB8sQa1Le1gtFdYIxGruZGVem49SB2yeeO5
+J70+WGKeMxzRpIh6q6gg/gaAEhnhuIxJBKkqHoyMGH5ipKxpvCXh2eQyPomniU/8tUt1R/8AvoAH
+9aj/AOETsI/+Pa61S19BFqM20f8AAWYr+lAG7RWF/YeqRf8AHt4n1DHZbiGCRR+SBvzNHkeKYfu6
+hpF0PR7OSE/mJGH6UAbtFYX2/wASQ/67Q7OYetrqBJP4PGoH50f8JFcRf8ffh3WIPUqkcw/Dy3Y/
+pn2oA3aKwv8AhL9GT/j4mubT1+12c0AH4ugFW7TxFol+cWesafcH0iuUf+RoA0qKKKACimSzRW8T
+SzSJHGv3ndgAPxNPoAKKKZLNFAm+aRI0yF3OwAyTgDn1JA/GgB9FFFABRRRQAUUUUAFFFFABRRRQ
+AUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB
+RRRQAUUUUAFVLvS9Pvxi8sba5H/TaFX/AJirdFAGF/whvh9f9Rpkdp/15s1vj/v2Vo/4RkR/8emt
+a1ben+mGbH/f4P8ArW7RQByWuQ69pOkTTw60t9lkiWG/so2EhdwgDGPZxlhnj1qjbP488NW8cV/p
+uj3FiX2JILySNbfPRWYq5C54BOcdCeldD4r/AOQF/wBvdr/6UR1r+JLm9tbYSp9nGnhHF0ZOXbKk
+KqqQQxLYAHckDHXIBiT6j4lsrF7u+0HT7eNPvf8AE0Ld8ADEXJJwABySQKoxTay+u6XP4g0iK3iu
+pGjs4kuvM+zuIncs67RliEYZz8ucAckmpp8XiPT72xuNagli0uGWFbUSyRutrnAcvjnkEgE/c4UH
+BJPVeKv+Qv4Y/wCwhJ/6Sz0AXaKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK
+KACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDI8Tw
+vP4fn8t40eN4pgZN207JFfHygnnbjgE81Rhn8W395DqV7pukjyxut7SS7kAgJHLMBGQX5xnsOB1J
+PS0UAZkmoeKZY2jk0zQ3RwVZWu5SCD1BHlVgeTr1rqmjJqcdmmk2t20kTwzPK0JaJ41jYso+TMnB
+PTGCeldlRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU
+UUUAFFFFABRRRQAUUUUAY8+oavNrtxpmk6dYzm3tobiWS7vXg/1jSqAoWJ8/6o5zjqKje98RRSLH
+JZ+G0dt2FbXJATt+9x9m7d/SnOmtaf4lu9S02y0+7iurO3gZbm9eBkaJ5myNsT5BEo9OlV3i1iQy
+l/C+isZS5fOuT87zlsf6Pxk+lAErX/iFX2NaeGg4dU2nXJM7m+6P+PbqcHA74pYLvxLdWn2uCw8P
+SW5JAlXWZdpIJU8/ZvUEVWW11VZTL/wi2imQtG5ZtcnJJQEL1t/c8d++asB9cGnHT38LaDNZkkmG
+fWJZVYltxzutjnk55oAsaNrtvqmj2t9I8EDzJuaLzg2w9xnjP1wK0I7mCVtsc8bt6K4Jrn9D8G6T
+ZaLaW19o+lSXSJiV1t1cFu+CVBI9yBWXqP8Awj+leI9HkhsbTTpra9kExW3WNihtptpG0fMrEcY7
+jHUEUAdzRUdvMbi3jmMUkW9Q2yQYZfYjsakoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACi
+iigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK
+KACiiigAqpdaZY3t1aXVzaxSz2jl7eR1yY2IwSP8+h7CiigC3RRRQAUUUUAFFFFABRRRQAUUUUAF
+FFFABRRRQAUUUUAFFFFABRRRQB//2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004035.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK5+10PS9b8Zaz/adjBd+T
+a2oi85d2zJlzj0zgV0FZei3EMHjPXfNmjjzbWeN7AZ5moAjOheAxnGlaewAJJW3JHBZT0Hqj/gpP
+QVNZ+FvBd+Zha6LYyeS5jc/ZyAGHUAkc/hWjFp3h6AAQC1gA6CGXZjljkbSMfeb8GI6GrVr/AGVZ
+BhbzQJkBf9dnAGcAZPAGTwOOTQBzPheCK1ttStYEEcEOpXCRRr0RQ5wB6Ct2sXw46uNWZGDKdUuS
+CDkH562qACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii
+igAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqjd6LpWoTCa90yzuZQNoeaBXb
+HpkjpV6igDK/4Rfw/wD9ALTP/ASP/Cj/AIRfw/8A9ALTP/ASP/CtWigCG1tLaxgEFpbxW8IJIjiQ
+Ioz14HFTUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUA
+FFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU
+UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRR
+RQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFUrzV9M06RY77UbS1dhuVZ51QkeoBNV/wDh
+KPD/AP0HdM/8C4/8aANWisr/AISjw/8A9B3TP/AuP/Gj/hKPD/8A0HdM/wDAuP8AxoA1aKjhniuY
+UmglSWJxuR0YMrD1BHWpKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA
+ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDn477SLLx3qB1
+a6sbcPplr5f2uRE3Ylnzjd+FR3WrWjzSm38Q+Fo0Cv5QNxEdzGT5d3HQIex+8B2zXQSW8MxBlijc
+joWUHFM+xWn/AD6w/wDfsUAYA1W2a6kdvEfhZITcI6Is8TYiBO5ScDkjHP8ALvcttV0aPRDC/iLw
+3/aW5ys8skUyAFyVyqtHn5SBgEfj30/sVp/z6w/9+xR9itP+fWH/AL9igDkPCdv4jk8M2b2usaOs
+DBygOmSPxvbuLgAj8K0nuvEGnavpEN9faZdW19ctbusFhJC64glkBDGZx1jAxjvXRqqooVQAoGAA
+OBXN6z4cvrvVtPu9O1EWscV0bidHXfgmGSLdHngNiToflyA2MghgDpaKitraO0to7eEMEQYG5ixP
+uSeSfc1LQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004040.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAY0DASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwLrSrDWfHFnbalaxXUCa
+bPIsco3KG8yIZx64JrfrJjmih+IFq0siRg6XOAWYD/lrFQAr+HfA0c7QnSdPMiuUZVgzhgFyOB1+
+dB9WA60tp4b8EX87wW2jWMkkaqzD7MQACARyRjOCOOtahsdAM0kwW0SSRy7skgUsx25JweuVU/UA
+9eantl0m0kMkM0KuQRkz7upBPU9yAT6kc0Ac1o1ja6Z4h8QWVjAlvaxywlIoxhVJiUnA963qx7CS
+OXxZ4ieN1dfMt+VOR/qVrYoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKK
+ACiiigAooooAKKKKACiiigAoopk00VvE0s8qRRr1d2CgfiaAH0VR/tvSv+gnZf8AgQv+NVLjxd4b
+tWKz6/paOOqG7Td+Wc0AbNFc3H460G4m8mymur2XGQlrZTScfULj9an/ALev5f8Aj28M6o/o8rQx
+L/49Ju/8doA3aKwvtXiib/V6Tplsv96a+d2H/AVjx/49/jR9k8Tzf6zV9Nt1/uwWDMw/4E0mP/Ha
+AN2isL+wL6X/AI+fEuqyf7MQhiX/AMdj3f8Aj1H/AAiOlP8A8fDX90e/2nUJ5B/3yX2j8BQBrXN7
+a2a7rq5hgX1lkCj9aym8Y+HQxWPWLW4ccFbZ/PYH0wmTn/61TW3hfQLNt9vomnRv3dbZNx+pxk1q
+qqooVVCqOAAMAUAYf/CUwSf8eumaxc+m2wkiB+hkCj8elH9sa1N/x7+GbiP0N3dwx/8AoDPW7RQB
+hbvFc3/LHRrP/trLc4/8dj/yfbk/szxBN/r/ABEkX/XnYKn5eY0lbtFAGF/wjRl/4+9c1q59f9K8
+nP8A35CfpTW8E+HJXV7rTI7116NfO9yf/Ihat+igDJHhbw8oAGg6WAOABZx8fpS/8Iv4f/6AWmf+
+Akf+FatFAFaz0+y06No7Gzt7VGO5lgiVAT6kAVZoooAKKKKACiiigAooooAKKKKACiiigAooooAK
+KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArD8VxpLpFtHIiuj6pp6srDIIN5DkEVuVhe
+Lp4rbRYLieVIoYtSsJJJJGCqii7hJYk8AAAkmgDVvk8NafeQ2c2m2JuZxmOJbePceQo6+pPH0Poa
+pWt54QupVFrplk7uU3FLWPjeUAz+Mig++fQ1bk8a+CphiXxNoDjBGGv4Twev8VM/4TDwPlT/AMJH
+4dyhBX/ToOCOmPm7UAVdc06xsvEnh17Wzt4GaWcExRKpI8pvQVr1z+peIdE1rxP4fi0rWNPv5I5J
+3kW1uUlKL5RGSFJwMkCugoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKA
+CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK
+KKKACiiigAooooAKKKKACiiigAooooAKKKKACiqt7qVhpqo19e21qHJCmeVU3Y9Mnmqn/CUeH/8A
+oO6Z/wCBcf8AjQBq0Vlf8JR4f/6Dumf+Bcf+NH/CUeH/APoO6Z/4Fx/40AatFQ2t5bX0AntLiG4h
+JIEkLh1OPcVNQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRR
+QAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAYGo3enWfjXRpdTuLWCA2N
+4oe5dVXdvt8DLcZ60Xur6bJeE2ev+GYrYMzDdcRFj+7G1TweN4OSDnB45FbkkMUwAljRwOgZQcVH
+9itP+fWH/v2KAOdfVIZFkx4l8KxEwqqbZomxJ8u5jkdDhuP9r8a0bPV9Bjiv/tGv+HmlkmZrZjPE
+yxrtUAFRt4DAnGf+BVo/YrT/AJ9Yf+/Yo+xWn/PrD/37FAHHeG49euE1OXT9b0NrdtQmw8emO6Oe
+MlSLjAHtz9a0dQuPEukxW91cajpNxC15bQSRR6bJGxWWZIyQxnYAjfnoeldKkaRoEjRUUdAowKwP
+EugXmqRxyaZeJbXH2i3klWZS8biKZJAcA8MNvUdRwexUA6Giq1jZrY2wiEkkrElpJZDlpGPUn/Ac
+DgAACrNABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH//Z
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004045.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAY0DASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwLrSrDWfHFnbalaxXUCa
+bPIsco3KG8yIZx64JrfrJjmih+IFq0siRg6XOAWYD/lrFQAr+HfA0c7QnSdPMiuUZVgzhgFyOB1+
+dB9WA60tp4b8EX87wW2jWMkkaqzD7MQACARyRjOCOOtahsdAM0kwW0SSRy7skgUsx25JweuVU/UA
+9eantl0m0kMkM0KuQRkz7upBPU9yAT6kc0Ac1o1ja6Z4h8QWVjAlvaxywlIoxhVJiUnA963qx7CS
+OXxZ4ieN1dfMt+VOR/qVrYoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKK
+ACiiigAooooAKKKKACiiigAoopk00VvE0s8qRRr1d2CgfiaAH0VR/tvSv+gnZf8AgQv+NVLjxd4b
+tWKz6/paOOqG7Td+Wc0AbNFc3H460G4m8mymur2XGQlrZTScfULj9an/ALev5f8Aj28M6o/o8rQx
+L/49Ju/8doA3aKwvtXiib/V6Tplsv96a+d2H/AVjx/49/jR9k8Tzf6zV9Nt1/uwWDMw/4E0mP/Ha
+AN2isL+wL6X/AI+fEuqyf7MQhiX/AMdj3f8Aj1H/AAiOlP8A8fDX90e/2nUJ5B/3yX2j8BQBrXN7
+a2a7rq5hgX1lkCj9aym8Y+HQxWPWLW4ccFbZ/PYH0wmTn/61TW3hfQLNt9vomnRv3dbZNx+pxk1q
+qqooVVCqOAAMAUAYf/CUwSf8eumaxc+m2wkiB+hkCj8elH9sa1N/x7+GbiP0N3dwx/8AoDPW7RQB
+hbvFc3/LHRrP/trLc4/8dj/yfbk/szxBN/r/ABEkX/XnYKn5eY0lbtFAGF/wjRl/4+9c1q59f9K8
+nP8A35CfpTW8E+HJXV7rTI7116NfO9yf/Ihat+igDJHhbw8oAGg6WAOABZx8fpTJvCPhueMpLoGl
+svp9kj/wrZooA52HwRodoG+wQ3VhuOSLO9mhUn3VXCn8RUv9gXsX/Ht4l1WP/ZkEMq/jujLfrW7R
+QBhfZPE8P+r1fTbhf7s9gysf+BLJj/x2j7V4oh/1mk6Zcr/ehvnRj/wFo8f+Pf41u0UAYX9vX8X/
+AB8+GdUT1eJoZV/8dk3f+O0f8Jbpaf8AHymoWp7/AGjT50X/AL6KbT+BrdooAybbxT4fu32W+t6d
+JJ3QXKbh9RnNaqurqGRgynoQcg1Fc2dreJsuraGdf7sqBh+tZTeDvDpYumjWkDnq9tH5LH8UwaAN
+uisL/hFreP8A49NS1i29NuoSSAfQSFgPpjFH9j6zD/x7+Jrl/QXdrDIP/HFQ/rQBu0VhbPFcP/Lf
+Rrv/ALYy2+f/AB6T/P14P7T8QQ/6/wAOxyf9ed+r/wDoxY6AN2isL/hJTH/x96HrVt6/6KJsf9+W
+f9Khi8e+F5Dh9Ygtz0IulaAj6+YBigDo6KzIPEmhXIJg1rTpQOpjukb+RqZdZ0t2CrqVmzE4AE6k
+k/nQBdooooAKKKKACiiigAooooAKKKKACiiigAooooAKw/FcaS6RbRyIro+qaerKwyCDeQ5BFblY
+Xi6eK20WC4nlSKGLUrCSSSRgqoou4SWJPAAAJJoA1b5PDWn3kNnNptibmcZjiW3j3HkKOvqTx9D6
+GqVreeELqVRa6ZZO7lNxS1j43lAM/jIoPvn0NW5PGvgqYYl8TaA4wRhr+E8Hr/FTP+Ew8D5U/wDC
+R+HcoQV/06Dgjpj5u1AFXXNOsbLxJ4de1s7eBmlnBMUSqSPKb0Fa9c/qXiHRNa8T+H4tK1jT7+SO
+Sd5FtblJSi+URkhScDJAroKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiii
+gAooooAKKKKACiiigArB8MWuhWXw40W/v7Cz2jT4Wd2t1ZmJQe3JrermvCfizwlH4F0ax1DxBoiu
+ljFHNb3F7ECpCAFWUng+xoA1Im8JGRhb6RZPcMu4Rx2Sb5BtVh27hwRnHfpg4r+LdN0h/AOp3ltp
+1km6yaSN0hTIyMggj+YNWT4q8BE5Ov8AhskHOTeQdfz9qy/Fvi3wrc+C9TsbDxDo0sr2rRQ28F7E
+zMcYCqobn0AFAHSUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRR
+RQAUUUUAFFFFABRRRQAUUUUAFFQ3F5bWaq1zcQwKxwDK4XP51X/tvSv+gnZf+BC/40AXqKo/23pX
+/QTsv/Ahf8aP7b0r/oJ2X/gQv+NAF6io4Z4bmISwSpLGejowYH8RUlABRRRQAUUUUAFFFFABRRRQ
+AUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB
+RRRQAUUUUAFFFFABRRRQBgaj/Z3/AAmujf2n9l8j7DeY+07du7fb4+9xnrT7waW10RaN4XWAMxBf
+y9xGwbQf+B5z/skY5rVuLO1vAoubaGcLyolQNj6ZqD+xNK/6Bll/4Dr/AIUAY7rbvvAk8Kx5hQKV
+WI4kG3ceeoPzemBjv0v2aaGIb77TL4dMzSsbY7YiqrtGMgYP3s98471Z/sTSv+gZZf8AgOv+FH9i
+aV/0DLL/AMB1/wAKAOV8Nxa8U1T+z7vQxB/aE2PLtXKE8Z24kxitK+vfEmlR29zdTaVNA13b27pF
+byI2JZkjyCXIyN+enauigghtohFBFHFGOiRqFA/AVgeJ9F1C/ijk0y7jikNzbSSR3O5om8qZJAwA
+5DfLjjgg4PYgA6Oiq1jafY7YRNPLPISWeWVss7HqfQD2HA6CrNABRRRQAUUUUAFFFFABRRRQAUUU
+UAFFFFABRRRQAUUUUAFFFFAH/9k=
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004050.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAY0DASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwdQ02y1fxlo9nqFtHc23
+2K7k8qUZXcGgAOPUBj+ZrerJkljh8eaO0siIv9n3gyzAD79vQA6Xw34HhuDA+k6f5qsEKCDJBO3A
+OB/tL/30PWktPDnge+uTb2+j2LyhPMI+zEADOOpGM57da1mstANw84WzWV3Du6SBSzAg5ODzyAfq
+AetS20ekWkolhmhVwHAJn3febc3U9SQCT1NAHOaVp9ppXinW7Owt0t7ZY7ZxFGMKGIfJx6nA/Kt2
+si2ljm8aa60Uiuvk2oypyOj1r0AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAF
+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
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004055.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABPAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK5/S/D+ka14i8Qy6np9vd
+vFcQpG0ybtq+RGcD0GST+NdBWX4fntk1zxNHcSxKGuosrIwGR9nj7GgCI6H4C2O40vT2REaRmW3L
+AKG2k5A7H9OenNWbPwp4Nv1ma20WxcQytC5+z4w69RyOfqOKvjTvDyRPFGLaON0aNkjm2DazbmGA
+RjJ6/l04q7DNp1u0rR3MIM0hkcmbdlsAdz6ADHTigDl/CKLF4dSJBhI7i5RF/uqJ5AAPYAAVuVie
+EyG0EMpBBu7ogjv/AKRJW3QAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUU
+AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFULrQ9IvpzP
+d6XZXExABklt0djj3Iq/RQBlf8Iv4f8A+gFpn/gJH/hVe58F+F7sfvvD+mE4xuW2RW/MAGt2igDn
+4vB2mWkYjsJ9SsUX7qW+oTBF+iFio/Kn/wBiapF/x7eJ78jstzDBIo/JFb8zW7RQBheR4qh+7f6R
+dD0e0khP4sJGH6Ufb/EkP+u0KzmA72moZJ/B41A/P8a3aKAML/hIriL/AI+vDusQepWOOYfh5bsf
+0o/4TDRU/wCPie4tPX7XZzQY/F1FbtFAGbaeINFv8fY9XsLjPTyblH/ka0qqXeladf5+2WFrc56+
+dCr/AMxWb/whvh9f9RpqWn/Xm72+P+/ZWgDdorC/4Rnyv+PTW9atvT/S/Px/3+D/AK/40f2Xr8P/
+AB7+I1l9Pttgkn5+WY6AN2isLd4rh/5ZaLef9tJbbP8A47JR/a+tQ/6/wzPJ/wBel3C//oZSgDdo
+rldV8WG1s/PNnqVi8TBiLixd43HTYzxh9oOfvDocdRkGSw+IPha/gSQ61aWrn70N3KIXRv7pDEc/
+TPtmgDpqKzk1/RpIxImr2DIRkMtyhB/HNVNN1qPW9RL2V5B9iiB2qrKz3B6bsdVjHY9WPPAxuANy
+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK
+KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAw/FMaTafZRyorxvqliGVhkEfaY+CKf
+4g0zQrO+iktbGwXUli3fZ2gXy7iMuqBH4wMsw2t1HJ5G4GPxbPDa6VaXNxLHDBFqVk8ksjBVRRcx
+kkk8AD1qrceK/B/iO+P2zX9Cj02AlNs15CJLog5IOTkRAgcfxkf3fvAFfS7jw14ukgNnpFtFpCSi
+N4xbRoZJcK2HPQR5dRgE+YT/AHR82vq+n2Vl4u0A2lnb25aK6DGKJUzwnXAqpqGueClul1TS/EXh
+mLUYhyGvoQlwox8jkHg8Da3VT6jIMR8U6N4n8S6BJpWoW1xIkN0ZoY5kd4uEHzBSe4IB6HqCRzQB
+1FFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQA
+UUUUAFFFFABRRRQAUUUUAFFFZepaleW+o2Wn6fYx3dzcpJIBJP5Sqqbc87W5+cdqANSisvd4q/6A
+Nh/4Mz/8ao3eKv8AoA2H/gzP/wAaoA1KKy9O1K9n1S807ULCO0uLaKKb91cearLIXA52rg5jP51q
+UAFFFFABRRRQBVvrCHUYVguC5h3hnjBwsoH8Leq5wSO+MHIyDa6UUUAFVWsITqK3ylo5wnluUOBK
+vYMO+Ccg9Rz2JBtUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQ
+AUUUUAFFFFABRRRQAUUUUAFFFFAHP2WhaVrfi7WzqdhBdmGK2EfnLu2AhycelB8I2Jufl8HaaIFk
+ZSCELOuzIYHdx83HI79qu33hzRtTuvtN7pltPOVCmR4wWIHQZ/E1W/4Q3w3/ANAWz/79igCj/wAI
+oCoYeCdIB2lip29dowud3XdnnpgD1yLw8GabHpAkHhTSri/8xgYnxCu3ccHID4+XHHP1o/4Q3w3/
+ANAWz/79ij/hDfDf/QFs/wDv2KAMbwne+JX8G6GYdJ06RP7PgxLcam6M48tcMQIW5PU8/nUXhyfV
+G+JsEFzBbR2cdtdFPIu3uFSUmPzEVmjTgfKccgEkZ/hHbQQQ2tvFb28SRQxIEjjQYVVAwAB2AFZd
+/ZahFq2n6jpMdmz20c0bRXDtGpEhQ5BVTzlPTvQBrXC+IP7SlaFoBaeZF5SBhkrk79xK5GRjpnqM
+d6dpSa6twn9qSRMnlybxFjbu3/JjgH7uf075rO/tTxZ/0DtF/wDAyX/41R/aniz/AKB2i/8AgZL/
+APGqAMNrnxN/wnGrEaRpBl+w2gZTqkgULvn2kH7PyTzkY4wOTnibUta8S6Tpl1qFzomkmC2iaWQR
+6rIWKqMnANuAT+IrQ0621N9bv9U1NLSN7iCCBI7aRnAEZkOSWVevmenaqnjDTNT1HQb6LS3Ek01r
+JAbWRgElDAgEE/dYE8Hoeh7EAHRUVT0+C7jieS+nElxKdzIh/dxDsi+oHqeScngYAuUAFFFFABRR
+RQAUUUUAFFFFABRRRQAUUUUAFFFFAH//2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004060.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABSAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK4yPUNes7jUpbO3sn0aC9
+MBe6uZN1udoZmOEOI8t77fZfu9nWf4WEptfEIhEZlOpTbBJnbu8tMZx2oAYLfxcQCLXQyD0IvJf/
+AI1WXPJ4wvrqfTbGHR0kjAE90lzIVhJx8oJj/wBYQc4wccE9QDRMniDRn/syC8A02Iwi7u4mDLp3
+yjeASuCCSTjGIwQT8uFruvDthJpmh29nLsLx5yyEnfkkliT1JJJJ7k5oAxvDl0t74b065WIxCS3R
+vLMhk28dNx5b6nk1qVh+Df8AkTdI/wCvZP5VuUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFA
+BRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAF
+FFFABXIL/wAJFDqeq6doN9YLDPO089xJbOzWzMqjaDvwz8A4xwDk9QD19RwwQ20flwRJGmS21BgZ
+JyT9SST+NAGRZxeJrCzS0tptCSFQflNpMSSeSSTLkkkkknkkkms4XHirw1CALnRzpZc5JtZSLMHs
+B5mRHnPc7c9lHy9ZQQCCCMg9qAM/QtPbSdCsbBplma3hVDIq4DEDqBk1oVHDBFbQJBBGscUahURB
+gKB0AFSUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFF
+FABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUU
+AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQA
+UUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABR
+RRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFF
+FABRRRQAUUUUAFFFFAGJbya/qup6tFp8+mwW9hdLbAXEEkjuTDFKTkOB/wAtcYx2qEXGstIqDXNC
+yyLID9imxhjhefMxknt1qaKz17TtS1OfTLvTRBf3C3BS5tnZkYQxxEZVwCP3YPTvUYstdEfliHwx
+5eANv9mvjAORx5nY80AQ/b9W8zyxruhs++RMLYTnLIMsOJPT8+2abqN9rmm+HjrM+r6DHA0HnRCe
+2kiMh2Fgo3S/eIHTrVoWviBScJ4aGSWONOk5JGCf9Z3HBpl7Z+Jb3R5dMabQI7Z4TCqpYyARqV2j
+aPMwMA8UALF408Nm2hkuPEGkQySRq5R72MEZHTk1kaC+heN/GN0t/aaRq32OwRNwEd1CGMjHchOc
+ZGMg8jGOeCeusrSOxs4reNVARFUlV27sDGaxNJ+yaN45umvdQQSz6cjvNcSBN7ea3AB4AAwAB+pJ
+JALreHvh+s7wf8I5oRkRnRgumRnDKFLDITqA6/icdeKdY+GvAOpPKln4c0KVolR2xpkYwHXcpyU5
+yPSryyeFUmeWO60yOR3Z2aOdFJZgAxOD1O0c+2etT2+oeH7QkwajYISipxcr91RhR16DJ/OgDjdF
+1XwxoeqeJrSC/wBI0+0j1JTHCk0UUaj7LBuwAQANwbOO+e+ag8UeO9Bi0a6W21vSbmOW3ljYQ30b
+SoxXCkKG+YZ4OORweea2dFFlda/4nuIBbyp/aiFJI9rD/j0ts4I98/jTvFtgt94fvTLK/kRW0shh
+HAkYLlSx9ARnHc49KAJbPwn4Jh0XTp7nw5oX79IUVzp8TF3cAD+HnJP9aZ/Y/wAOhGsn/CP6FtaI
+zD/iVpnYDjONmR1/rWjaX/h680bTUvLzTZTDHFIgkmQlHUAgjJ4INLjwltx5+l58sxbvPTdsJB25
+znHA4oAw/Fnhrwvo+mW1zZaJo9leJqVgUlhtYo5FBu4g2CACBgkH2zW99ttP+fqH/v4KxfHJ8Oar
+plu7HSry8OoWESMfLkk2G7i3KOpxgtkehNTXXh/w9a20k58PWEgQZKxWUbMR3wMc+uBz6ZNAGzHI
+kq7o3V19VORTq5Dwte6Zb6hq1npyRmOfUd8Edqo2LH9mgJfjgLk9e5PrXX0AFFFFABRRRQAUUUUA
+FFFFABRRRQAtFFFABSUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB
+RRRQAUUUUAFV7iws7wqbm0gnK8KZYw2PpmiigCH+xNK/6Bll/wCA6/4Uf2JpX/QMsv8AwHX/AAoo
+oAs29tBaR+XbwRwpnO2NAoz9BUhAYEEAg8EGiigCl/Ymlf8AQMsv/Adf8KP7E0r/AKBll/4Dr/hR
+RQA6PSdNhkWSLT7RHU5VlhUEH2OKuUUUAYXh+0t7fU/ELwW8UTSagC5RApb9zEecdeWY/Un1rdoo
+oAKKKKACiiigAooooAKWiigApDRRQB//2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004065.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABOAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwNN0HTdb8Q+IJNStzcND
+cRRx7pHAVfIQ4ABHck/jW/VDw0obW/E6sAVN1ECD3/0eOgCt/YPgnGRBE4wWBSWRsgNtOMHnn0qz
+beEfCt2JTBp+4RSNE5Mkowy8Ecnn6jitP/hG9I8oxfYwE2smA7Dhm3Hv3P8Ah0q/b2kNqZjCpBmk
+8yQlixZsAZ59gB+FAHI+E1EehGIFikV5dxoGYnCrcyKoyfQAD8K26xfC3/IIm/7CF9/6VS1tUAFF
+FFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUU
+UAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABWXfeGtB1O5Nzf6Jpt3cEAGWe0SRiB05IzWpR
+QBhf8IV4U/6FjRf/AAAi/wDiaP8AhCvCn/QsaL/4ARf/ABNbtFAENpZ2un2qWtlbQ21vHwkUKBEX
+nPAHA5NTUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUA
+FFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU
+UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRR
+RQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFZuoeItD0m4FvqOs6fZzFdwjuLpI2K+uGIO
+ODVT/hNfCn/Qz6L/AOB8X/xVAG7RWF/wmvhT/oZ9F/8AA+L/AOKo/wCE18Kf9DPov/gfF/8AFUAb
+tFRwTxXMEc8EqSwyKHSSNgysp5BBHBBrJ1C8vLrUtMsNJvraH7U8wedovOA8scqAGHOcg88YoA2q
+Kz/7B8Sf9DHZ/wDgrP8A8do/sHxJ/wBDHZ/+Cs//AB2gDQorHsJNTt/EV/pOoXkF2IbS3uY5Yrcw
+n948ylSNzZx5QOfc1sUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRR
+RQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQBz9pr2j6J4z1katq1jYGa1tDGL
+u5SLeAZs43EZxntSnxhpfms//Ce+HwokYrH9tgwybcAE9Qd3PHr3rfooA5eXxVZyAhPiJ4fjOxAC
+LuAkPt+ZueMZ6LjvnIq8PGOiR6R5Nv458Npfb2YTXN3HOoBcnBUSITgHHUdOnatqigDivCVj4hbw
+fozQ63aRxGyiKI2nlio2jAz5gz9ai0ez1SL4mWFxc3KPbP8AaEJW1MAlkCYZwpY9OBu43Y7gAnuq
+zdT0qW+urO7ttQmsrm1L7JIkR8hhgghwRQBpXGkXs2qy3Q1JxCzxMkIBAQIHBHXByXB6fwjrxg0n
+SL2wmEl1qT3Z2SBiwI3FpNwOCTjA4/HsOKyfsOvf9DXef+Alv/8AG6PsOvf9DXef+Alv/wDG6AMi
+T/hJ/wDhO9T/AOQR539m2e7/AFu3b5t1tx3zndn8Kl1XUfE+kaTd6lNHpEkdrC0zIhlBYKMkAnvx
+Wpp+kz2upXWoXmpz39zcQxQFpY40CpGZGUAIo7yt19qoeMdLvNQ0DUPsFyI5ntJIXimY+VIhU9cZ
+2sM5BA9j2wAdHRVPT7We2hZrq5ae5lbfI3IQH0Rf4VH59zkkmrlABRRRQAUUUUAFFFFABRRRQAUU
+UUAFFFFABRRRQB//2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004070.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABPAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwZ9KsNZ8cQW+pWkV1DHp
+sjpHKNyhvMQZA9cVvVm2f/JQU/7BT/8Ao1KAIptA8CW8kkcul6crRlw/7jIUqoZskDAwGX88daks
+/DPgq/mlittFsneJUZwbYrtDruXqO4IOK2n0DSpJZZDYxB5i7SFMrvLgBicdc4H489eas21jb2js
+8KEMVC5LluB6ZPHv69TQByWh2Vtpuu+IrKyhSC1juoikSDCrmCMnA7ZNbtZNj/yNfib/AK+Yf/Se
+OtagAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK
+KKACiimTTRW8TSzypFGvV3YKB+JoAfRVH+29K/6Cdl/4EL/jVS48XeG7Vis+v6Wjjqhu03flnNAG
+zRXNx+OtBuJvJsprq9lxkJa2U0nH1C4/Wp/7fv5f+Pbwzqjj+/K0MS/+PSbv/HaAN2isL7X4nm/1
+ek6Zbqf4p793Yf8AAVjx/wCPf40fZPE83+s1fTbdf7sFg7MP+BNJj/x2gDdorC/sC+l/4+fE2quP
+7sSwxL/47Hu/8eo/4RHS3/4+H1C6Pf7RqE8i/wDfJfaPwFAGvc3lrZpvurmGBf70rhR+tZTeMfDg
+YpHrNpO44KW0nnMD6YTJqW28LeH7R99vomnRv3dbZNx+pxk1qqqooVVCqOgAwBQBh/8ACU28n/Hr
+pusXPpt0+SMH6GQKD9c4o/tjWZv+Pfwzcp6G7uoYx/44zn9K3aKAMLf4rm/5d9GtPrNLcf8AssdH
+9m+IZv8AX+Ioo/8Arz09U/8ARjSVu0UAYX/CNNJ/x967rVx6/wCkiH/0SqVG/gbw3PKkt3paX0if
+de+ke5I/GQtXQ0UAYX/CFeFP+hY0X/wAi/8AiaP+EK8Kf9Cxov8A4ARf/E1u0UAVNP0vT9JgaDTb
+C1soWbc0dtCsalumSFA54FW6KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAC
+iiigAooooAKKKKACiiigAooooAKw/FcaS6RbRyIro+qaerKwyCDeQ5BFblYXi6eK20WC4nlSKGLU
+rCSSSRgqoou4SWJPAAAJJoA2by38N2NzFbTadY+fKP3cYtkJbJCgdOMk4Gff0NU7d/C8so2aLar5
+pj2v9kjw4fZg8f8AXSPg8/MOMZIkl8Y+CJ3V5vEnh6RlGAXvoSR+bUg8X+BhjHiLw6NpDDF7BwQA
+AfvdgAPwHpQBV1zTrGy8SeHXtbO3gZpZwTFEqkjym9BWvXP6l4h0TWvE/h+LStY0+/kjknZ0tblJ
+Sq+URkhScDNdBQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRR
+RQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFF
+ABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUA
+FFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU
+UUUAFFFFAGHf2h1TxfpmnS3V5DbNYXc7LbXDQlnSS3VSSpBOBI3HvTLnQLeG8NvEviOULMqNINRu
+Au0ruLA5OcdMevcVe1HRbbUrm3uZJruC4gR40ltbl4W2uVLKSpGQSin8Kr/8I5H/ANBbXP8AwaTf
+/FUAZkmnKELQ2HiiT/RxKA2o3CZbcAU+oHP9O9aFp4ainhv5JDr6m3lZIYhqcwaZQqkEbmUZJJHX
+HHWn/wDCOR/9BbXP/BpN/wDFUf8ACOR/9BbXP/BpN/8AFUAYvh/W9Uhtry3Ph7XbpYb2aNGkubV3
+RQ3CszT5JHTuPc1pv4muLd4PtnhzVrWKaeODzpHtmVWdgi5CTM2MsOgNamm6Zb6VatBbmVg0jSu8
+0rSO7McklmJJrn/GcuoW0Fs8UAu7Z7+zKxqVR43WdDjJIBVsY9QfUH5QDrKKr2S3S2q/bZI3uGJZ
+vLGFXP8ACO5A6ZPXrx0qxQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9k=
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004075.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABPAY0DASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwtV0+01XxTolnf26XFs0
+dy5ikGVLAJg49Rk/nW7WRcyxw+NNCaWRUXyboZY4HRKAHzeG/A9vcGCXStOWVWRWXyc7S33c+mcd
+/b1FMs/D/ga/uFgttHsXkaLzgPsxHybiuckY6g8de/StmSz0GW5e4ZbPznZXd1cKXKklS2DzyT1/
+oKkto9Is3RoJ4lMaMi5uC2Azbm6nqTznrQBzen6bZaR4y1iz0+2jtrb7FaSeVEMLuLTgnHqQo/IV
+vVkxyxzePNYaKRHX+z7MZVgR9+4rWoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoo
+ooAKKKKACiiigAooooAKKKKACiiigAoopskiQxtJK6oijLMxwAPc0AOoqj/belf9BOy/8CF/xqrc
+eLPDloxW417TI2H8LXaBvyzmgDYorm18eeHpZlgtbqe8mb7qWlpLLn8VUj9an/4SC8l/49fDWryj
++8/kxD/x+QN+lAG7RWF9s8TTf6rRtPgH9641BiR/wFIyD/30KPs3iib7+qaXbL6RWLyN/wB9NIB/
+47QBu0Vhf2FqMv8Ax8+JtTYd0gjgiX8xGW/8e/xo/wCES05+bmbUro9/P1GdlP8AwHft/SgDYnuY
+LVN9xPHEn96Rwo/WsmTxh4cRyg1uxlkHWOGYSsP+Ark0+Dwp4etn8yLQ9PEn/PQ2yFz/AMCIzWtH
+GkSBI0VFHRVGAKAMT/hKrST/AI9bDV7k/wCxp0yA/RnVVP50f21q83/Hv4YvV9GuriCMH/vl2P6V
+u0UAYXm+Kpulno9oOxa5knP4gIn5Z7daP7P8Rzf6/X7aIelpp+0j8ZHf+VbtFAGF/wAI5NJ/x9eI
+dZuPYTJD/wCikWmSeCfD85U3di98V5BvrmW5x/38Zq6CigDIXwr4dRQqaBpaqOgFnGAP0ps3hHw3
+cR+XLoGmMvX/AI9EH64rZooA5y38DaFYl206K709nxu+x3s0QOOmVDbT+Iqb+wb+L/j28Taonoky
+QSr+se7/AMerdooAwvsviiH/AFeq6Zcr/dmsXRj/AMCWTH/jv+FH2vxPD/rNH064X+9BfsrH/gLR
+4/8AHq3aKAML+372L/j58NarH/tRmGVfw2yFv0o/4S7Sk/4+Bf2vr9p0+eMf99FNv61u0UAZNt4n
+0C8bZba3p0r9Ni3KFh9RnNaqsrqGUgqRkEHg1Dc2VperturWGdemJYww/WspvB3h3cWj0e1t3JyW
+tU8hifXKYOaANyisL/hFoI/+PXU9YtvpqEkoH4SlhR/ZGtQ/8e/ia4k9ry0hk/8AQFSgDdorC2+K
+4f8Alto15/2ylts/+PSUf2n4gh/1/h1JfX7Hfq/5eYsdAG7RWF/wkpi/4+9D1q29f9F87H/fkvn8
+P8Khi8e+F5DhtYgtz3F0Ggx9fMAxQB0dFZkPiTQrlS0GtadKB1Md0jfyNTLrOluwVdSs2YnAAnUk
+n86ALtFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABWH4yAbwjqSsAQYsEHvyK3KwvGTKnhDU3Y
+hVWLcxJwAAQSTQBsajB4b0vyhdadYq0ocootkJIRC7Hp6D8yB3qsF8NrPhtCtkLlFEhtI8NuDHqP
+TY2foOuRTpvGXgi52+f4k8PS7c7d99C2MjBxlvQkUn/CX+BgFH/CReHcKwdR9tg4YDAI+bqAAM+l
+AFXxPpmn2d14fltrG2gk/tRRuiiVTjyZeMgVr1z2veJtA1i/8P22l63pt9cDUw5itbuOVgohlycK
+SccjmuhoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK
+KACsLwrZ6DafDnw3d31jYjfptoC7wKSzNGvtknufxNbtcz4R8W+EU8A+H7O/8Q6GskWm2ySwT3sQ
+KOsSghlJ4IPY0AasY8MmQm28P28jOpbMVnHlgFVhx15EiY4/iAODmq/i3TdIbwLfXlrp1mha3WSN
+0hTIyQQQR/MGrf8AwlvgTn/iofDnOc/6bB3xn+L/AGV/IelZPizxb4VufB99Y2HiHRpZXiEcNvBe
+xMx5ACqoP6CgDpKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo
+oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiig
+AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAC
+iiigDE1qFrzWNCsDc3MEFzcyCX7NM0TMFhdgNykHGQDUeo6BBZyPFAviO5dYjICupXAQ4I43Annk
+8e341oalpFvqv2czPcRSW7mSKW3naJ1JUqeVIPIJFVf+Ecj/AOgtrn/g0m/+KoAo3GkxxybILXxP
+L87x5Oo3CjIVSD1PykkjP+zxnpVjR/D0epNKbga/ZoqqVWXUrgMSSwIOSB2B4zwR9BN/wjkf/QW1
+z/waTf8AxVH/AAjkf/QW1z/waTf/ABVAGLpGqajYanrlimg69eQ294qx+bdW8jxgwxtgs8+TkksO
+vDDocgaF34pu7CynvLnwrrMdvBG0sr+ZaHaqjJOBPk8DtWrpmk2+lC48l7iR7iTzZZLiZpXdtqqM
+sxJ6Ko/Csjxyb2Pwpq0tsFlgNhcJNCcBgChw6n27g9R05GCAdIrB0DDoRkUtZ+kPezWv2i7VYhIF
+MUAwTGmONzDqx6nHA6DOMnQoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//Z
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004080.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABnAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwLXQ9L1vxlrA1SxhuxBa
+2oiEy7tmTLnHpnArfrL0W4hg8Z675s0cebazxvYDPM1AEMmjeAIlLPpumhc43eRkE7mTAOOTuRgB
+32mrFn4W8GX5mFtolk/kuY3zbFcMOo5Az+FX10vw5GoWOOziVWDKIpdgUhiwIwRggs2D2yccVctf
+7Ksgwt5oEyAv+uzgDOAMngDJ4HHJoA5nwvBFa22pWsCCOCHUrhIo16Ioc4A9BW7WL4cdXGrMjBlO
+qXJBByD89bVABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFA
+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
+QAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFA
+BRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAF
+FFFABRRRQAUUUUAFFFFABRWE2njWfGNxZz3l9Fbw6fFKiW108I3NJICTtIzwo61UutJjgmlSK18T
+TLErszDUbgbsSbAF7MTw3X7pJ7UAdRRXL/2UjXDoln4mMa3CxCRtSnXcpJBcAnoMA/j2q5Z+Go59
+Ga8l/t8XAMmLWPVJg7bWYKB5jKMkAHJwOfSgDcorjfDfiDVW8P2vmeHNau2AZfPM9qS+GIGS04JP
+GOfStT/hJZ47m1ivPD2q2aXEywrNK9syhjnGdkzN29KAN6iiigAooooAKKKKACiiigAooooAKKKK
+ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA
+KKKKACiiigDMvtCtr6+F6bi9t7jyhEXtbqSHcoJIB2kZwSfzqH/hHI/+gtrn/g0m/wDiqKKAD/hH
+I/8AoLa5/wCDSb/4qj/hHI/+gtrn/g0m/wDiqKKANDT7CDTLCGytQwhiGF3MWPXJJJ5Jya5nxdPq
+FndaaywrdW0mowGFVYIyScjYSeqt1z1Bz1GMFFAHUWaXKWqC8kSS4OS5jXCgk5wPYdMnk4qeiigA
+ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004085.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABnAYwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwIdF0zW/HOqJqdlDdrBp
+tkYlmXcELS3W7Hpnav5Ct+svSp4YPHms+bLHHnTLHG9gM/vbugCKXQ/AULESaZpoIYof3OcMMjHT
+r8rYHfBx0qay8MeCtQeVLbRbJ2h2782xXGRkdQM/h071orpvh1CDHHZx4fzB5cgQBucHgjkZOD2y
+cYqzaLpNjn7NNAmUWP8A12cKudoGTwBk/nQBzfhu2hsn1m0to1it4dSkSKNfuou1DgDsMk/nW7WN
+oLrJea86MGU6pJgqcg/IlbNABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRR
+QAUUUUAFFFFABRRRQAUUUUAFFFRXFzBaR+ZcTxwpnG6Rwoz9TQBLRVH+29K/6Cdl/wCBC/41Rn8Z
+eGbclZPEGmbx1RbpGb/vkHNAG5RXOQ+ONGu5Gj0/7dfSKMkW1jMwx/vbQv61N/bupS/8e3hjUSOz
+zywRL+XmFv8Ax2gDdorC+0eKZvuabpVsvrJeySt+KiMD/wAeo+w+Jpv9brdhCPS2085H/AnkYH8q
+AN2isL/hHrqX/j68R6vMO6o0UI/Dy41P60f8Iho7/wDHwl3d+v2u+mmB/B3I/DGKANS61GxsRm7v
+Le3HrNKqfzNZh8ZeHScQ6rBdH0tMzn/yGDVi18N6FYndaaNp8Ddd0dsikn1yBWoAAMDgUAYX/CTx
+yf8AHrpGs3H/AG4tD/6N2Uf2trs3+o8NPF6fbL2JPz8vzK3aKAML/iq5u2i2efeW5x/6Lz+n68H9
+la9N/wAfHiRovX7FZRp+XmeZW7RQBhf8Iwkn/H1rOtXHr/prQ/8AonZTf+EI8NPL5s+j293JjG+8
+BuDj6yFvWt+igDK/4Rfw/wD9ALTP/ASP/CoLnwb4Zu0CzeH9NOOhFsikfQgZFblFAHPQeC9Jsoym
+nPqFguSdlrfzKmfXYWK/pUn9h6nF/wAe3ifUcdluIoJFH4+WG/Wt2igDC+z+KYfu6jpN0PSSzkib
+8WEjD/x2j7d4lh/12h2Uw9bXUCSfweNQPzrdooAwv+EiuYv+Prw5rEPqypFMPw8t2P6Z/Sj/AIS/
+Rk/4+Jbq0Pf7XZTQgfi6Afj0rdooAzLTxFol8cWmsafOfSK5Rj+hrTqrd6ZYX4xeWNtcD/ptEr/z
+FZn/AAhvh5f9RpcVp/15lrf/ANFlaAN2isL/AIRlY/8Aj01nWrf0/wBNM3/o4PR/ZWvQ/wDHv4k8
+30+22Mcn5+WY/wDOfwAN2isLPiuH+HRbz/gUttn9JMUf2trkP+v8NSS/9ed5E/8A6MMdAG7RWC/i
+qC3RnvdL1i0VRlmaxeUKPUmLeP8AP1pkPjvwtN/zHbKI+lxJ5J/8fxQB0NFZ0XiDRZ03xavYSJ/e
+S5Qj+dTQ6pp9xKsUF/ayyN0RJlYn8AaALdFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABWLrkE
+Nzq3hqGeJJYm1M7kkUMD/o0/UGtqsHxFe2unah4dvL65htbWLUyZJp5AiIDbzgZY8DkgfjQBqX58
+L6ddfZZ9OsvO8ppii2qnCqMk9PQE49vcZS1i8Ny3X2ZdEtYpWlaPBtY8Fhv7jI58uT/vk5xxlsvi
+/wADTuHm8ReHZHCldz3sBOD1HLdOBSjxj4IV1dfEnh4OpJDC+hyCckn73fJ/M0AU7uxtLLx5Zi0t
+YIA2mT7hFGFz+9i64rYrAOt6TrXjq1fStTsr9YtMmEjWtwkoQmWLAO0nGcH8q36ACiiigAooooAK
+KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDC8ZgHwZq4IyDbPkfhW
+xqVv4a0sRi806wXzQ5VfsqkkIhdjjHQAfmQO9Y/jMgeC9YJOALVySewxWjN4y8EXG3z/ABJ4el25
+2776FsZGDjLehIoAjx4cgkeNPD1uoUguy2sIUHLAknPGDG+SePl75GYPFOl6faPocttY2sMn9qRj
+fHCqnGx+4FWT4t8Csu1vEPhwrnODewYzgj+97n86zPEHifw/q9xodrpmuaZe3H9pxt5VtdxyPgI+
+ThSTigDoaKKKACiiigAooooAKKKKACisMeMNBYZW/DKejLE5B+hC1Xu/HegWgGbi4ldgdscNpKxP
+/juB+JFAHSUVwz+P2uQTb20FhEOs2pO2VHrsjDDH1da3P7D1G751LX7pwesNiotY/wAxmQf990Aa
+d9qVjpkPnX95b2sX9+eUIPzJrM/4SeK540vTdR1E9njg8qP6+ZLtUj/dJq1Y+HdI06bz7bT4VuO9
+w43yn6yNlj+JrToAwseJ73qdO0uM+m66kx/44qn/AL6FH/CLwXHOqX+oake6zz7Iz/2zj2qR9Qa3
+aKAK1lp9lpsAgsbSC1hH/LOCMIv5AVZIBGDyKKKAMafwro0szTxWYtLhuTNZO1u5PuYyN345qP8A
+szXLP/jx1wXCD/llqNuH/APHsI+pDVu0UAYX9s6tacajoEzKOs2nyrcIP+Ana/4BTVi08S6Nezi3
+iv40uT0tpwYZv+/bgN+latQXljaahAYL21guYT1jmjDqfwPFAE9FYX/CLW1vzpd7f6Yey205aMfS
+N9yD8FFZt/rup+H7kW11fabqDbBII2jkt5thJAJKh1PIPZQcUAdfRXIWvxF0iRgl7BfWLk4Bkt2k
+Qn2aPdgfXFan/CXaH/z+n/vxJ/8AE0AbdFVNP1Oz1WBprGcTRo5jYgEbWABwQee4/OrdABRRRQAU
+UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAGX4
+b1EaV8M9KvDBNP5dkh8uFCzHj2HA96tyeKdlwIvsLf6yaPcZMBdiBsnj3wf7uD1rH8LeKLDSfC2m
+6fe2usR3NvAscqDRrtwGHXlYiD9QcVr/APCcaP8A88da/wDBHe//ABqgCPxdcfa/hnrFzsKedpUs
+m09VzGTir1c94q8UWGq+E9X0+ytdZkurm0lhiQ6NdqGZlIAy0QA5PUkCuhoAKKKKACiiigAooooA
+KKKKACiiigArP0j/AJH3VP8AsGWn/o24rQrCGpw6J4zvbq8gvzBcafbxxyW1hPcAsskxYHy0bBAd
+euOtAGrL4pCSzIunz/u3lQeaDGW2R78gEdD0z2yD34t6LrL6sZd9qIAscci4l3khwTzxwRg8dcYP
+Gapf8Jxo/wDzx1r/AMEd7/8AGqP+E40f/njrX/gjvf8A41QBS0f/AJCviP8A7Ch/9ExVr1ieHpft
+M+tXiw3EUNzqDSRfaLd4WZfKjXO1wGAyp6jtW3QAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUU
+AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQA
+UUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUVhyWH9seMHsp7y+it4rBZVS2uXhyxkYEnaRngDrVS60
+iOCeWOK18TTCIZZhqNwA37woAvOCcYbr90n0oA6eiuWOlxm7SKOz8TtG03l+a2o3C4XcwL4PQYAI
+z13e1XbHw5FdaS95KPEEc4DEWo1SYO2OgG9lGT05wPfHNAG5RXG+HNf1X+xY1fw5rd2UlmjEzT2r
+EhZXABLTgkgAAn1HU9a028SzwzW63nh3VbSKeZIBNK9syqzkKuQkzNjJHQGgDfooooAKKKKACiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKA
+CiiigAooooAKKKKACiiigAooooAzL7Q7a/vVvDPe29wI/KL2t08JZc5wdpGeSah/4RyP/oLa5/4N
+Jv8A4qiigA/4RyP/AKC2uf8Ag0m/+Ko/4RyP/oLa5/4NJv8A4qiigC/p2nwaXYx2dsH8pCxG9y7E
+sxYkk8kkkmub8Z3F9ZiyYQi6tZNQtPLVCFdJBKvy8nBDY69j14PBRQB01kt0tqv2142uDkt5Ywq5
+P3R3IHTJ69eOlWKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/2Q==
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004090.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABnAY0DASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwP7H07WvHFzFqdnFdxw6
+bC0aTLuCkySgkD3wPyrfrKsJ4YPHt6ZZUjzpkGN7AZ/ey0ANl0HwHC7pJpenBkZlbEOcMq7iOB1x
+2+vpUll4Z8FahLNHa6NYu8IQuDbFcb13L1A7fl3rT/s/w8HZ0WzjLMzny5AgLMu0nAI5wOvarFr/
+AGVZkmCeFcxpHzPnCoCFAyeAMn86AOa8PWlvYX/iGztIlhtodSCxxIMKgNvCSAO3JJ/Gt2sbRnST
+WfEzxurqdTGGU5B/0aCtmgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA
+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
+EGseE7mIXN9YanC65aJ4mgmRQf8AWEoHDD1+UdBjvQB3FFcdafEjSJQBeW97Z56OYDLG3uGj3ce5
+ArTl8aeH4ImllvyqL1Jgk/8AiaAN6isbw9rI12K5u0kQRLJ5awAHfFwD8/8AtEMDgcAY69a2aACi
+iigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK
+KAMPR2to/hiZLq0kuok89jFECXJEzkFSOQQcHcPu4z2qnL49utGnXSrmxkvrp2uEtJt4QzCIZ/eD
+HysBgtx0IIBJ2iPSPGNp4f8AD0emSWOqSasjzbbYaZckN++b5twjIKDcpJXPB4BOBVuHWPD72lwu
+oxazeXV1g3E50O9Ukg5UJiLKKp5XByDzksSSAXL602eAdcv5386+u9Nmaecjr+7bCp6RjJ2j3yck
+km9Zf8eFt/1yX+QrltS8ZwP4d1XRrmPV5557WWCyuG0e6Q3TNG21CDEMSDHOPlI545C9VaKyWcCM
+MMsagj0OKAJqKKKACiiigAooooAKKKKACiiigArNsP8AkoD/APYL/wDataVc/eava+HvFo1HUVu0
+s3sPJE0NnLOofzRwfLVtucjGcZoAhu/FEfhS4vZY7KcaRHNKjwuChhdVRt0YI5RjJ90dMFh3FaWg
+Xk/ibUjf6jarDDBHHNY24mEgXeufMcAffweM9BnHcmjbeKtP1C+XUNUtdajELE2lmdFvGEXbzHIi
+IMh9shQcDnJLY/FumaJd7rS31htJlJaWE6Ndr9lPUupMQGz1Xt1HcUAXtO/5GbxR/wBf0X/pLBWt
+WF4fu01LUte1O3juFtLu8jeB57eSEyKLeFdwVwDjKkZxzit2gAooooAKKKKACiiigAooooAKKKKA
+CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigCpZ6fHaTT3Bd5bidsvLJjdt
+Gdqj0UZ4A9z1JJt0UUAQXdpBfWr21zHvifqMkEEcggjkEHBBHIIyKdbxPBbxxPM8zIoBkcDc3ucA
+DP0FS0UAFFFFABRRRQAUUUUAFFFFABRRRQAVUm0+O51CG6md5BAMxQnGxX5+fHdscDPTnHU1booA
+KKKKAKljp8enmZbd3EEjblg42xHvt9AeuOg7YzVuiigAooooAKKKKACisG60uz1jxvZ2t/EZoF06
+aQR72UbvMiGeCOcE0XPg+0F20dt4dhMKvH+8e5Y71JO7HzgggYPI9eDQBvUVy03hQkgweFrZQUY4
+ku2yGDnAOJO67foSfTFXLLwbZf2bcTXegRm7BzFbrcMoI2rxu3kfe3DJ+uB0oA3ap6rqMek6bLey
+RSyrHtAjixuYlgoA3EDqR1IrlvDN9rNtptxbwaAzxRX93Gga+X5AJ3GznnC9PwrO8Y6nrKx227TH
+t3mliRoftiyLIgkU52j7uCR83TnBzlcAHYf2nrH/AEJ2tf8Af+y/+SKP7T1j/oTta/7/ANl/8kVt
+6tcarC9uum2izKwlMrsR8hEbFBjI6vtHf9ciBZtb8xGMSeWZokKlRnbgb2zn3PHYr3zQBkLrl1Hf
+2Vrf+H9TsBeStDFNO9sybxG8mD5crMPljbtitmud8Y6tex614fjXw7qciQ6o5SVJLbbP/olwMJmY
+EcEn5gvCnvgFl/rWpSWMoHhvXLUgbhOs1kPLxzk5nxjjkHgjNAFz+35Jbm6htNE1S8W2lMLywLHs
+3gAkDc4Pcdqd/bF//wBCvrX/AHzD/wDHarfDrUbq/wDDeq6hJYul1JfSyfZiQpZvLTAByQM8Y5OM
+9T1rVg1TxDIluZNLSNnkhEyspBRWjy5GGIJ3ZA5479c0AU/7Yv8A/oV9a/75h/8AjtXdNv4dV0y2
+v7cOIbiMSIHGGAPqPWrcGo6pFocdzdaVLd3u7a9vZbEJ56jzXUAfU59K4nwnrWoReE9LjTwvq0yr
+bqBIktoFbjqN04P5gUAdRqmpx6VapM8E07SSpDHFAAXd2OABkgfmaq/2xf8A/Qr61/3zD/8AHa5b
+VNa1B/FOi2kmk6jbw3OoW8jJcvbt5JVwNy+XKxCnpgjGeQeoPoWpX2qQajFDaWBktTGGe4IDBW8x
+ARtDA8IXPAOePQ0AY39sX/8A0K+tf98w/wDx2lttcaXU4bC50rULGWaN5IjcrHtYJt3YKu3PzCtD
+TtR12a4hS+06OFWkkV9gJ2qNu35s47sc4wcDHNYPiXVr2HxtpCp4e1KcRQXSo8clsBMD5WSu6UEA
+d92088A0AdJRWF/b2pf9CjrX/f2z/wDkitLS9Ri1bSrXUIEkSK5jEirIAGUHscEjP0JoAt0UUUAF
+FFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQBn6
+joem6rLFLe2olkiUqj7ipAOMjII44H5VU/4RHQ/+fI/9/wCT/wCKoooAP+ER0P8A58j/AN/5P/iq
+P+ER0P8A58j/AN/5P/iqKKANKxsLXTLRbWzhWGFSzBF9SSSfckkmqPiHTZL7SrgWkET3jeVgthS4
+SQPt3fnjtk0UUAWP+Ej1z/oWD/4Hx/4Uf8JHrn/QsH/wPj/woooAo3k+sa1quitPo4soLK8a5kka
+6WTIME0YAAHXMg/I1sXFtDdwmG4jWSIkEowyDg5GR9RRRQBjabe6rodzqkS6Dc3kdxetcRzQ3EKg
+qyqOjMDnIPatD/hJ9V/6FS//APAq3/8AjlFFAB/wk+q/9Cpf/wDgVb//AByoPDVlPp3hnTrO6QJP
+DAqyKCDtbHIyOtFFAEGuafJshu7CyE9yl9BcyorKryqhHGWIHA6ZNXv+En1X/oVL/wD8Crf/AOOU
+UUAH/CT6r/0Kl/8A+BVv/wDHKovPqWr+JtOvJtHnsYLSCdWaaaJ9zOY8ABGP900UUAaOofbVhWWx
+2PJG25oX485e6hv4T3B6ZGDwcjA8BSXlx4X02WRVitFtVSKPgu57uT2HYD8T1wCigDqqKKKACiii
+gAooooA//9k=
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004095.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABnAYsDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKwLXQ9L1vxlrA1SxhuxBa
+2oiEy7tmTLnHpnArfrP0H/kctf8A+vaz/nNQBVk0bwBEpZ9N00LnG7yMgncyYBxydyMAO+01Ys/C
+3gy/MwttEsn8lzG+bYrhh1HIGfwrXXw7pEahY7GOJVYMoiygUhiwIwRggs2D2yccVctbC2sgwt4t
+mQF6k4AzgDPQDJ4HHJoA5HwvBFa22pWsCCOCHUrhIo16Ioc4A9BW7WN4f66v/wBhW5/9DrZoAKKK
+KACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooo
+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
+BRRRQAUUUUAFFFFAH//Z
+
+------=_NextPart_000_0022_01C810FE.43A69F70
+Content-Type: image/jpeg
+Content-Transfer-Encoding: base64
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/images/004100.jpg
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABsAYsDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2aiii
+gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK5KbX7rTtV1CS10zVNQ02
+CQrdNGqMIJNqsSm5wSuGGRjA6jjIrraz/CzvGviV44jK66m5WMEAufIiwMngZ96AK0euXksayR+G
+tYdHAZWUQEEHoQfNqle+JdSMjWNj4b1Q6gUD4kWIrEpON7Yk+uBxuwRkYJFCfxBr2gy+RYaZiOVF
+muLYws408MilpBtP3S5kGzIwUJyBnHY+E4ZI9H8yfbJPM/mSXAUg3BIB3knk+nQDAwAFAoAo6BPF
+c6HaXEMlxKkqb99ycyEkknd2HOeBwOg4xWlWH4P/AORS07/rmf8A0I1uUAFFFFABRRRQAUUUUAFF
+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
+dTRRRQB//9k=
+
+------=_NextPart_000_0022_01C810FE.43A69F70--

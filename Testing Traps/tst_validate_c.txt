@@ -1,0 +1,141 @@
+#include <tstp.h>
+#include <btreep.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define LEFT( inx )     (2 * (inx) + 1)
+#define RIGHT( inx )    (2 * (inx) + 2)
+#define PARENT( inx )   (((inx) - 1) / 2)
+
+typedef CDA_BOOL_t TEST_PROC_t( BTREE_ID_t tree );
+typedef TEST_PROC_t *TEST_PROC_p_t;
+
+typedef struct test_case_s
+{
+    TEST_PROC_p_t   test_proc;
+    const char      *comment;
+} TEST_CASE_t, TEST_CASE_p_t;
+
+static BTREE_ID_t build_tree(
+    void
+);
+
+static TEST_PROC_t test_v;
+static TEST_PROC_t test_ivroot;
+static TEST_PROC_t test_ivleft;
+static TEST_PROC_t test_ivright;
+
+static TEST_CASE_t  tests[] =
+{
+    { test_v,       "001050: Testing valid tree"                    },
+    { test_ivroot,  "001100: Testing tree w/invalid root"           },
+    { test_ivleft,  "001150: Testing tree w/invalid left child"     },
+    { test_ivright, "001200: Testing tree w/invalid right child"    },
+    { test_v,       "Sanity check: tree should be valid now"        }
+};
+
+static BTREE_NODE_ID_t  nodes_[15];
+
+CDA_BOOL_t TST_validate( void )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+    BTREE_ID_t  tree    = build_tree();
+    size_t      inx     = 0;
+
+    for ( inx = 0 ; rcode && inx < CDA_CARD( tests ) ; ++inx )
+    {
+        puts( tests[inx].comment );
+        if ( rcode = tests[inx].test_proc( tree ) )
+            puts( "PASSED" );
+        else
+            puts( "FAILED" );
+    }
+
+    BTREE_destroy_tree( tree, NULL );
+
+    return rcode;
+}
+
+static BTREE_ID_t build_tree()
+{
+    BTREE_ID_t      tree    = BTREE_create_tree();
+    int             limit   = CDA_CARD( nodes_ );
+    int             inx     = 0;
+
+    CDA_UINT32_t    shortp  = 0;
+    CDA_UINT32_t    longp   = 0;
+    CDA_UINT32_t    count   = 0;
+
+    nodes_[0] = BTREE_add_root( tree, NULL );
+    for ( inx = 0 ; inx < limit ; ++inx )
+    {
+        int left    = LEFT( inx );
+        int right   = RIGHT( inx );
+        if ( left < limit )
+            nodes_[left] = BTREE_add_left( nodes_[inx], NULL );
+        if ( right < limit )
+            nodes_[right] = BTREE_add_right( nodes_[inx], NULL );
+    }
+
+    BTREE_compute_stats( tree );
+    shortp = BTREE_get_shortest_path( tree );
+    longp = BTREE_get_longest_path( tree );
+    count = BTREE_get_num_nodes( tree );
+    printf( "short = %lu, long = %lu, count = %lu\n", shortp, longp, count );
+
+    return tree;
+}
+
+static CDA_BOOL_t test_v( BTREE_ID_t tree )
+{
+    CDA_BOOL_t  rcode   = BTREE_validate( tree );
+
+    if ( !rcode )
+        puts( "    BTREE_validate failed on valid tree" );
+
+    return rcode;
+}
+
+static CDA_BOOL_t test_ivroot( BTREE_ID_t tree )
+{
+    CDA_BOOL_t  rcode   = CDA_TRUE;
+
+    nodes_[0]->parent = nodes_[1];
+    rcode = !BTREE_validate( tree );
+    nodes_[0]->parent = NULL;
+
+    if ( !rcode )
+        puts( "    BTREE_validate failed to find invalid root" );
+
+    return rcode;
+}
+
+static CDA_BOOL_t test_ivleft( BTREE_ID_t tree )
+{
+    CDA_BOOL_t      rcode   = CDA_TRUE;
+    BTREE_NODE_ID_t parent  = nodes_[5];
+
+    parent->left->parent = nodes_[14];
+    rcode = !BTREE_validate( tree );
+    parent->left->parent = parent;
+
+    if ( !rcode )
+        puts( "    BTREE_validate failed to find invalid left child" );
+
+    return rcode;
+}
+
+static CDA_BOOL_t test_ivright( BTREE_ID_t tree )
+{
+    CDA_BOOL_t      rcode   = CDA_TRUE;
+    BTREE_NODE_ID_t parent  = nodes_[1];
+
+    parent->right->parent = nodes_[14];
+    rcode = !BTREE_validate( tree );
+    parent->right->parent = parent;
+
+    if ( !rcode )
+        puts( "    BTREE_validate failed to find invalid right child" );
+
+    return rcode;
+}

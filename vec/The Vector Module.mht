@@ -1,0 +1,215 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: The Vector Module
+Date: Wed, 17 Oct 2007 20:50:30 -0700
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----=_NextPart_000_0052_01C810FF.5A7326A0"
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0052_01C810FF.5A7326A0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/vec/index.html
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>The Vector Module</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252"><LINK=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/sub.css" =
+rel=3DStylesheet>
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H1>The Vector Module</H1><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/vec/doc/html/index.html=
+">Reference=20
+</A>]</B> <BR><BR><B>[VEC Module Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/vec/vec.c">vec.c. =
+</A>]</B>=20
+<BR><B>[VEC Module Public Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/vec/vec.h">vec.h. =
+</A>]</B>=20
+<BR><B>[VEC Module Private Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/vec/vecp.h">vecp.h. =
+</A>]</B>=20
+<BLOCKQUOTE>A <I>vector</I> is a simple but useful data structure. =
+Basically=20
+  it is an array that resizes itself as necessary allowing you to add =
+elements=20
+  to it indefinitely. There are two common ways to implement a vector: =
+as a=20
+  linked structure, and as a contiguous, dynmically allocated array. Of =
+these=20
+  two the most useful is the contiguous array since it offers the most=20
+  flexibility to the end user, as demonstrated in the following two =
+examples:=20
+  <P class=3Dcaption>Example 1: One use of a vector. </P><PRE =
+class=3Dexample>    VEC_ID_t    vec     =3D VEC_create( sizeof(int), 0, =
+0 );
+    int         *begin  =3D NULL;
+    int         *end    =3D NULL;
+    int         max     =3D rand() % 1000;
+    int         inx     =3D 0;
+
+    for ( inx =3D 0 ; inx &lt; max ; ++inx )
+        VEC_append( vec, &amp;inx );
+
+    begin =3D VEC_begin( vec );
+    end =3D VEC_end( vec );
+    while ( begin &lt; end )
+        printf( "%d\n", *begin++ ); </PRE>
+  <P class=3Dcaption>Example 2: Another use of a vector. </P><PRE =
+class=3Dexample>    VEC_ID_t    vec         =3D VEC_create( =
+sizeof(RECORD_t), 0, 0 );
+    RECORD_p_t  record      =3D next_record();
+    size_t      inx         =3D 0;
+    size_t      num_recs    =3D 0;
+
+    while ( record !=3D NULL )
+    {
+        VEC_append( vec, record );
+        record =3D next_record();
+    }
+
+    num_recs =3D VEC_get_curr_size( vec );
+    record =3D VEC_begin( vec );
+    for ( inx =3D 0 ; inx &lt; num_recs ; ++inx )
+        printf( "%4u %s\n", record[inx].cid, record[inx].cname );</PRE>
+  <P>To describe the vector object we use this struct from <A=20
+  href=3D"http://faculty.washington.edu/jstraub/dsa/vec/vecp.h">vecp.h: =
+</A></P><PRE class=3Dcode>typedef struct vec__control_s
+{
+    CDA_UINT8_t*    buffer;
+    size_t          next;
+    size_t          curr_len;
+    size_t          extend_by;
+    size_t          element_size;
+} VEC__CONTROL_t, *VEC__CONTROL_p_t;</PRE>
+  <P>Where:=20
+  <DL class=3Dcode>
+    <DT>buffer=20
+    <DD>is the contiguous memory block where the vector elements are =
+stored.=20
+    <DT>next=20
+    <DD>is a the index to the next free element.=20
+    <DT>curr_len=20
+    <DD>is the current capacity of the vector.=20
+    <DT>extend_by=20
+    <DD>is the number of elements by which to extend the vector's =
+capacity=20
+    should it be necessary to do so.=20
+    <DT>element_size=20
+    <DD>is the size of an element in the vector. </DD></DL>
+  <P>To create the vector we allocate an array of length =
+<I>initial-capacity</I>=20
+  where each element is size <I>element-size,</I> and set the next free =
+element=20
+  to 0: </P><PRE class=3Dcode>vec-&gt;buffer         =3D CDA_calloc( =
+cap, element_size );
+vec-&gt;next           =3D 0;
+vec-&gt;curr_len       =3D cap;
+vec-&gt;extend_by      =3D res;
+vec-&gt;element_size   =3D element_size;</PRE>
+  <P>To append an element to the vector, we locate the first byte of the =
+
+  <I>next</I> element, copy the user's data into that space, and update =
+the=20
+  <I>next</I> field: </P><PRE class=3Dcode>CDA_UINT8_t*    target  =3D =
+NULL;
+target =3D vec-&gt;buffer + vec-&gt;next * vec-&gt;element_size;
+memmove( target, item, vec-&gt;element_size );
+++vec-&gt;next;</PRE>
+  <P>To append an element to a vector with no spare capacity we have to=20
+  <I>realloc</I> the vector's buffer: </P><PRE class=3Dcode>if ( =
+vec-&gt;next &gt;=3D vec-&gt;curr_len )
+{
+    size_t  new_size    =3D 0;
+    vec-&gt;curr_len +=3D vec-&gt;extend_by;
+    new_size =3D vec-&gt;curr_len * vec-&gt;element_size;
+    vec-&gt;buffer =3D CDA_realloc( vec-&gt;buffer, new_size );
+}</PRE>
+  <P>The complete implementation of the VEC module may be found in <A=20
+  href=3D"http://faculty.washington.edu/jstraub/dsa/vec/vec.c">vec.c; =
+</A>the=20
+  documentaion for the VEC module may be found in the <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/vec/doc/html/index.html=
+">VEC=20
+  Module Reference. </A></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2007 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>
+
+------=_NextPart_000_0052_01C810FF.5A7326A0
+Content-Type: text/css;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/sub.css
+
+BODY {
+	BORDER-RIGHT: black thick ridge; PADDING-RIGHT: 10px; =
+BACKGROUND-POSITION: left bottom; BORDER-TOP: black thick ridge; =
+PADDING-LEFT: 10px; BACKGROUND-ATTACHMENT: fixed; PADDING-BOTTOM: 10px; =
+BORDER-LEFT: black thick ridge; PADDING-TOP: 10px; BORDER-BOTTOM: black =
+thick ridge; BACKGROUND-REPEAT: no-repeat; FONT-FAMILY: arial, =
+helvetica, sans-serif; BACKGROUND-COLOR: #f5f5f5; -moz-border-radius: =
+8px 8px 8px 8px
+}
+BODY.ref-frame {
+	BORDER-RIGHT: medium none; BORDER-TOP: medium none; MARGIN-LEFT: 5%; =
+BORDER-LEFT: medium none; WIDTH: 90%; BORDER-BOTTOM: medium none; =
+BACKGROUND-COLOR: #00ffaa
+}
+TABLE.ref-frame {
+	BORDER-COLLAPSE: collapse; empty-cells: show
+}
+H3 {
+	counter-increment: section; counter-reset: subsection
+}
+H3:unknown {
+	content: counter( section ) ". "
+}
+H4 {
+	counter-increment: subsection; counter-reset: subsubsection
+}
+H4:unknown {
+	content: counter( section ) "." counter( subsection ) ". "
+}
+#logo {
+	BACKGROUND-POSITION: center center; FLOAT: left; BACKGROUND-IMAGE: =
+url(backg_small.gif); WIDTH: 32pt; BOTTOM: -2px; BACKGROUND-REPEAT: =
+no-repeat; POSITION: relative; HEIGHT: 27pt
+}
+P.caption {
+	FONT-WEIGHT: bold; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 2%; WIDTH: 94%; =
+FONT-FAMILY: Arial, Verdana, sans-serif; WHITE-SPACE: normal; =
+counter-increment: example
+}
+P.caption:unknown {
+	content: "Example " counter( example ) ". "
+}
+P.code {
+	PADDING-LEFT: 6px; MARGIN-LEFT: 5%; FONT-FAMILY: "Courier New", =
+Courier, "Lucida Console", monospace
+}
+PRE.code {
+	PADDING-LEFT: 6px; MARGIN-LEFT: 5%; WIDTH: 90%; FONT-FAMILY: "Courier =
+New", Courier, "Lucida Console", monospace
+}
+PRE.example {
+	BORDER-RIGHT: black 2px solid; PADDING-RIGHT: 6px; BORDER-TOP: black =
+2px solid; MARGIN-TOP: 4px; PADDING-LEFT: 6px; FONT-SIZE: 90%; =
+MARGIN-BOTTOM: 4px; PADDING-BOTTOM: 4px; MARGIN-LEFT: 2%; BORDER-LEFT: =
+black 2px solid; WIDTH: 94%; PADDING-TOP: 4px; BORDER-BOTTOM: black 2px =
+solid; FONT-FAMILY: "Courier New", Courier, "Lucida Console", monospace; =
+BACKGROUND-COLOR: #cfcfcf
+}
+DL.code > DT {
+	FONT-WEIGHT: bold; FONT-STYLE: italic
+}
+
+------=_NextPart_000_0052_01C810FF.5A7326A0--

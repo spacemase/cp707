@@ -1,0 +1,32 @@
+#ifndef RAND_H
+#define RAND_H
+
+#include <cda.h>
+
+#define RAND_NULL (NULL)
+
+typedef struct rand__control_s *RAND_ID_t;
+
+RAND_ID_t RAND_create(
+    void
+);
+
+RAND_ID_t RAND_destroy(
+    RAND_ID_t   rid
+);
+
+void RAND_init(
+    RAND_ID_t       rid,
+    CDA_UINT32_t    seed
+);
+
+void RAND_init_by_array(
+    RAND_ID_t       rid,
+    CDA_UINT32_t    *seeds,
+    int             length
+);
+
+CDA_UINT32_t RAND_irandom(
+    RAND_ID_t   rid
+);
+#endif

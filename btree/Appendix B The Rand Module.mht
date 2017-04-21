@@ -1,0 +1,108 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Appendix B: The Rand Module
+Date: Wed, 17 Oct 2007 20:43:05 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/btree/rand.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Appendix B: The Rand Module</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H3>Appendix B: The Rand Module </H3><B>[<A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/index.html"> =
+Home </A>]=20
+</B><B>[<A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/timer.html">=20
+Previous Page ]</A> </B><BR><B>[ <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/references/index.=
+html">References=20
+</A>]</B> <BR><BR><B>[Rand Module Source File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand_c.txt">rand.=
+c ]</A>=20
+</B><BR><B>[Rand Module Public Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand_h.txt">rand.=
+h ]</A>=20
+</B><BR><B>[Rand Module Private Header File: <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/randp_h.txt">rand=
+p.h ]</A>=20
+</B>
+<BLOCKQUOTE>
+  <P>This module encapsulates a random number generator. It is adapted =
+from the=20
+  <I>Mersenne Twister</I> as described by M. Matsumoto and T. Nishimura. =
+The=20
+  original code is copyrighted by A. Fog; see <A=20
+  =
+href=3D"http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html">http://=
+www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html</A>It=20
+  is protected by the GNU General Public License, <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/www.gnu.org/copyl=
+eft/gpl.html">http://faculty.washington.edu/jstraub/dsa/btree/www.gnu.org=
+/copyleft/gpl.html</A>
+  <P>Prior to utilizing the random number generator a rand ID must be =
+obtained=20
+  by invoking <I>RAND_create;</I> when it is no longer needed, it must =
+be=20
+  destroyed by invoking <I>RAND_destroy.</I> After obtaining an ID, the =
+random=20
+  number generator may optionally be seeded by calling <I>RAND_init</I> =
+or=20
+  <I>RAND_init_by_array.</I> After (the optional) initialization, random =
+
+  integers may be obtained by sequentially invoking <I>RAND_irandom.</I> =
+
+  <P>I will not attempt to discuss random number generators here at =
+length; a=20
+  good list of references and examples may be found at <A=20
+  =
+href=3D"http://random.mat.sbg.ac.at/links/rando.html">http://random.mat.s=
+bg.ac.at/links/rando.html</A>I=20
+  will, however, point out a few general features that are relevant to =
+testing=20
+  our BTREE module,=20
+  <OL>
+    <LI>Random number generators are <I>deterministic;</I> that is, a =
+particular=20
+    random number generator when invoked twice using the same seed will =
+produce=20
+    the same sequence of numbers both times.=20
+    <LI>Random number generators have a <I>period;</I> that is, after a =
+certain=20
+    number of iterations they will repeat the sequence of generated =
+numbers. The=20
+    <I>Mersenne Twister</I> has a very long period, well in excess of =
+10**5000.=20
+    <LI>A random number generator will generate duplicate numbers at =
+least=20
+    occasionally. For our purposes a random number generator that =
+produces=20
+    duplicates frequently will slow our tests appreciably. During our =
+test of=20
+    <I>BTREE_balance</I> the <I>Mersenne Twister</I> produced a single =
+duplicate=20
+    in the course of 100,000 invocations. </LI></OL>
+  <P>This module has been tested in both Microsoft Windows XP=99 and =
+Linux. The=20
+  complete code for the rand module can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand_c.txt">rand.=
+c </A>,=20
+  <A =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/rand_h.txt">rand.=
+h=20
+  </A>and <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/btree/randp_h.txt">rand=
+p.h.=20
+  </A></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>

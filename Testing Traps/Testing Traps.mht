@@ -1,0 +1,263 @@
+From: "Saved by Windows Internet Explorer 7"
+Subject: Testing Traps
+Date: Wed, 17 Oct 2007 20:39:36 -0700
+MIME-Version: 1.0
+Content-Type: text/html;
+	charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://faculty.washington.edu/jstraub/dsa/traptest/index.html
+X-MimeOLE: Produced By Microsoft MimeOLE V6.0.6000.16545
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>Testing Traps</TITLE>
+<META http-equiv=3DContent-Type content=3D"text/html; =
+charset=3Dwindows-1252">
+<META content=3D"MSHTML 6.00.6000.16546" name=3DGENERATOR></HEAD>
+<BODY>
+<H1>Testing Traps</H1><B>[Sample code: catching SIGABRT, <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/abort_test_c.t=
+xt">abort_test.c.=20
+</A>]</B> <BR><B>[Sample code: catching assertions, <A=20
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/assert_test_c.=
+txt">assert_test.c.=20
+</A>]</B>=20
+<BLOCKQUOTE>
+  <P>This discussion concerns testing particularly difficult types of =
+error=20
+  paths. Specifically assertions, and exceptions that are thrown via =
+signals.=20
+  <P>
+  <H3>Table of Contents</H3>
+  <OL>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/index.html#Tra=
+ppingSIGABRT">Trapping=20
+    SIGABRT </A>
+    <LI><A=20
+    =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/index.html#Tra=
+ppingAssertions">Trapping=20
+    Assertions </A></LI></OL><A name=3DTrappingSIGABRT>
+  <H3>Trapping SIGABRT</H3>
+  <P>The first scenario is this:=20
+  <BLOCKQUOTE>You have written a function which validates its input and =
+raises=20
+    <TT>SIGABRT</TT> (usually by invoking <TT>abort()</TT>) if the =
+validation=20
+    fails. Now you have to write a test driver to determine whether the =
+function=20
+    behaves correctly when given invalid input. </BLOCKQUOTE>
+  <P>The simplest way to test this scenario is to write a small driver =
+that=20
+  passes invalid data to the function, and then watch as the driver =
+comes=20
+  crashing down. Frequently, however, you want an automated driver that =
+can run=20
+  a variety of tests, report the result of each test, and exit normally. =
+This is=20
+  a bit more involved.=20
+  <P>To implement the test driver you will have to 1) call the target =
+function=20
+  passing invalid data; 2) catch the signal raised by the function =
+(assuming the=20
+  function does what it's supposed to); and 3) recover from the error. =
+To do=20
+  this follow these basic steps.=20
+  <OL>
+    <LI>Before calling the target function establish a signal handler =
+for=20
+    <TT>SIGABRT</TT>; don't forget to save the previously registered =
+signal=20
+    handler and test for an error:=20
+    <BLOCKQUOTE><PRE>old_handler =3D signal( SIGABRT, my_signal_handler =
+);
+if ( old_handler =3D=3D SIG_ERR )
+    abort();<PRE>                </PRE></PRE></BLOCKQUOTE>
+    <LI>Next prepare for a longjmp; the environment buffer that you use =
+will=20
+    have to be a global variable since it will also be used by your =
+signal=20
+    handler:=20
+    <BLOCKQUOTE><PRE>if ( setjmp( jmp_env_ ) =3D=3D 0 =
+)</PRE></BLOCKQUOTE>
+    <LI>Next call the target function passing invalid data; if the =
+function=20
+    works correctly it will raise SIGABRT which will be trapped by your =
+signal=20
+    handler. The signal handler should execute a long jump using the =
+globally=20
+    declared environment buffer:=20
+    <BLOCKQUOTE><PRE>static void my_signal_handler( int sig )
+{
+    if ( sig !=3D SIGABRT )
+        raise( sig ); // just playing it safe
+    longjmp( jmp_env_, 1 );
+}</PRE></BLOCKQUOTE>
+    <LI>If the target function fails to raise a signal, execution will =
+return to=20
+    the line in your test driver following the function call, at which =
+point you=20
+    should fail the test:=20
+    <BLOCKQUOTE><PRE>if ( setjmp( jmp_env_ ) =3D=3D 0 )
+{
+    test_funk( data ); // pass invalid data to test_funk
+    test =3D FAILED;     // won't get here if test_funk works
+}
+else
+    test =3D PASSED;</PRE></BLOCKQUOTE></LI></OL>
+  <P>After executing the test remember to re-register the old signal =
+handler:=20
+  <BLOCKQUOTE><PRE>signal( SIGABRT, old_handler =
+);</PRE></BLOCKQUOTE>Also remember that a=20
+  signal handler is automatically unregistered whenever it is invoked; =
+so if you=20
+  are going to run several consecutive such tests, your signal handler =
+will have=20
+  to be re-registered after each long jump.=20
+  <P>Sample code that illustrates this procedure can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/abort_test_c.t=
+xt">traptest.c.=20
+  </A>It traps a signal raised by the function <TT>testTrap</TT>, which =
+takes an=20
+  integer argument that must be non-negative. The sample utilizes cda.h =
+in order=20
+  to obtain declarations for CDA_BOOL_t, CDA_TRUE and CDA_FALSE. If =
+cda.h is not=20
+  available to you, the declarations are as follows:=20
+  <BLOCKQUOTE><PRE>#define CDA_TRUE  (1)
+#define CDA_FALSE (0)
+typedef int CDA_BOOL_t;</PRE></BLOCKQUOTE><A name=3DTrappingAssertions>
+  <H3>Trapping Assertions</H3>
+  <P>The second scenario involves testing assertions:=20
+  <BLOCKQUOTE>You have written a function which validates its input =
+Using=20
+    assertions. You have to write a test driver to determine whether the =
+
+    function behaves correctly when given invalid input. </BLOCKQUOTE>
+  <P>Once again, the simplest way to test this scenario is to write a =
+small=20
+  driver that passes invalid data to the function, then watch as the =
+driver=20
+  aborts and make sure the usual assertion diagnostics are printed. As =
+in the=20
+  first scenario, however, you may want an automated driver that can run =
+the=20
+  assertion test as part of a suite of other tests.=20
+  <P>To implement the test driver you will have to 1) replace the usual =
+assert=20
+  macro with a customized macro that calls an assert function that you =
+write; 2)=20
+  call the target function passing invalid data; and 3) recover from the =
+
+  assertion by long-jumping from the assert function. To do this follow =
+these=20
+  basic steps.=20
+  <OL>
+    <LI>Undefine (if necessary) the usual assert macro, and define a new =
+one=20
+    yourself:=20
+    <BLOCKQUOTE><PRE>static void assert_proc( int dummy );
+#ifdef CDA_ASSERT
+#undef CDA_ASSERT
+#endif
+#define CDA_ASSERT( exp ) \
+    ( (exp) ? (void)0 : CDA_assert_( __LINE__, __FILE__, =
+#exp))</PRE></BLOCKQUOTE>
+    <LI>Next prepare for a longjmp; the environment buffer that you use =
+will=20
+    have to be a global variable since it will also be used by your =
+signal=20
+    handler:=20
+    <BLOCKQUOTE><PRE>if ( setjmp( jmp_env_ ) =3D=3D 0 =
+)</PRE></BLOCKQUOTE>
+    <LI>Next call the target function passing invalid data; if the =
+function=20
+    works correctly your assert function will be called. The assert =
+function=20
+    should execute a long jump using the globally declared environment =
+buffer:=20
+    <BLOCKQUOTE><PRE>static int assert_proc( int dummy )
+{
+    longjmp( jmp_env_, 2 );
+}</PRE></BLOCKQUOTE>
+    <LI>If the target function fails to assert execution will return to =
+the line=20
+    in your test driver following the function call, at which point you =
+should=20
+    fail the test:=20
+    <BLOCKQUOTE><PRE>if ( setjmp( jmp_env_ ) =3D=3D 0 )
+{
+    test_funk( data ); // pass invalid data to test_funk
+    test =3D FAILED;     // won't get here if test_funk works
+}
+else
+    test =3D PASSED;</PRE></BLOCKQUOTE></LI></OL>
+  <P>Sample code that illustrates this procedure can be found in <A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/assert_test_c.=
+txt">assert_test.c.=20
+  </A>It traps an assertion expressed by the function <TT>testTrap</TT>, =
+which=20
+  takes an integer argument that must be non-negative. The sample =
+utilizes cda.h=20
+  in order to obtain declarations for CDA_BOOL_t, CDA_TRUE and =
+CDA_FALSE. If=20
+  cda.h is not available to you, the declarations are as follows:=20
+  <BLOCKQUOTE><PRE>#define CDA_TRUE  (1)
+#define CDA_FALSE (0)
+typedef int CDA_BOOL_t;</PRE></BLOCKQUOTE><A name=3DExercises>
+  <H3>Exercises</H3>
+  <P><B>Exercise 1:</B> Combine the abort and assert tests into a single =
+test=20
+  driver. Your main function should call separate subroutines to perform =
+the two=20
+  tests; all the common code in the two subroutines should be moved to a =
+third=20
+  subroutine. <B>Hint:</B> revise testTrap so that it aborts for =
+negative input=20
+  values and asserts that the input is not 0. <BR><B><A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/combined_test_=
+c.txt">Solution.=20
+  </A></B>
+  <P><B>Exercise 2:</B> Revise our CDA_ASSERT facility (or develop your =
+own)=20
+  that will optionally execute a long jump if requested to do so by a =
+test=20
+  driver; if not requested to do so, it should perform in compliance =
+with the=20
+  C89 assert facility. <B>Hint: </B>you will have to rewrite CDA_ASSERT =
+in=20
+  cda.h, and you will have to put an assert function in cda.c; the =
+assert=20
+  function will long jump only if a jump buffer is registered by the =
+user (via=20
+  yet another function added to cda.c). <B>Hint: </B>If you check your =
+reference=20
+  book, you will see that C89 requires jmp_buf to be defined as an =
+array.=20
+  <BR><B><A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/rewriting_asse=
+rt.html">Writing=20
+  the assert macro </A></B><BR><B><A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/cda_assert_fac=
+ility.txt">Solution=20
+  </A></B>
+  <P><B>Exercise 3:</B> Rewrite the assertion test driver (<A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/assert_test_c.=
+txt">=20
+  assert_test.c) </A>to use the facility developed in Exercise 2. =
+<BR><B><A=20
+  =
+href=3D"http://faculty.washington.edu/jstraub/dsa/traptest/cda_assert_tes=
+t_c.txt">Solution=20
+  </A></B></P></BLOCKQUOTE>
+<HR>
+<FONT size=3D-1>
+<P><B>Copyright =A9 2005 by Jack Straub<BR>jstraub@centurytel.net=20
+</B></P></FONT></BODY></HTML>
